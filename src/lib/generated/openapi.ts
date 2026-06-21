@@ -9323,6 +9323,4546 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AdminOverview: {
+            apiKeys: {
+                [key: string]: number;
+            };
+            auditLogs: number;
+            complianceJobs: {
+                [key: string]: number;
+            };
+            securityChecks: components["schemas"]["SecurityChecks"];
+            securityEvents: {
+                open: number;
+            };
+            sessions: {
+                active: number;
+                revoked: number;
+            };
+            tenant: {
+                createdAt: string;
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+                updatedAt: string;
+            };
+            users: {
+                [key: string]: number;
+            };
+        };
+        /** @enum {string} */
+        AiActionStatus: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED" | "CANCELLED";
+        AiAgent: {
+            _count?: {
+                actions?: number;
+                conversations?: number;
+                usageLogs?: number;
+            };
+            archivedAt?: string | null;
+            createdAt: string;
+            createdById?: string | null;
+            description?: string | null;
+            enabled: boolean;
+            guardrails?: unknown;
+            id: string;
+            knowledgeScope?: unknown;
+            maxOutputTokens?: number | null;
+            model: string;
+            name: string;
+            provider: string;
+            systemPrompt?: string | null;
+            temperature?: number | null;
+            tenantId: string;
+            tools: string[];
+            type: string;
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        AiConversationStatus: "OPEN" | "ARCHIVED" | "RESOLVED";
+        /** @enum {string} */
+        AiRequestStatus: "COMPLETED" | "FAILED" | "CANCELLED";
+        AiSettings: {
+            allowedProviders: string[];
+            createdAt: string;
+            dataRetentionDays: number;
+            defaultModel: string;
+            defaultProvider: string;
+            enabled: boolean;
+            id: string;
+            monthlyCostLimit?: (number | string) | null;
+            monthlyTokenLimit?: number | null;
+            policy?: unknown;
+            redactSensitiveData: boolean;
+            tenantId: string;
+            updatedAt: string;
+        };
+        AnalyticsOverview: {
+            budget: {
+                actual: number;
+                planned: number;
+            };
+            openRisks: number;
+            overdueTasks: number;
+            projects: number;
+            tasks: {
+                [key: string]: number;
+            };
+            time: {
+                entries: number;
+                minutes: number;
+            };
+        };
+        AnalyticsQuery: {
+            from?: string;
+            projectId?: string;
+            teamId?: string;
+            to?: string;
+            workspaceId?: string;
+        };
+        ApiKey: {
+            createdAt: string;
+            createdBy?: components["schemas"]["UserSummary"] | null;
+            createdById?: string | null;
+            expiresAt?: string | null;
+            id: string;
+            lastUsedAt?: string | null;
+            metadata?: unknown;
+            name: string;
+            prefix: string;
+            revokedAt?: string | null;
+            scopes: string[];
+            status: components["schemas"]["ApiKeyStatus"];
+            tenantId: string;
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        ApiKeyStatus: "ACTIVE" | "REVOKED" | "EXPIRED";
+        /** @enum {string} */
+        ApprovalStatus: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
+        AuditLog: {
+            action: string;
+            actorId?: string | null;
+            createdAt: string;
+            entityId?: string | null;
+            entityType: string;
+            id: string;
+            ipAddress?: string | null;
+            newValue?: unknown;
+            oldValue?: unknown;
+            tenantId: string;
+            userAgent?: string | null;
+        };
+        AuthLifecycleResponse: {
+            devLink?: string;
+            email?: string;
+            message: string;
+            requiresEmailVerification?: boolean;
+            success: boolean;
+            tenantSlug?: string;
+        };
+        AuthResponse: {
+            accessToken: string;
+            refreshToken?: string;
+            trustedDeviceToken?: string;
+            user: components["schemas"]["AuthUser"];
+        };
+        AuthSession: {
+            createdAt: string;
+            expiresAt: string;
+            id: string;
+            ipAddress?: string | null;
+            revokedAt?: string | null;
+            tenantId: string;
+            updatedAt: string;
+            user?: components["schemas"]["UserSummary"] | null;
+            userAgent?: string | null;
+            userId: string;
+        };
+        AuthUser: {
+            avatarUrl?: string | null;
+            email: string;
+            firstName: string;
+            id: string;
+            isPlatformAdmin?: boolean;
+            lastName: string;
+            locale?: string | null;
+            permissions: string[];
+            platformAdminLevel?: components["schemas"]["PlatformAdminLevel"] | null;
+            platformAdminScopes?: string[];
+            roles: string[];
+            status: string;
+            tenantId: string;
+            timezone?: string | null;
+        };
+        BillingAccountStatus: {
+            entitlements: components["schemas"]["BillingEntitlements"];
+            seats: {
+                limit?: number | null;
+                remaining?: number | null;
+                used: number;
+                withinLimit: boolean;
+            };
+            subscription: components["schemas"]["SiteSubscription"] | null;
+            tenantId: string;
+        };
+        BillingCheckoutSession: {
+            accessCode?: unknown;
+            currency?: string;
+            expiresAt?: unknown;
+            id?: unknown;
+            message?: string;
+            mode?: string;
+            planId?: string | null;
+            provider: string;
+            reference?: unknown;
+            seatCount?: number;
+            url?: unknown;
+        };
+        BillingEntitlementFeature: {
+            allowed: boolean;
+            category?: string | null;
+            config?: unknown;
+            enabled: boolean;
+            key: string;
+            limit?: number | null;
+            metered: boolean;
+            name: string;
+            remaining?: number | null;
+            unit?: string | null;
+            used: number;
+        };
+        BillingEntitlements: {
+            features: components["schemas"]["BillingEntitlementFeature"][];
+            plan: {
+                id: string;
+                interval: string;
+                name: string;
+                slug: string;
+            } | null;
+            seats: {
+                allowed: boolean;
+                limit?: number | null;
+                remaining?: number | null;
+                used: number;
+            };
+            subscription: {
+                currentPeriodEnd?: string | null;
+                currentPeriodStart?: string | null;
+                id: string;
+                status: string;
+                trialEndsAt?: string | null;
+            } | null;
+        };
+        BillingInvoice: components["schemas"]["SiteInvoice"];
+        BillingPlan: components["schemas"]["SiteBillingPlan"];
+        BillingPortalSession: {
+            id?: unknown;
+            message?: string;
+            mode?: string;
+            provider: string;
+            subscriptionId?: string | null;
+            url?: unknown;
+        };
+        BillingUsageRecord: components["schemas"]["SiteUsageRecord"];
+        BillingUsageSummary: {
+            data: {
+                featureKey: string;
+                quantity: number;
+                records: number;
+            }[];
+            totalQuantity: number;
+            totalRecords: number;
+        };
+        BoardColumn: {
+            boardId: string;
+            createdAt?: string;
+            id: string;
+            isCollapsed: boolean;
+            isOverWipLimit?: boolean;
+            metrics?: {
+                actualMins: number;
+                blockedCount: number;
+                completedStoryPoints: number;
+                completionRate: number;
+                dueTodayCount: number;
+                estimateMins: number;
+                highPriorityCount: number;
+                isOverWipLimit: boolean;
+                overdueCount: number;
+                storyPoints: number;
+                taskCount: number;
+                unassignedCount: number;
+            };
+            name: string;
+            sortOrder: number;
+            status?: components["schemas"]["TaskStatus"] | null;
+            taskCount?: number;
+            tasks?: components["schemas"]["Task"][];
+            updatedAt?: string;
+            wip?: {
+                limit?: number | null;
+                remaining?: number | null;
+                usagePercent?: number | null;
+                used: number;
+            };
+            wipLimit?: number | null;
+        };
+        BookingFormField: {
+            createdAt?: string;
+            fieldKey: string;
+            helpText?: string | null;
+            id: string;
+            isActive: boolean;
+            label: string;
+            options?: string[] | null;
+            pageId: string;
+            placeholder?: string | null;
+            required: boolean;
+            sortOrder: number;
+            tenantId: string;
+            type: components["schemas"]["BookingFormFieldType"];
+            updatedAt?: string;
+        };
+        /** @enum {string} */
+        BookingFormFieldType: "TEXT" | "LONG_TEXT" | "EMAIL" | "PHONE" | "NUMBER" | "DATE" | "SINGLE_SELECT" | "MULTI_SELECT" | "BOOLEAN" | "URL";
+        BookingPage: {
+            _count?: {
+                fields?: number;
+                requests?: number;
+            };
+            allowCancel: boolean;
+            allowReschedule: boolean;
+            approvalRequired: boolean;
+            brandColor?: string | null;
+            bufferAfterMins: number;
+            bufferBeforeMins: number;
+            collectCompanyName: boolean;
+            conferenceProvider?: string | null;
+            createdAt?: string;
+            createdById?: string | null;
+            dailyLimit?: number | null;
+            department?: string | null;
+            description?: string | null;
+            durationMins?: number | null;
+            fields?: components["schemas"]["BookingFormField"][];
+            heroImageUrl?: string | null;
+            id: string;
+            isActive: boolean;
+            locationMode: components["schemas"]["MeetingLocationMode"];
+            locationName?: string | null;
+            logoUrl?: string | null;
+            meetingType?: {
+                bufferAfterMins: number;
+                bufferBeforeMins: number;
+                category: components["schemas"]["MeetingTypeCategory"];
+                defaultAgenda?: string[] | null;
+                defaultReminderMins: number[];
+                description?: string | null;
+                durationMins: number;
+                id: string;
+                isActive: boolean;
+                locationMode: components["schemas"]["MeetingLocationMode"];
+                name: string;
+                requiresApproval: boolean;
+                slug: string;
+            } | null;
+            meetingTypeId?: string | null;
+            meetingUrl?: string | null;
+            minNoticeMins: number;
+            owner?: (components["schemas"]["UserSummary"] & {
+                avatarUrl?: string | null;
+                status?: string;
+                timezone?: string | null;
+            }) | null;
+            ownerId?: string | null;
+            path: string;
+            rollingWindowDays: number;
+            routingStrategy: components["schemas"]["BookingRoutingStrategy"];
+            scope: components["schemas"]["BookingPageScope"];
+            subtitle?: string | null;
+            team?: ({
+                description?: string | null;
+                id: string;
+                name: string;
+            } & {
+                members?: {
+                    role?: string | null;
+                    user: components["schemas"]["UserSummary"] & {
+                        avatarUrl?: string | null;
+                        status?: string;
+                        timezone?: string | null;
+                    };
+                }[];
+            }) | null;
+            teamId?: string | null;
+            tenant?: {
+                id: string;
+                logoUrl?: string | null;
+                name: string;
+                slug: string;
+                status: string;
+                website?: string | null;
+            };
+            tenantId: string;
+            timezone: string;
+            title: string;
+            updatedAt?: string;
+            weeklyLimit?: number | null;
+        };
+        /** @enum {string} */
+        BookingPageScope: "TENANT" | "TEAM" | "USER";
+        BookingRequest: {
+            approvedAt?: string | null;
+            cancellationReason?: string | null;
+            cancelledAt?: string | null;
+            conferenceProvider?: string | null;
+            createdAt?: string;
+            endAt: string;
+            guestCompany?: string | null;
+            guestEmail: string;
+            guestName: string;
+            guestPhone?: string | null;
+            guestTimezone: string;
+            host?: components["schemas"]["UserSummary"] | null;
+            hostId?: string | null;
+            id: string;
+            intakeResponses?: {
+                [key: string]: unknown;
+            } | null;
+            locationMode: components["schemas"]["MeetingLocationMode"];
+            locationName?: string | null;
+            meeting?: {
+                approvalStatus: components["schemas"]["MeetingApprovalStatus"];
+                endAt: string;
+                id: string;
+                startAt: string;
+                status: components["schemas"]["MeetingStatus"];
+                title: string;
+            } | null;
+            meetingId?: string | null;
+            meetingType?: {
+                id: string;
+                name: string;
+                slug: string;
+            } | null;
+            meetingTypeId?: string | null;
+            meetingUrl?: string | null;
+            notes?: string | null;
+            page?: {
+                allowCancel: boolean;
+                allowReschedule: boolean;
+                id: string;
+                path: string;
+                title: string;
+            };
+            pageId: string;
+            rejectedAt?: string | null;
+            routingSnapshot?: {
+                [key: string]: unknown;
+            } | null;
+            startAt: string;
+            status: components["schemas"]["BookingRequestStatus"];
+            team?: {
+                id: string;
+                name: string;
+            } | null;
+            teamId?: string | null;
+            tenantId: string;
+            title: string;
+            updatedAt?: string;
+        };
+        /** @enum {string} */
+        BookingRequestStatus: "PENDING_APPROVAL" | "CONFIRMED" | "REJECTED" | "CANCELLED" | "RESCHEDULED" | "EXPIRED";
+        /** @enum {string} */
+        BookingRoutingStrategy: "DIRECT_HOST" | "ROUND_ROBIN" | "LEAST_BUSY" | "PRIORITY" | "DEPARTMENT";
+        BudgetAnalytics: {
+            data: {
+                actual: number;
+                currency: string;
+                id: string;
+                notes?: string | null;
+                planned: number;
+                project: {
+                    id: string;
+                    key: string;
+                    name: string;
+                };
+                utilizationPercent: number;
+                variance: number;
+            }[];
+            total: number;
+        };
+        BulkInviteUserInput: {
+            email: string;
+            firstName?: string;
+            lastName?: string;
+            roleIds?: string[];
+        };
+        BulkInviteUsersResponse: {
+            created: number;
+            failed: number;
+            inviteDelivery: string;
+            results: {
+                email: string;
+                message: string;
+                /** @enum {string} */
+                status: "CREATED" | "UPDATED" | "SKIPPED" | "FAILED";
+                userId: string | null;
+            }[];
+            skipped: number;
+            updated: number;
+        };
+        ComplianceJob: {
+            approvedAt?: string | null;
+            approvedBy?: components["schemas"]["UserSummary"] | null;
+            approvedById?: string | null;
+            completedAt?: string | null;
+            createdAt: string;
+            error?: string | null;
+            expiresAt?: string | null;
+            fileName?: string | null;
+            fileUrl?: string | null;
+            id: string;
+            mimeType?: string | null;
+            parameters?: unknown;
+            reason?: string | null;
+            requestedAt: string;
+            requestedBy?: components["schemas"]["UserSummary"] | null;
+            requestedById?: string | null;
+            result?: unknown;
+            sizeBytes?: number | null;
+            startedAt?: string | null;
+            status: components["schemas"]["ComplianceJobStatus"];
+            subjectId?: string | null;
+            subjectType?: string | null;
+            tenantId: string;
+            type: components["schemas"]["ComplianceJobType"];
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        ComplianceJobStatus: "REQUESTED" | "APPROVED" | "REJECTED" | "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED" | "CANCELLED" | "EXPIRED";
+        /** @enum {string} */
+        ComplianceJobType: "DATA_EXPORT" | "DATA_DELETION" | "RETENTION_PURGE";
+        Conversation: {
+            _count?: {
+                members?: number;
+                messages?: number;
+            };
+            createdAt: string;
+            id: string;
+            isGroup: boolean;
+            members: components["schemas"]["ConversationMember"][];
+            messages?: components["schemas"]["Message"][];
+            tenantId: string;
+            title?: string | null;
+        };
+        ConversationMember: {
+            id: string;
+            user?: components["schemas"]["UserSummary"] | null;
+            userId: string;
+        };
+        CreatedApiKey: components["schemas"]["ApiKey"] & {
+            token: string;
+        };
+        CustomField: {
+            archivedAt?: string | null;
+            config?: {
+                [key: string]: unknown;
+            } | null;
+            createdAt: string;
+            entityType: string;
+            id: string;
+            name: string;
+            options?: components["schemas"]["CustomFieldOption"][];
+            projectId?: string | null;
+            required: boolean;
+            sortOrder: number;
+            tenantId: string;
+            type: components["schemas"]["CustomFieldType"];
+            updatedAt: string;
+            workspaceId?: string | null;
+        };
+        CustomFieldOption: {
+            customFieldId: string;
+            id: string;
+            label: string;
+            sortOrder: number;
+            value: string;
+        };
+        /** @enum {string} */
+        CustomFieldType: "TEXT" | "LONG_TEXT" | "NUMBER" | "CURRENCY" | "DATE" | "DATETIME" | "BOOLEAN" | "SINGLE_SELECT" | "MULTI_SELECT" | "USER" | "PROJECT" | "TASK" | "URL" | "EMAIL" | "PHONE" | "JSON";
+        CycleTimeAnalytics: {
+            averageCycleTimeHours: number;
+            data: ({
+                id: string;
+                key: string;
+                priority: components["schemas"]["TaskPriority"];
+                title: string;
+            } & {
+                completedAt?: string | null;
+                createdAt: string;
+                cycleTimeHours?: number | null;
+                type?: string;
+            })[];
+            total: number;
+        };
+        DocumentFolder: {
+            _count?: {
+                children?: number;
+                documents?: number;
+            };
+            archivedAt?: string | null;
+            children?: components["schemas"]["DocumentFolder"][];
+            createdAt: string;
+            createdById?: string | null;
+            description?: string | null;
+            id: string;
+            name: string;
+            parentId?: string | null;
+            tenantId: string;
+            updatedAt: string;
+        };
+        DocumentPayload: {
+            body?: string;
+            changeNote?: string;
+            documentType?: string;
+            folderId?: string;
+            projectId?: string;
+            slug?: string;
+            status?: components["schemas"]["DocumentStatus"];
+            summary?: string;
+            tags?: string[];
+            title: string;
+            visibility?: components["schemas"]["Visibility"];
+        };
+        /** @enum {string} */
+        DocumentStatus: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+        DocumentVersion: {
+            body?: string | null;
+            changeNote?: string | null;
+            createdAt: string;
+            createdById?: string | null;
+            documentId: string;
+            folderId?: string | null;
+            id: string;
+            projectId?: string | null;
+            status?: components["schemas"]["DocumentStatus"] | null;
+            summary?: string | null;
+            tags?: string[] | null;
+            title?: string | null;
+            version: number;
+            visibility?: components["schemas"]["Visibility"] | null;
+        };
+        FileAsset: {
+            archivedAt?: string | null;
+            createdAt: string;
+            deletedAt?: string | null;
+            entityId?: string | null;
+            entityType: string;
+            expiresAt?: string | null;
+            fileName: string;
+            fileUrl: string;
+            id: string;
+            metadata?: unknown;
+            mimeType?: string | null;
+            provider: string;
+            scope: string;
+            sizeBytes?: number | null;
+            storageKey?: string | null;
+            tenantId: string;
+            updatedAt: string;
+            uploadedBy?: components["schemas"]["UserSummary"] | null;
+            uploadedById?: string | null;
+            visibility: components["schemas"]["Visibility"];
+        };
+        GlobalSearchResponse: {
+            data: components["schemas"]["GlobalSearchResult"][];
+            limit: number;
+            page: number;
+            total: number;
+            totalPages: number;
+        } & {
+            facets: {
+                [key: string]: number;
+            };
+            query: {
+                category: components["schemas"]["SearchCategory"];
+                contextId?: string;
+                contextType?: string;
+                search: string;
+            };
+        };
+        GlobalSearchResult: {
+            id: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+            score: number;
+            subtitle?: string | null;
+            title: string;
+            type: components["schemas"]["GlobalSearchResultType"];
+            updatedAt?: string | null;
+            url: string;
+        };
+        /** @enum {string} */
+        GlobalSearchResultType: "PROJECT" | "TASK" | "FILE" | "USER" | "TEAM" | "WORKSPACE" | "MESSAGE";
+        IdentitySecurityOverview: {
+            loginHistory: {
+                createdAt: string;
+                email: string;
+                id: string;
+                ipAddress?: string | null;
+                method: string;
+                reason?: string | null;
+                status: string;
+                suspicious: boolean;
+                userAgent?: string | null;
+            }[];
+            mfa: {
+                backupCodes: {
+                    remaining: number;
+                    total: number;
+                };
+                enabled: boolean;
+                factors: {
+                    createdAt: string;
+                    enabledAt?: string | null;
+                    id: string;
+                    label?: string | null;
+                    lastUsedAt?: string | null;
+                    status: string;
+                    type: string;
+                }[];
+            };
+            trustedDevices: {
+                createdAt: string;
+                expiresAt: string;
+                id: string;
+                ipAddress?: string | null;
+                lastUsedAt?: string | null;
+                name?: string | null;
+                revokedAt?: string | null;
+                status: string;
+                userAgent?: string | null;
+            }[];
+        };
+        Integration: {
+            _count?: {
+                logs?: number;
+            };
+            config?: unknown;
+            createdAt: string;
+            createdById?: string | null;
+            enabled: boolean;
+            externalAccountId?: string | null;
+            hasSecrets?: boolean;
+            id: string;
+            lastError?: string | null;
+            lastSyncAt?: string | null;
+            name: string;
+            provider: components["schemas"]["IntegrationProvider"];
+            scopes: string[];
+            secretKeys?: string[];
+            status: components["schemas"]["IntegrationStatus"];
+            tenantId: string;
+            updatedAt: string;
+        };
+        IntegrationLog: {
+            createdAt: string;
+            data?: unknown;
+            eventType: string;
+            id: string;
+            integrationId: string;
+            level: string;
+            message: string;
+            tenantId: string;
+        };
+        /** @enum {string} */
+        IntegrationProvider: "GITHUB" | "GITLAB" | "BITBUCKET" | "SLACK" | "TEAMS" | "GOOGLE" | "MICROSOFT" | "ZOOM" | "STRIPE" | "PAYPAL" | "OPENAI" | "ANTHROPIC" | "ZAPIER" | "CUSTOM";
+        /** @enum {string} */
+        IntegrationStatus: "ACTIVE" | "DISABLED" | "ERROR" | "REVOKED";
+        /** @enum {string} */
+        InternalMailFolder: "INBOX" | "SENT" | "DRAFTS" | "ARCHIVE" | "DELETED" | "JUNK" | "SNOOZED";
+        InternalMailFolderSummary: {
+            counts: {
+                [key: string]: number;
+            };
+            flagged: number;
+            pinned: number;
+            starred: number;
+            unread: number;
+        };
+        InternalMailMessage: {
+            attachments?: unknown;
+            bodyHtml?: string | null;
+            bodyText: string;
+            createdAt: string;
+            id: string;
+            isDraft: boolean;
+            priority: components["schemas"]["InternalMailPriority"];
+            recipients?: components["schemas"]["InternalMailRecipient"][];
+            sender?: components["schemas"]["UserSummary"] | null;
+            senderId: string;
+            sentAt?: string | null;
+            subject: string;
+            tenantId: string;
+            threadId: string;
+            updatedAt: string;
+        };
+        InternalMailParticipant: {
+            archivedAt?: string | null;
+            createdAt: string;
+            deletedAt?: string | null;
+            flaggedAt?: string | null;
+            folder: components["schemas"]["InternalMailFolder"];
+            id: string;
+            lastReadMessageId?: string | null;
+            pinnedAt?: string | null;
+            readAt?: string | null;
+            snoozedUntil?: string | null;
+            starredAt?: string | null;
+            tenantId: string;
+            threadId: string;
+            updatedAt: string;
+            user?: components["schemas"]["UserSummary"] | null;
+            userId: string;
+        };
+        /** @enum {string} */
+        InternalMailPriority: "NORMAL" | "HIGH" | "URGENT";
+        InternalMailRecipient: {
+            createdAt: string;
+            deliveredAt?: string | null;
+            id: string;
+            kind: components["schemas"]["InternalMailRecipientKind"];
+            messageId: string;
+            readAt?: string | null;
+            tenantId: string;
+            user?: components["schemas"]["UserSummary"] | null;
+            userId: string;
+        };
+        /** @enum {string} */
+        InternalMailRecipientKind: "TO" | "CC" | "BCC";
+        InternalMailThread: {
+            createdAt: string;
+            createdBy?: components["schemas"]["UserSummary"] | null;
+            createdById: string;
+            currentParticipant: components["schemas"]["InternalMailParticipant"];
+            id: string;
+            lastMessageAt: string;
+            latestMessage?: components["schemas"]["InternalMailMessage"] | null;
+            messageCount: number;
+            messages: components["schemas"]["InternalMailMessage"][];
+            metadata?: unknown;
+            participants: components["schemas"]["InternalMailParticipant"][];
+            priority: components["schemas"]["InternalMailPriority"];
+            recipientCount: number;
+            subject: string;
+            tenantId: string;
+            unread: boolean;
+            updatedAt: string;
+        };
+        InternalMailbox: {
+            address: string;
+            aliases: components["schemas"]["InternalMailboxAlias"][];
+            canReceive: boolean;
+            createdAt: string;
+            description?: string | null;
+            displayName: string;
+            id: string;
+            localPart: string;
+            memberCount: number;
+            members: components["schemas"]["InternalMailboxMember"][];
+            primaryAddress: string;
+            status: components["schemas"]["InternalMailboxStatus"];
+            team?: {
+                id: string;
+                name: string;
+            } | null;
+            teamId?: string | null;
+            tenantId: string;
+            type: components["schemas"]["InternalMailboxType"];
+            updatedAt: string;
+            user?: components["schemas"]["UserSummary"] | null;
+            userId?: string | null;
+        };
+        InternalMailboxAlias: {
+            address: string;
+            createdAt: string;
+            id: string;
+            isPrimary: boolean;
+            localPart: string;
+            mailboxId: string;
+            status: components["schemas"]["InternalMailboxStatus"];
+            tenantId: string;
+            updatedAt: string;
+        };
+        InternalMailboxMember: {
+            id: string;
+            role: components["schemas"]["InternalMailboxMemberRole"];
+            user?: components["schemas"]["UserSummary"] | null;
+            userId: string;
+        };
+        /** @enum {string} */
+        InternalMailboxMemberRole: "OWNER" | "MANAGER" | "MEMBER";
+        /** @enum {string} */
+        InternalMailboxStatus: "ACTIVE" | "SUSPENDED" | "ARCHIVED";
+        /** @enum {string} */
+        InternalMailboxType: "USER" | "SHARED" | "TEAM" | "SYSTEM";
+        Meeting: {
+            _count?: {
+                activities?: number;
+                agendaItems?: number;
+                attendees?: number;
+                checklistItems?: number;
+                comments?: number;
+                decisions?: number;
+                reminders?: number;
+            };
+            agendaItems?: components["schemas"]["MeetingAgendaItem"][];
+            aiEnabled: boolean;
+            aiSummary?: {
+                [key: string]: unknown;
+            } | null;
+            approvalStatus: components["schemas"]["MeetingApprovalStatus"];
+            approvedAt?: string | null;
+            archivedAt?: string | null;
+            attendees?: components["schemas"]["MeetingAttendee"][];
+            cancelledAt?: string | null;
+            cancelledReason?: string | null;
+            clientCompany?: string | null;
+            clientEmail?: string | null;
+            clientName?: string | null;
+            completedAt?: string | null;
+            conferenceProvider?: string | null;
+            createdAt?: string;
+            createdById?: string | null;
+            description?: string | null;
+            endAt: string;
+            host?: components["schemas"]["UserSummary"] | null;
+            hostId?: string | null;
+            id: string;
+            liveNotes?: string | null;
+            liveNotesUpdatedAt?: string | null;
+            liveNotesUpdatedBy?: components["schemas"]["UserSummary"] | null;
+            liveNotesUpdatedById?: string | null;
+            liveNotesVersion?: number;
+            locationMode: components["schemas"]["MeetingLocationMode"];
+            locationName?: string | null;
+            meetingType?: {
+                category: components["schemas"]["MeetingTypeCategory"];
+                color?: string | null;
+                durationMins: number;
+                id: string;
+                name: string;
+                requiresApproval: boolean;
+                slug: string;
+            } | null;
+            meetingTypeId?: string | null;
+            meetingUrl?: string | null;
+            project?: {
+                id: string;
+                key: string;
+                name: string;
+                status: components["schemas"]["ProjectStatus"];
+            } | null;
+            projectId?: string | null;
+            recurrenceRule?: string | null;
+            reminders?: components["schemas"]["MeetingReminder"][];
+            runtimeState?: {
+                [key: string]: unknown;
+            } | null;
+            sprint?: {
+                completedAt?: string | null;
+                endDate?: string | null;
+                goal?: string | null;
+                id: string;
+                name: string;
+                startDate?: string | null;
+            } | null;
+            sprintId?: string | null;
+            startAt: string;
+            status: components["schemas"]["MeetingStatus"];
+            task?: {
+                id: string;
+                key: string;
+                priority: components["schemas"]["TaskPriority"];
+                status: components["schemas"]["TaskStatus"];
+                title: string;
+            } | null;
+            taskId?: string | null;
+            team?: {
+                id: string;
+                name: string;
+            } | null;
+            teamId?: string | null;
+            tenantId: string;
+            timezone: string;
+            title: string;
+            updatedAt?: string;
+            visibility: components["schemas"]["Visibility"];
+        };
+        MeetingActivity: {
+            action: string;
+            actor?: components["schemas"]["UserSummary"] | null;
+            actorId?: string | null;
+            createdAt: string;
+            id: string;
+            meetingId: string;
+            newValue?: {
+                [key: string]: unknown;
+            } | null;
+            oldValue?: {
+                [key: string]: unknown;
+            } | null;
+        };
+        MeetingAdminAnalytics: {
+            bookings: {
+                [key: string]: number;
+            };
+            byStatus: {
+                [key: string]: number;
+            };
+            hostUtilization: {
+                completed: number;
+                completionRate: number;
+                host: components["schemas"]["UserSummary"] | null;
+                hostId: string;
+                hours: number;
+                meetings: number;
+            }[];
+            range: {
+                from: string;
+                to: string;
+            };
+            totals: {
+                booked: number;
+                cancellationRate: number;
+                cancelled: number;
+                completed: number;
+                completionRate: number;
+                convertedActionItems: number;
+                live: number;
+                meetingToTaskConversion: number;
+                noShowRate: number;
+                noShows: number;
+                overdueFollowUps: number;
+                scheduled: number;
+                totalActionItems: number;
+            };
+        };
+        MeetingAdminOverview: {
+            aiUsage: components["schemas"]["MeetingAiUsageSummary"];
+            analytics: components["schemas"]["MeetingAdminAnalytics"];
+            integrationHealth: components["schemas"]["MeetingIntegrationHealth"];
+            permissions: {
+                canConnectCalendar: boolean;
+                canConnectWhatsApp: boolean;
+                canCreateBookingLinks: boolean;
+                canManagePolicy: boolean;
+                canUseMeetingAi: boolean;
+            };
+            policy: components["schemas"]["MeetingPolicy"];
+            recentAudit: {
+                action: string;
+                createdAt: string;
+                entityId?: string | null;
+                entityType: string;
+                id: string;
+                ipAddress?: string | null;
+                userAgent?: string | null;
+            }[];
+            reminderDelivery: components["schemas"]["MeetingReminderDeliverySummary"];
+        };
+        MeetingAgendaItem: {
+            createdAt?: string;
+            durationMins?: number | null;
+            id: string;
+            meetingId: string;
+            notes?: string | null;
+            owner?: components["schemas"]["UserSummary"] | null;
+            ownerId?: string | null;
+            sortOrder: number;
+            status: components["schemas"]["MeetingAgendaStatus"];
+            tenantId: string;
+            title: string;
+            updatedAt?: string;
+        };
+        /** @enum {string} */
+        MeetingAgendaStatus: "OPEN" | "IN_PROGRESS" | "DONE" | "SKIPPED";
+        MeetingAiActionItem: {
+            convertedTaskId?: string | null;
+            convertedTaskKey?: string | null;
+            description?: string | null;
+            dueDate?: string | null;
+            id: string;
+            ownerEmail?: string | null;
+            ownerId?: string | null;
+            priority?: components["schemas"]["TaskPriority"];
+            projectId?: string | null;
+            reminderId?: string | null;
+            sprintId?: string | null;
+            /** @enum {string} */
+            status?: "OPEN" | "CONVERTED" | "DONE" | "DISMISSED";
+            taskId?: string | null;
+            title: string;
+        };
+        MeetingAiState: {
+            actionItems: components["schemas"]["MeetingAiActionItem"][];
+            enabled: boolean;
+            health: {
+                convertedActionItems: number;
+                effectivenessScore?: number | null;
+                hasAgenda: boolean;
+                hasNotes: boolean;
+                missingDueDates: number;
+                missingOwners: number;
+                openActionItems: number;
+            };
+            links: {
+                clientCompany?: string | null;
+                clientEmail?: string | null;
+                clientName?: string | null;
+                projectId?: string | null;
+                sprintId?: string | null;
+                taskId?: string | null;
+                teamId?: string | null;
+            };
+            meetingId: string;
+            summary: {
+                [key: string]: unknown;
+            };
+        };
+        MeetingAiUsageSummary: {
+            byType: {
+                estimatedCost: number;
+                requestType: string;
+                requests: number;
+                status: string;
+                totalTokens: number;
+            }[];
+            recentFailures: {
+                createdAt: string;
+                error?: string | null;
+                id: string;
+                model: string;
+                provider: string;
+                requestType?: string | null;
+                status: string;
+            }[];
+            totals: {
+                estimatedCost: number;
+                inputTokens: number;
+                outputTokens: number;
+                requests: number;
+                totalTokens: number;
+            };
+        };
+        /** @enum {string} */
+        MeetingApprovalStatus: "NOT_REQUIRED" | "PENDING" | "APPROVED" | "REJECTED";
+        MeetingAttendee: {
+            createdAt?: string;
+            email?: string | null;
+            id: string;
+            isExternal: boolean;
+            meetingId: string;
+            name?: string | null;
+            responseNote?: string | null;
+            role: components["schemas"]["MeetingAttendeeRole"];
+            status: components["schemas"]["MeetingAttendeeStatus"];
+            tenantId: string;
+            updatedAt?: string;
+            user?: components["schemas"]["UserSummary"] | null;
+            userId?: string | null;
+        };
+        /** @enum {string} */
+        MeetingAttendeeRole: "HOST" | "CO_HOST" | "REQUIRED" | "OPTIONAL" | "GUEST" | "OBSERVER";
+        /** @enum {string} */
+        MeetingAttendeeStatus: "INVITED" | "ACCEPTED" | "DECLINED" | "TENTATIVE" | "ATTENDED" | "NO_SHOW" | "REMOVED";
+        MeetingAvailability: {
+            blackouts: components["schemas"]["MeetingBlackoutWindow"][];
+            windows: components["schemas"]["MeetingAvailabilityWindow"][];
+        };
+        /** @enum {string} */
+        MeetingAvailabilityScope: "USER" | "TEAM" | "TENANT";
+        MeetingAvailabilityWindow: {
+            capacity: number;
+            createdAt?: string;
+            dayOfWeek: number;
+            endTime: string;
+            id: string;
+            isActive: boolean;
+            label?: string | null;
+            ownerId?: string | null;
+            scope: components["schemas"]["MeetingAvailabilityScope"];
+            startTime: string;
+            teamId?: string | null;
+            tenantId: string;
+            timezone: string;
+            updatedAt?: string;
+        };
+        MeetingBlackoutWindow: {
+            createdAt?: string;
+            endAt: string;
+            id: string;
+            ownerId?: string | null;
+            reason?: string | null;
+            startAt: string;
+            teamId?: string | null;
+            tenantId: string;
+            timezone: string;
+            title: string;
+            updatedAt?: string;
+        };
+        MeetingChecklistItem: {
+            createdAt: string;
+            dueAt?: string | null;
+            id: string;
+            isDone: boolean;
+            meetingId: string;
+            metadata?: {
+                [key: string]: unknown;
+            } | null;
+            notes?: string | null;
+            owner?: components["schemas"]["UserSummary"] | null;
+            ownerId?: string | null;
+            sortOrder: number;
+            taskId?: string | null;
+            tenantId: string;
+            title: string;
+            updatedAt: string;
+        };
+        MeetingComment: {
+            author?: components["schemas"]["UserSummary"] | null;
+            authorId: string;
+            body: string;
+            createdAt: string;
+            id: string;
+            meetingId: string;
+            metadata?: {
+                [key: string]: unknown;
+            } | null;
+            tenantId: string;
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        MeetingConferenceProvider: "NONE" | "MANUAL" | "GOOGLE_CALENDAR" | "GOOGLE_MEET" | "MICROSOFT_TEAMS" | "ZOOM" | "CUSTOM_URL";
+        MeetingDecision: {
+            createdAt: string;
+            dueAt?: string | null;
+            id: string;
+            impact?: string | null;
+            meetingId: string;
+            metadata?: {
+                [key: string]: unknown;
+            } | null;
+            owner?: components["schemas"]["UserSummary"] | null;
+            ownerId?: string | null;
+            status: components["schemas"]["MeetingDecisionStatus"];
+            summary?: string | null;
+            taskId?: string | null;
+            tenantId: string;
+            title: string;
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        MeetingDecisionStatus: "OPEN" | "APPROVED" | "REJECTED" | "DEFERRED" | "SUPERSEDED";
+        MeetingIntegrationHealth: {
+            providers: {
+                [key: string]: {
+                    connected: boolean;
+                    integrationId?: string;
+                    name?: string;
+                    provider?: string;
+                    scopes?: string[];
+                };
+            };
+            queue: {
+                [key: string]: number;
+            };
+            settings: components["schemas"]["MeetingPolicy"];
+            webhookErrors: {
+                attempts: number;
+                createdAt: string;
+                eventType: string;
+                id: string;
+                lastError?: string | null;
+                responseStatus?: number | null;
+                status: string;
+                webhook?: {
+                    enabled: boolean;
+                    id: string;
+                    name: string;
+                };
+            }[];
+        };
+        MeetingIntegrationSettings: {
+            aiMeetingProcessingEnabled?: boolean;
+            allowExternalGuests?: boolean;
+            allowedConferenceProviders: components["schemas"]["MeetingConferenceProvider"][];
+            calendarConnectionPermissions?: string[];
+            calendarSyncEnabled: boolean;
+            createdAt?: string;
+            defaultConferenceProvider: components["schemas"]["MeetingConferenceProvider"];
+            defaultMeetingVisibility?: components["schemas"]["Visibility"];
+            defaultReminderChannels: components["schemas"]["MeetingReminderChannel"][];
+            emailRemindersEnabled: boolean;
+            id: string;
+            manualLinkPolicy?: {
+                [key: string]: unknown;
+            } | null;
+            maxAdvanceBookingDays?: number;
+            maxMeetingDurationMins?: number;
+            minBookingNoticeMins?: number;
+            policyConfig?: {
+                [key: string]: unknown;
+            } | null;
+            providerConfig?: {
+                [key: string]: unknown;
+            } | null;
+            publicBookingCreatorPermissions?: string[];
+            publicBookingEnabled?: boolean;
+            requireApprovalForExternalGuests?: boolean;
+            requireApprovedWhatsappTemplates: boolean;
+            smsRemindersEnabled: boolean;
+            tenantId: string;
+            updatedAt?: string;
+            webhookEventsEnabled: boolean;
+            whatsappConnectionPermissions?: string[];
+            whatsappRemindersEnabled: boolean;
+        };
+        MeetingIntegrationStatus: {
+            providers: {
+                [key: string]: {
+                    connected: boolean;
+                    integrationId?: string;
+                    name?: string;
+                    provider?: string;
+                    scopes?: string[];
+                };
+            };
+            queue: {
+                [key: string]: number;
+            };
+            settings: components["schemas"]["MeetingIntegrationSettings"];
+            supportedEvents: string[];
+        };
+        /** @enum {string} */
+        MeetingLocationMode: "IN_PERSON" | "ONLINE" | "HYBRID" | "PHONE" | "TBD";
+        MeetingPolicy: {
+            aiMeetingProcessingEnabled: boolean;
+            allowExternalGuests: boolean;
+            calendarConnectionPermissions: string[];
+            defaultMeetingVisibility: components["schemas"]["Visibility"];
+            id: string;
+            maxAdvanceBookingDays: number;
+            maxMeetingDurationMins: number;
+            minBookingNoticeMins: number;
+            publicBookingCreatorPermissions: string[];
+            publicBookingEnabled: boolean;
+            requireApprovalForExternalGuests: boolean;
+            tenantId: string;
+            whatsappConnectionPermissions: string[];
+        } & {
+            policyConfig?: {
+                [key: string]: unknown;
+            } | null;
+            updatedAt?: string;
+        };
+        MeetingReminder: {
+            attendeeId?: string | null;
+            channel: components["schemas"]["MeetingReminderChannel"];
+            createdAt?: string;
+            destination?: string | null;
+            error?: string | null;
+            id: string;
+            meetingId: string;
+            offsetMinutes: number;
+            scheduledFor: string;
+            sentAt?: string | null;
+            status: components["schemas"]["MeetingReminderStatus"];
+            templateKey?: string | null;
+            tenantId: string;
+            updatedAt?: string;
+        };
+        /** @enum {string} */
+        MeetingReminderChannel: "IN_APP" | "EMAIL" | "WHATSAPP" | "SMS" | "WEBHOOK";
+        MeetingReminderDeliverySummary: {
+            byChannel: {
+                [key: string]: number;
+            };
+            byStatus: {
+                [key: string]: number;
+            };
+            failedRecent: components["schemas"]["MeetingReminderJob"][];
+        };
+        MeetingReminderJob: {
+            attempts: number;
+            channel: components["schemas"]["MeetingReminderChannel"];
+            createdAt?: string;
+            deadLetterAt?: string | null;
+            destination?: string | null;
+            failedAt?: string | null;
+            id: string;
+            lastError?: string | null;
+            lockedAt?: string | null;
+            maxAttempts: number;
+            meeting?: {
+                conferenceProvider?: string | null;
+                endAt: string;
+                id: string;
+                meetingUrl?: string | null;
+                startAt: string;
+                status: components["schemas"]["MeetingStatus"];
+                tenantId: string;
+                title: string;
+            };
+            meetingId: string;
+            nextAttemptAt: string;
+            provider?: string | null;
+            reminder?: {
+                attendeeId?: string | null;
+                id: string;
+                offsetMinutes: number;
+                templateKey?: string | null;
+            } | null;
+            reminderId?: string | null;
+            scheduledFor: string;
+            sentAt?: string | null;
+            status: components["schemas"]["MeetingReminderJobStatus"];
+            tenantId: string;
+            updatedAt?: string;
+        };
+        /** @enum {string} */
+        MeetingReminderJobStatus: "QUEUED" | "PROCESSING" | "SENT" | "FAILED" | "CANCELLED" | "DEAD_LETTER";
+        /** @enum {string} */
+        MeetingReminderStatus: "PENDING" | "SCHEDULED" | "SENT" | "FAILED" | "CANCELLED";
+        /** @enum {string} */
+        MeetingStatus: "SCHEDULED" | "LIVE" | "COMPLETED" | "CANCELLED" | "NO_SHOW" | "ARCHIVED";
+        MeetingType: {
+            _count?: {
+                meetings?: number;
+            };
+            bufferAfterMins: number;
+            bufferBeforeMins: number;
+            category: components["schemas"]["MeetingTypeCategory"];
+            color?: string | null;
+            createdAt?: string;
+            createdById?: string | null;
+            defaultAgenda?: string[] | null;
+            defaultReminderMins: number[];
+            defaultVisibility: components["schemas"]["Visibility"];
+            description?: string | null;
+            durationMins: number;
+            icon?: string | null;
+            id: string;
+            isActive: boolean;
+            locationMode: components["schemas"]["MeetingLocationMode"];
+            name: string;
+            requiresApproval: boolean;
+            slug: string;
+            tenantId: string;
+            updatedAt?: string;
+        };
+        /** @enum {string} */
+        MeetingTypeCategory: "INTERNAL" | "CLIENT" | "SALES" | "SUPPORT" | "SPRINT" | "STANDUP" | "REVIEW" | "INTERVIEW" | "TRAINING" | "CUSTOM";
+        MeetingWorkspace: {
+            activity: components["schemas"]["MeetingActivity"][];
+            agendaItems: components["schemas"]["MeetingAgendaItem"][];
+            attendees: components["schemas"]["MeetingAttendee"][];
+            checklist: components["schemas"]["MeetingChecklistItem"][];
+            comments: components["schemas"]["MeetingComment"][];
+            decisions: components["schemas"]["MeetingDecision"][];
+            files: components["schemas"]["FileAsset"][];
+            live: {
+                notes: string;
+                runtimeState: {
+                    [key: string]: unknown;
+                };
+                updatedAt?: string | null;
+                updatedBy?: components["schemas"]["UserSummary"] | null;
+                version: number;
+            };
+            meeting: components["schemas"]["Meeting"];
+            metrics: {
+                absent: number;
+                agendaItems: number;
+                attendees: number;
+                checklist: number;
+                checklistDone: number;
+                checklistProgress: number;
+                completedRelatedTasks: number;
+                decisions: number;
+                files: number;
+                openDecisions: number;
+                present: number;
+                relatedTasks: number;
+                reminders: number;
+            };
+            relatedTasks: components["schemas"]["Task"][];
+            reminderJobs: components["schemas"]["MeetingReminderJob"][];
+            reminders: components["schemas"]["MeetingReminder"][];
+        };
+        Message: {
+            attachments?: components["schemas"]["MessageAttachment"][] | unknown;
+            body?: string | null;
+            conversationId: string;
+            createdAt: string;
+            forwardedFromMessageId?: string | null;
+            id: string;
+            metadata?: unknown;
+            parentMessageId?: string | null;
+            pinnedAt?: string | null;
+            pinnedById?: string | null;
+            reactions?: components["schemas"]["MessageReaction"][];
+            readReceipts?: components["schemas"]["MessageReadReceipt"][];
+            sender?: components["schemas"]["UserSummary"] | null;
+            senderId: string;
+            updatedAt: string;
+        };
+        MessageAttachment: {
+            id?: string;
+            /** @enum {string} */
+            kind?: "image" | "video" | "audio" | "file" | "link";
+            mimeType?: string | null;
+            name: string;
+            sizeBytes?: number | null;
+            url: string;
+        };
+        MessageReaction: {
+            emoji: string;
+            id: string;
+            messageId?: string;
+            userId: string;
+        };
+        MessageReadReceipt: {
+            id: string;
+            messageId?: string;
+            readAt: string;
+            user?: components["schemas"]["UserSummary"] | null;
+            userId: string;
+        };
+        MfaChallengeResponse: {
+            expiresAt: string;
+            message: string;
+            methods: string[];
+            mfaToken: string;
+            /** @enum {boolean} */
+            requiresMfa: true;
+        };
+        ModuleStatus: {
+            module?: string;
+            status: string;
+        };
+        Notification: {
+            body?: string | null;
+            channel: components["schemas"]["NotificationChannel"];
+            createdAt: string;
+            data?: {
+                [key: string]: unknown;
+            } | null;
+            deliveries?: components["schemas"]["NotificationDelivery"][];
+            id: string;
+            readAt?: string | null;
+            template?: {
+                channel: components["schemas"]["NotificationChannel"];
+                id: string;
+                key: string;
+                name: string;
+            } | null;
+            templateId?: string | null;
+            tenantId: string;
+            title: string;
+            userId: string;
+        };
+        /** @enum {string} */
+        NotificationChannel: "IN_APP" | "EMAIL" | "SMS" | "PUSH" | "WEBHOOK";
+        NotificationDelivery: {
+            attempts: number;
+            channel: components["schemas"]["NotificationChannel"];
+            createdAt: string;
+            id: string;
+            lastError?: string | null;
+            nextAttemptAt?: string | null;
+            provider?: string | null;
+            providerMessageId?: string | null;
+            sentAt?: string | null;
+            status: components["schemas"]["NotificationDeliveryStatus"];
+            updatedAt?: string;
+        };
+        /** @enum {string} */
+        NotificationDeliveryStatus: "PENDING" | "SENT" | "FAILED" | "CANCELLED";
+        NotificationPreference: {
+            channel: components["schemas"]["NotificationChannel"];
+            enabled: boolean;
+            id: string | null;
+            locked?: boolean;
+            userId: string;
+        };
+        OmoFlowRuntimeActionItem: {
+            assigneeEmail?: string;
+            description?: string;
+            dueDate?: string;
+            priority?: components["schemas"]["TaskPriority"];
+            storyPoints?: number;
+            title: string;
+        };
+        OmoFlowRuntimeEvent: {
+            actionItems?: components["schemas"]["OmoFlowRuntimeActionItem"][];
+            agendaItems?: unknown[];
+            eventId: string;
+            eventType: string;
+            meeting?: {
+                endedAt?: string;
+                id?: string;
+                recordingUrl?: string;
+                startedAt?: string;
+                summary?: string;
+                title?: string;
+                transcriptUrl?: string;
+            };
+            payload?: unknown;
+            projectId?: string;
+        };
+        OmoFlowRuntimeResult: {
+            eventId: string;
+            idempotent: boolean;
+            integration: components["schemas"]["Integration"];
+            mappedTasks: {
+                createdAt?: string;
+                description?: string | null;
+                dueDate?: string | null;
+                id: string;
+                key: string;
+                priority: components["schemas"]["TaskPriority"];
+                projectId: string;
+                status: components["schemas"]["TaskStatus"];
+                storyPoints?: number | null;
+                title: string;
+            }[];
+            message: string;
+        };
+        Permission: {
+            action: string;
+            createdAt?: string;
+            description?: string | null;
+            id: string;
+            subject: string;
+        };
+        PlatformAdminGrant: {
+            createdAt: string;
+            grantedById?: string | null;
+            id: string;
+            level: components["schemas"]["PlatformAdminLevel"];
+            notes?: string | null;
+            revokedAt?: string | null;
+            revokedById?: string | null;
+            scopes: string[];
+            status: components["schemas"]["PlatformAdminStatus"];
+            updatedAt: string;
+            user: components["schemas"]["UserSummary"] & {
+                tenant: {
+                    id: string;
+                    name: string;
+                    slug: string;
+                };
+                tenantId: string;
+            };
+            userId: string;
+        };
+        /** @enum {string} */
+        PlatformAdminLevel: "OWNER" | "ADMIN" | "SUPPORT" | "AUDITOR";
+        /** @enum {string} */
+        PlatformAdminStatus: "ACTIVE" | "REVOKED";
+        PlatformAuditLog: {
+            action: string;
+            actor?: (components["schemas"]["UserSummary"] & {
+                id: string;
+            }) | null;
+            actorId?: string | null;
+            createdAt: string;
+            entityId?: string | null;
+            entityType: string;
+            id: string;
+            ipAddress?: string | null;
+            newValue?: unknown;
+            oldValue?: unknown;
+            targetTenant?: {
+                id: string;
+                name: string;
+                slug: string;
+            } | null;
+            targetTenantId?: string | null;
+            userAgent?: string | null;
+        };
+        Project: {
+            _count?: {
+                budgets?: number;
+                changeRequests?: number;
+                decisions?: number;
+                dependencies?: number;
+                documents?: number;
+                members?: number;
+                milestones?: number;
+                risks?: number;
+                sprints?: number;
+                stakeholders?: number;
+                tasks?: number;
+            };
+            addressLine1?: string | null;
+            addressLine2?: string | null;
+            billingCode?: string | null;
+            city?: string | null;
+            clientEmail?: string | null;
+            clientName?: string | null;
+            clientPhone?: string | null;
+            completedAt?: string | null;
+            contractValue?: (number | string) | null;
+            costCenter?: string | null;
+            country?: string | null;
+            createdAt?: string;
+            currency?: string | null;
+            description?: string | null;
+            dueDate?: string | null;
+            financeRedacted?: boolean;
+            id: string;
+            key: string;
+            locationName?: string | null;
+            name: string;
+            permissions?: components["schemas"]["ProjectPermissionMatrix"];
+            postalCode?: string | null;
+            progress: number;
+            startDate?: string | null;
+            state?: string | null;
+            status: components["schemas"]["ProjectStatus"];
+            team?: {
+                id: string;
+                name: string;
+            } | null;
+            teamId?: string | null;
+            tenantId?: string;
+            timezone?: string | null;
+            updatedAt?: string;
+            visibility?: components["schemas"]["Visibility"];
+            workspace?: {
+                id: string;
+                name: string;
+                slug: string;
+            };
+            workspaceId?: string | null;
+        };
+        ProjectBoard: {
+            columns: components["schemas"]["BoardColumn"][];
+            createdAt?: string;
+            description?: string | null;
+            id: string;
+            isDefault: boolean;
+            name: string;
+            permissions?: {
+                canCreateTask: boolean;
+                canEditBoard: boolean;
+                canManageColumns: boolean;
+                canManageSprints?: boolean;
+                canMoveTasks: boolean;
+                canView: boolean;
+                canViewReports: boolean;
+            };
+            projectId: string;
+            summary?: {
+                actualMins: number;
+                blockedCount: number;
+                blockingCount: number;
+                cancelledCount: number;
+                completedCount: number;
+                completedStoryPoints: number;
+                completionRate: number;
+                dueTodayCount: number;
+                estimateMins: number;
+                generatedAt: string;
+                highPriorityCount: number;
+                openCount: number;
+                overdueCount: number;
+                storyPoints: number;
+                taskCount: number;
+                unassignedCount: number;
+            };
+            tenantId: string;
+            updatedAt?: string;
+        };
+        ProjectBudget: {
+            actual?: (number | string) | null;
+            createdAt?: string;
+            currency?: string | null;
+            id: string;
+            notes?: string | null;
+            planned?: (number | string) | null;
+            projectId: string;
+            updatedAt?: string;
+        };
+        ProjectChangeRequest: {
+            approvedAt?: string | null;
+            approvedByEmail?: string | null;
+            approvedByName?: string | null;
+            budgetImpact?: (number | string) | null;
+            createdAt?: string;
+            description?: string | null;
+            dueDate?: string | null;
+            id: string;
+            implementedAt?: string | null;
+            notes?: string | null;
+            projectId: string;
+            reason?: string | null;
+            requestedByEmail?: string | null;
+            requestedByName?: string | null;
+            riskImpact?: string | null;
+            scheduleImpactDays?: number | null;
+            scopeImpact?: string | null;
+            status: components["schemas"]["ProjectChangeRequestStatus"];
+            submittedAt?: string | null;
+            title: string;
+            updatedAt?: string;
+        };
+        /** @enum {string} */
+        ProjectChangeRequestStatus: "DRAFT" | "SUBMITTED" | "APPROVED" | "REJECTED" | "IMPLEMENTED" | "CANCELLED";
+        ProjectDecision: {
+            createdAt?: string;
+            decidedAt?: string | null;
+            description?: string | null;
+            effectiveAt?: string | null;
+            id: string;
+            notes?: string | null;
+            outcome?: string | null;
+            ownerEmail?: string | null;
+            ownerName?: string | null;
+            projectId: string;
+            status: components["schemas"]["ProjectDecisionStatus"];
+            title: string;
+            updatedAt?: string;
+        };
+        /** @enum {string} */
+        ProjectDecisionStatus: "PROPOSED" | "DECIDED" | "SUPERSEDED" | "REOPENED";
+        ProjectDependency: {
+            createdAt?: string;
+            dependencyType?: string | null;
+            description?: string | null;
+            dueDate?: string | null;
+            externalUrl?: string | null;
+            id: string;
+            notes?: string | null;
+            ownerEmail?: string | null;
+            ownerName?: string | null;
+            projectId: string;
+            resolvedAt?: string | null;
+            status: components["schemas"]["ProjectDependencyStatus"];
+            title: string;
+            updatedAt?: string;
+        };
+        /** @enum {string} */
+        ProjectDependencyStatus: "OPEN" | "BLOCKED" | "RESOLVED" | "CANCELLED";
+        ProjectHealthAnalytics: {
+            data: ({
+                dueDate?: string | null;
+                id: string;
+                key: string;
+                name: string;
+                progress: number;
+                status: components["schemas"]["ProjectStatus"];
+            } & {
+                _count?: {
+                    risks?: number;
+                    tasks?: number;
+                };
+                completion: number;
+                doneTasks: number;
+                healthScore: number;
+                openRisks: number;
+                overdueTasks: number;
+            })[];
+            total: number;
+        };
+        ProjectMember: {
+            createdAt?: string;
+            id: string;
+            role?: string | null;
+            user: components["schemas"]["UserSummary"];
+        };
+        ProjectMilestone: {
+            completedAt?: string | null;
+            createdAt?: string;
+            description?: string | null;
+            dueDate?: string | null;
+            id: string;
+            projectId: string;
+            title: string;
+            updatedAt?: string;
+        };
+        /** @enum {string} */
+        ProjectPermissionAction: "viewProject" | "editProject" | "archiveProject" | "restoreProject" | "deleteProject" | "manageMembers" | "manageMilestones" | "manageRisks" | "viewBudget" | "manageBudget" | "createTasks" | "editTasks" | "moveTasks" | "deleteTasks" | "commentTasks" | "viewBoard" | "manageBoardColumns" | "manageSprints" | "manageFiles" | "viewPrivateFiles";
+        ProjectPermissionMatrix: {
+            accessLevel: string;
+            actions: {
+                [key: string]: boolean;
+            };
+            key: string;
+            name: string;
+            projectId: string;
+            projectRole?: string | null;
+            roles: {
+                accessLevel: string;
+                description: string;
+                role: string;
+            }[];
+            source: string;
+            status: components["schemas"]["ProjectStatus"];
+            teamRole?: string | null;
+            visibility: components["schemas"]["Visibility"];
+        };
+        ProjectRisk: {
+            createdAt?: string;
+            description?: string | null;
+            id: string;
+            isOpen: boolean;
+            mitigation?: string | null;
+            projectId: string;
+            severity?: components["schemas"]["TaskPriority"] | null;
+            title: string;
+            updatedAt?: string;
+        };
+        ProjectStakeholder: {
+            createdAt?: string;
+            email?: string | null;
+            id: string;
+            influence: components["schemas"]["ProjectStakeholderInfluence"];
+            isExternal: boolean;
+            name: string;
+            notes?: string | null;
+            organization?: string | null;
+            projectId: string;
+            role?: string | null;
+            updatedAt?: string;
+        };
+        /** @enum {string} */
+        ProjectStakeholderInfluence: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+        /** @enum {string} */
+        ProjectStatus: "PLANNING" | "ACTIVE" | "ON_HOLD" | "COMPLETED" | "ARCHIVED";
+        PublicBookingCreateResponse: {
+            booking: components["schemas"]["BookingRequest"];
+            selfService: {
+                cancelUrl: string;
+                expiresAt: string;
+                rescheduleUrl: string;
+            };
+        };
+        PublicBookingPageResponse: {
+            page: {
+                allowCancel: boolean;
+                allowReschedule: boolean;
+                approvalRequired: boolean;
+                brandColor?: string | null;
+                collectCompanyName: boolean;
+                description?: string | null;
+                durationMins?: number | null;
+                fields?: components["schemas"]["BookingFormField"][];
+                heroImageUrl?: string | null;
+                id: string;
+                locationMode: components["schemas"]["MeetingLocationMode"];
+                locationName?: string | null;
+                logoUrl?: string | null;
+                meetingType?: {
+                    bufferAfterMins: number;
+                    bufferBeforeMins: number;
+                    category: components["schemas"]["MeetingTypeCategory"];
+                    defaultAgenda?: string[] | null;
+                    defaultReminderMins: number[];
+                    description?: string | null;
+                    durationMins: number;
+                    id: string;
+                    isActive: boolean;
+                    locationMode: components["schemas"]["MeetingLocationMode"];
+                    name: string;
+                    requiresApproval: boolean;
+                    slug: string;
+                } | null;
+                minNoticeMins: number;
+                path: string;
+                rollingWindowDays: number;
+                routingStrategy: components["schemas"]["BookingRoutingStrategy"];
+                scope: components["schemas"]["BookingPageScope"];
+                subtitle?: string | null;
+                team?: ({
+                    description?: string | null;
+                    id: string;
+                    name: string;
+                } & {
+                    members?: {
+                        role?: string | null;
+                        user: components["schemas"]["UserSummary"] & {
+                            avatarUrl?: string | null;
+                            status?: string;
+                            timezone?: string | null;
+                        };
+                    }[];
+                }) | null;
+                timezone: string;
+                title: string;
+            } & {
+                hosts: {
+                    avatarUrl?: string | null;
+                    id: string;
+                    name: string;
+                    timezone?: string | null;
+                }[];
+            };
+            tenant: {
+                id: string;
+                logoUrl?: string | null;
+                name: string;
+                slug: string;
+                status: string;
+                website?: string | null;
+            };
+        };
+        PublicBookingSlot: {
+            endAt: string;
+            hostAvatarUrl?: string | null;
+            hostId: string;
+            hostName: string;
+            routingStrategy: components["schemas"]["BookingRoutingStrategy"];
+            startAt: string;
+        };
+        PublicBookingSlotsResponse: {
+            page: {
+                id: string;
+                path: string;
+                timezone: string;
+                title: string;
+            };
+            slots: components["schemas"]["PublicBookingSlot"][];
+        };
+        ReadinessResponse: {
+            checks?: {
+                [key: string]: unknown;
+            };
+            status: string;
+            timestamp?: string;
+        };
+        Report: {
+            _count?: {
+                executions?: number;
+                exports?: number;
+            };
+            archivedAt?: string | null;
+            cacheTtlSeconds?: number | null;
+            createdAt: string;
+            createdBy?: components["schemas"]["UserSummary"] | null;
+            createdById?: string | null;
+            description?: string | null;
+            id: string;
+            lastRunAt?: string | null;
+            metadata?: unknown;
+            name: string;
+            nextRunAt?: string | null;
+            query?: unknown;
+            recipients?: string[];
+            schedule?: string | null;
+            status: components["schemas"]["ReportStatus"];
+            tenantId: string;
+            timezone?: string | null;
+            type: string;
+            updatedAt: string;
+        };
+        ReportExecution: {
+            cacheKey?: string | null;
+            completedAt?: string | null;
+            createdAt: string;
+            durationMs?: number | null;
+            error?: string | null;
+            id: string;
+            parameters?: unknown;
+            report?: {
+                id: string;
+                name: string;
+                status: components["schemas"]["ReportStatus"];
+                type: string;
+            } | null;
+            reportId?: string | null;
+            requestedById?: string | null;
+            result?: unknown;
+            rowCount?: number | null;
+            startedAt?: string | null;
+            status: components["schemas"]["ReportExecutionStatus"];
+            summary?: unknown;
+            tenantId: string;
+            type: string;
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        ReportExecutionStatus: "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED" | "CANCELLED";
+        ReportExport: {
+            createdAt: string;
+            error?: string | null;
+            execution?: {
+                id: string;
+                rowCount?: number | null;
+                status: components["schemas"]["ReportExecutionStatus"];
+            } | null;
+            executionId?: string | null;
+            expiresAt?: string | null;
+            fileName?: string | null;
+            fileUrl?: string | null;
+            format: components["schemas"]["ReportExportFormat"];
+            id: string;
+            mimeType?: string | null;
+            report?: {
+                id: string;
+                name: string;
+                type: string;
+            } | null;
+            reportId?: string | null;
+            requestedById?: string | null;
+            sizeBytes?: number | null;
+            status: components["schemas"]["ReportExportStatus"];
+            tenantId: string;
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        ReportExportFormat: "CSV" | "XLSX" | "PDF" | "JSON";
+        /** @enum {string} */
+        ReportExportStatus: "QUEUED" | "PROCESSING" | "COMPLETED" | "FAILED" | "EXPIRED";
+        /** @enum {string} */
+        ReportStatus: "DRAFT" | "ACTIVE" | "PAUSED" | "ARCHIVED";
+        Role: {
+            _count?: {
+                users?: number;
+            };
+            createdAt?: string;
+            description?: string | null;
+            id: string;
+            isSystem: boolean;
+            name: string;
+            permissions?: {
+                permission: components["schemas"]["Permission"];
+            }[];
+            updatedAt?: string;
+        };
+        /** @enum {string} */
+        SearchCategory: "all" | "projects" | "tasks" | "files" | "people" | "teams" | "workspaces" | "messages";
+        SecurityChecks: {
+            corsConfigured: boolean;
+            corsOrigins: string[];
+            helmetEnabled: boolean;
+            nodeEnv: string;
+            rateLimit: {
+                authMax: number;
+                defaultMax: number;
+                ttlSeconds: number;
+            };
+            requestBodyLimit: string;
+            requestTimeoutMs: number;
+            secretsConfigured: {
+                encryption: boolean;
+                jwtAccess: boolean;
+                jwtRefresh: boolean;
+                webhookSigning: boolean;
+            };
+            swaggerProductionSafe: boolean;
+            validationPipe: {
+                forbidNonWhitelisted: boolean;
+                transform: boolean;
+                whitelist: boolean;
+            };
+        };
+        SecurityEvent: {
+            actor?: components["schemas"]["UserSummary"] | null;
+            actorId?: string | null;
+            createdAt: string;
+            id: string;
+            ipAddress?: string | null;
+            metadata?: unknown;
+            requestId?: string | null;
+            resolvedAt?: string | null;
+            resolvedBy?: components["schemas"]["UserSummary"] | null;
+            resolvedById?: string | null;
+            severity: components["schemas"]["SecurityEventSeverity"];
+            source?: string | null;
+            status: components["schemas"]["SecurityEventStatus"];
+            subjectId?: string | null;
+            subjectType?: string | null;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            } | null;
+            tenantId?: string | null;
+            type: string;
+            updatedAt: string;
+            userAgent?: string | null;
+        };
+        /** @enum {string} */
+        SecurityEventSeverity: "INFO" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+        /** @enum {string} */
+        SecurityEventStatus: "OPEN" | "ACKNOWLEDGED" | "RESOLVED" | "DISMISSED";
+        SecurityPolicy: {
+            allowedLoginMethods?: string[];
+            allowedUploadMimeTypes: string[];
+            auditRetentionDays: number;
+            createdAt: string;
+            dataRetentionDays?: number | null;
+            domainDiscoveryEnabled?: boolean;
+            enforceIpAllowlist: boolean;
+            id: string;
+            ipAllowlist: string[];
+            maxSessionsPerUser?: number | null;
+            maxUploadBytes?: number | null;
+            metadata?: unknown;
+            mfaRequired: boolean;
+            passwordHistoryCount: number;
+            passwordMinLength: number;
+            passwordRequireLower: boolean;
+            passwordRequireNumber: boolean;
+            passwordRequireSymbol: boolean;
+            passwordRequireUpper: boolean;
+            sessionTtlMinutes: number;
+            ssoRequired?: boolean;
+            tenantId: string;
+            trustedDeviceTtlDays?: number;
+            updatedAt: string;
+        };
+        SiteAdminOverview: {
+            platformAdmins: number;
+            platformAuditLogs: number;
+            recentEvents: components["schemas"]["SecurityEvent"][];
+            recentTenants: components["schemas"]["Tenant"][];
+            securityEvents: {
+                open: number;
+                total: number;
+            };
+            sessions: {
+                active: number;
+            };
+            tenants: {
+                [key: string]: number;
+            };
+            users: {
+                [key: string]: number;
+            };
+        };
+        SiteAdminProfile: {
+            createdAt: string;
+            id: string;
+            level: components["schemas"]["PlatformAdminLevel"];
+            scopes: string[];
+            status: components["schemas"]["PlatformAdminStatus"];
+            tenantMembership: {
+                tenantId: string;
+                tenantName: string;
+                tenantSlug: string;
+            };
+            updatedAt: string;
+            userId: string;
+        };
+        SiteAiAction: {
+            agent?: {
+                id: string;
+                model: string;
+                name: string;
+                provider: string;
+            } | null;
+            agentId?: string | null;
+            completedAt?: string | null;
+            conversation?: {
+                id: string;
+                status: components["schemas"]["AiConversationStatus"];
+                title?: string | null;
+            } | null;
+            conversationId?: string | null;
+            createdAt: string;
+            entityId?: string | null;
+            entityType?: string | null;
+            error?: string | null;
+            id: string;
+            input?: unknown;
+            messageId?: string | null;
+            output?: unknown;
+            requestedBy?: components["schemas"]["UserSummary"] | null;
+            requestedById?: string | null;
+            status: components["schemas"]["AiActionStatus"];
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+            tenantId: string;
+            type: string;
+            updatedAt: string;
+        };
+        SiteAiAgent: components["schemas"]["AiAgent"] & {
+            createdBy?: components["schemas"]["UserSummary"] | null;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+        };
+        SiteAiConversation: {
+            _count?: {
+                actions?: number;
+                messages?: number;
+                usageLogs?: number;
+            };
+            agent?: {
+                id: string;
+                model: string;
+                name: string;
+                provider: string;
+            };
+            agentId: string;
+            archivedAt?: string | null;
+            contextId?: string | null;
+            contextType?: string | null;
+            createdAt: string;
+            id: string;
+            status: components["schemas"]["AiConversationStatus"];
+            summary?: string | null;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+            tenantId: string;
+            title?: string | null;
+            updatedAt: string;
+            user?: components["schemas"]["UserSummary"];
+            userId: string;
+        };
+        SiteAiOverview: {
+            actions: {
+                byStatus: {
+                    [key: string]: number;
+                };
+            };
+            agents: {
+                byProvider: {
+                    [key: string]: number;
+                };
+            };
+            conversations: {
+                byStatus: {
+                    [key: string]: number;
+                };
+            };
+            recentActions: components["schemas"]["SiteAiAction"][];
+            safety: {
+                events: number;
+                recentEvents: components["schemas"]["SecurityEvent"][];
+            };
+            settings: {
+                [key: string]: number;
+            };
+            usage: {
+                averageLatencyMs: number;
+                byStatus: {
+                    [key: string]: number;
+                };
+                last30dCost: number;
+                last30dTokens: number;
+            };
+        };
+        SiteAiSettings: components["schemas"]["AiSettings"] & {
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+        };
+        SiteAiUsageLog: {
+            agent?: {
+                id: string;
+                model: string;
+                name: string;
+                provider: string;
+            } | null;
+            agentId?: string | null;
+            conversationId?: string | null;
+            createdAt: string;
+            error?: string | null;
+            estimatedCost?: number | null;
+            id: string;
+            inputTokens: number;
+            latencyMs?: number | null;
+            model: string;
+            outputTokens: number;
+            provider: string;
+            requestType?: string | null;
+            status: components["schemas"]["AiRequestStatus"];
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+            tenantId: string;
+            totalTokens: number;
+            user?: components["schemas"]["UserSummary"] | null;
+            userId?: string | null;
+        };
+        SiteApproval: {
+            createdAt: string;
+            currentStep: number;
+            decidedAt?: string | null;
+            definitionId?: string | null;
+            description?: string | null;
+            dueDate?: string | null;
+            entityId: string;
+            entityType: string;
+            id: string;
+            requestedById?: string | null;
+            status: components["schemas"]["ApprovalStatus"];
+            steps?: {
+                approverId: string;
+                decidedAt?: string | null;
+                dueDate?: string | null;
+                id: string;
+                required: boolean;
+                status: components["schemas"]["ApprovalStatus"];
+                stepOrder: number;
+                title?: string | null;
+            }[];
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            } | null;
+            tenantId: string;
+            title: string;
+            updatedAt: string;
+            workflowRun?: {
+                id: string;
+                status: components["schemas"]["WorkflowRunStatus"];
+                workflow?: {
+                    id: string;
+                    name: string;
+                } | null;
+            } | null;
+            workflowRunId?: string | null;
+        };
+        SiteApprovalDefinition: {
+            archivedAt?: string | null;
+            createdAt: string;
+            description?: string | null;
+            entityType: string;
+            id: string;
+            isActive: boolean;
+            name: string;
+            steps?: {
+                approverId?: string | null;
+                approverRole?: string | null;
+                escalationHours?: number | null;
+                id: string;
+                required: boolean;
+                stepOrder: number;
+                title: string;
+            }[];
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            } | null;
+            tenantId: string;
+            updatedAt: string;
+        };
+        SiteAutomationOverview: {
+            approvals: {
+                byStatus: {
+                    [key: string]: number;
+                };
+            };
+            definitions: {
+                [key: string]: number;
+            };
+            recentFailedRuns: components["schemas"]["SiteWorkflowRun"][];
+            runs: {
+                byStatus: {
+                    [key: string]: number;
+                };
+                deadLetter: number;
+                last24h: number;
+            };
+            runtimeLogs: {
+                errorLogs: number;
+            };
+            workflows: {
+                byTrigger: {
+                    [key: string]: number;
+                };
+            };
+        };
+        SiteBillingEntitlement: {
+            entitlements: {
+                enabled: boolean;
+                key: string;
+                limit?: number | null;
+                metered: boolean;
+                name: string;
+                unit?: string | null;
+            }[];
+            plan: components["schemas"]["SiteBillingPlan"];
+            seatUsage: {
+                limit: number;
+                used: number;
+            };
+            subscription: {
+                currentPeriodEnd?: string | null;
+                id: string;
+                seatCount: number;
+                status: string;
+                trialEndsAt?: string | null;
+            };
+            tenant: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            } & {
+                _count?: {
+                    users?: number;
+                };
+            };
+        };
+        SiteBillingEvent: {
+            createdAt: string;
+            error?: string | null;
+            eventId: string;
+            id: string;
+            processedAt?: string | null;
+            provider: string;
+            status: string;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            } | null;
+            tenantId?: string | null;
+            type: string;
+            updatedAt: string;
+        };
+        SiteBillingFeature: {
+            category?: string | null;
+            createdAt: string;
+            defaultLimit?: number | null;
+            description?: string | null;
+            id: string;
+            isActive: boolean;
+            key: string;
+            metered: boolean;
+            name: string;
+            plans?: {
+                config?: unknown;
+                enabled: boolean;
+                featureId: string;
+                id: string;
+                limit?: number | null;
+                plan: components["schemas"]["SiteBillingPlan"];
+                planId: string;
+            }[];
+            unit?: string | null;
+            updatedAt: string;
+        };
+        SiteBillingFeaturePayload: {
+            category?: string;
+            defaultLimit?: number;
+            description?: string;
+            isActive?: boolean;
+            key: string;
+            metered?: boolean;
+            name: string;
+            unit?: string;
+        };
+        SiteBillingOverview: {
+            billingEvents: {
+                [key: string]: number;
+            };
+            features: number;
+            invoices: {
+                [key: string]: number;
+            };
+            plans: number;
+            recentBillingEvents: components["schemas"]["SiteBillingEvent"][];
+            recentSubscriptions: components["schemas"]["SiteSubscription"][];
+            revenue: number;
+            subscriptions: {
+                [key: string]: number;
+            };
+            tenantHealth: ({
+                createdAt: string;
+                id: string;
+                logoUrl?: string | null;
+                name: string;
+                slug: string;
+                status: string;
+                updatedAt: string;
+                website?: string | null;
+            } & {
+                _count?: {
+                    auditLogs?: number;
+                    integrations?: number;
+                    projects?: number;
+                    securityEvents?: number;
+                    teams?: number;
+                    users?: number;
+                    workspaces?: number;
+                } & {
+                    billingEvents?: number;
+                    usageRecords?: number;
+                };
+                billing?: components["schemas"]["SiteSubscription"] | null;
+                health: string;
+            })[];
+            usageRecords: number;
+        };
+        SiteBillingPlan: {
+            _count?: {
+                features?: number;
+                subscriptions?: number;
+            };
+            archivedAt?: string | null;
+            createdAt: string;
+            currency: string;
+            description?: string | null;
+            features?: {
+                config?: unknown;
+                enabled: boolean;
+                feature: {
+                    category?: string | null;
+                    defaultLimit?: number | null;
+                    description?: string | null;
+                    id: string;
+                    isActive: boolean;
+                    key: string;
+                    metered: boolean;
+                    name: string;
+                    unit?: string | null;
+                };
+                id: string;
+                limit?: number | null;
+            }[];
+            id: string;
+            interval: string;
+            isActive: boolean;
+            metadata?: unknown;
+            name: string;
+            price: number | string;
+            providerPriceId?: string | null;
+            seatLimit?: number | null;
+            slug: string;
+            trialDays?: number | null;
+            updatedAt: string;
+        };
+        SiteBillingPlanPayload: {
+            currency?: string;
+            description?: string;
+            interval?: string;
+            isActive?: boolean;
+            metadata?: unknown;
+            name: string;
+            price?: number;
+            providerPriceId?: string;
+            seatLimit?: number;
+            slug: string;
+            trialDays?: number;
+        };
+        SiteComplianceJob: components["schemas"]["ComplianceJob"] & {
+            approvedBy?: components["schemas"]["UserSummary"] | null;
+            requestedBy?: components["schemas"]["UserSummary"] | null;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+        };
+        SiteComplianceOverview: {
+            evidenceTrail: (components["schemas"]["AuditLog"] & {
+                tenant?: {
+                    id: string;
+                    name: string;
+                    slug: string;
+                    status: string;
+                };
+            })[];
+            jobs: {
+                byStatus: {
+                    [key: string]: number;
+                };
+                byType: {
+                    [key: string]: number;
+                };
+            };
+            policies: {
+                boundaryChecks: {
+                    auditRetentionDays: number;
+                    dataRetentionDays?: number | null;
+                    domainDiscoveryEnabled: boolean;
+                    /** @enum {string} */
+                    evidence: "PASS" | "REVIEW";
+                    mfaRequired: boolean;
+                    tenant: {
+                        id: string;
+                        name: string;
+                        slug: string;
+                        status: string;
+                    };
+                }[];
+                reviewed: number;
+            };
+            recentJobs: components["schemas"]["SiteComplianceJob"][];
+        };
+        SiteConversationMetadata: {
+            _count?: {
+                members?: number;
+                messages?: number;
+            };
+            createdAt: string;
+            id: string;
+            isGroup: boolean;
+            members?: {
+                id: string;
+                userId: string;
+            }[];
+            messages?: {
+                createdAt: string;
+                id: string;
+                pinnedAt?: string | null;
+                senderId: string;
+                updatedAt?: string;
+            }[];
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            } | null;
+            tenantId: string;
+            title?: string | null;
+        };
+        SiteDashboard: {
+            _count?: {
+                widgets?: number;
+            };
+            archivedAt?: string | null;
+            createdAt: string;
+            description?: string | null;
+            id: string;
+            isDefault: boolean;
+            name: string;
+            owner?: components["schemas"]["UserSummary"] | null;
+            ownerId?: string | null;
+            refreshIntervalSeconds?: number | null;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+            tenantId: string;
+            updatedAt: string;
+            visibility: string;
+        };
+        SiteHardeningOverview: {
+            checks: {
+                [key: string]: string | number;
+            };
+            data: {
+                [key: string]: unknown;
+            };
+            qaMatrix: {
+                area: string;
+                evidence: string;
+                status: string;
+            }[];
+            recentPlatformAudit: components["schemas"]["PlatformAuditLog"][];
+        };
+        SiteIdentitySecurityOverview: {
+            loginHistory: {
+                byMethod: {
+                    [key: string]: number;
+                };
+                byStatus: {
+                    [key: string]: number;
+                };
+                suspiciousLast7Days: number;
+            };
+            mfa: {
+                activeFactors: number;
+                pendingFactors: number;
+                requiredPolicies: number;
+            };
+            recentSuspiciousLogins: components["schemas"]["SiteLoginHistory"][];
+            riskyTenants: (components["schemas"]["Tenant"] & {
+                riskScore: number;
+                securityPolicy?: {
+                    allowedLoginMethods: string[];
+                    domainDiscoveryEnabled: boolean;
+                    mfaRequired: boolean;
+                    ssoRequired: boolean;
+                } | null;
+            })[];
+            sso: {
+                activeProviders: number;
+                domainDiscoveryPolicies: number;
+                requiredPolicies: number;
+            };
+            trustedDevices: {
+                [key: string]: number;
+            };
+            users: {
+                [key: string]: number;
+            };
+        };
+        SiteIntegration: {
+            _count?: {
+                logs?: number;
+            };
+            config?: unknown;
+            createdAt: string;
+            createdById?: string | null;
+            enabled: boolean;
+            externalAccountId?: string | null;
+            hasSecrets?: boolean;
+            id: string;
+            lastError?: string | null;
+            lastSyncAt?: string | null;
+            name: string;
+            provider: components["schemas"]["IntegrationProvider"];
+            scopes: string[];
+            secretKeys?: string[];
+            status: components["schemas"]["IntegrationStatus"];
+            tenantId: string;
+            updatedAt: string;
+        } & {
+            _count?: {
+                logs?: number;
+            };
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+        };
+        SiteIntegrationsOverview: {
+            deliveries: {
+                [key: string]: number;
+            };
+            deliveriesLast24h: number;
+            integrations: {
+                [key: string]: {
+                    [key: string]: number;
+                };
+            };
+            omoflowIntegrations: components["schemas"]["SiteIntegration"][];
+            providerCatalog: {
+                category: string;
+                label: string;
+                provider: string;
+            }[];
+            recentFailures: components["schemas"]["SiteWebhookDelivery"][];
+            webhooks: {
+                [key: string]: number;
+            };
+        };
+        SiteInvoice: {
+            amount: number | string;
+            createdAt: string;
+            currency: string;
+            dueDate?: string | null;
+            hostedInvoiceUrl?: string | null;
+            id: string;
+            invoicePdfUrl?: string | null;
+            number?: string | null;
+            paidAt?: string | null;
+            provider: string;
+            providerInvoiceId?: string | null;
+            status: string;
+            subscription?: components["schemas"]["SiteSubscription"];
+            subscriptionId: string;
+            subtotal?: (number | string) | null;
+            tax?: (number | string) | null;
+            tenantId?: string | null;
+            total?: (number | string) | null;
+            updatedAt: string;
+        };
+        SiteLoginHistory: {
+            createdAt: string;
+            email: string;
+            id: string;
+            ipAddress?: string | null;
+            metadata?: unknown;
+            method: string;
+            reason?: string | null;
+            status: string;
+            suspicious: boolean;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            } | null;
+            tenantId?: string | null;
+            tenantSlug?: string | null;
+            user?: components["schemas"]["UserSummary"] | null;
+            userAgent?: string | null;
+            userId?: string | null;
+        };
+        SiteMeetingOperationsOverview: {
+            aiUsage: {
+                estimatedCost: number;
+                requests: number;
+                totalTokens: number;
+            };
+            booking: {
+                activePages: number;
+                requests: {
+                    [key: string]: number;
+                };
+            };
+            deliveryPressure: {
+                failures: number;
+                status: components["schemas"]["MeetingReminderJobStatus"];
+                tenant: {
+                    id: string;
+                    name: string;
+                    slug: string;
+                    status: string;
+                } | null;
+            }[];
+            meetings: {
+                [key: string]: number;
+            };
+            policies: {
+                aiMeetingEnabled: number;
+                calendarSyncEnabled: number;
+                publicBookingEnabled: number;
+                tenantsWithSettings: number;
+                whatsappEnabled: number;
+            };
+            privacy: {
+                policy: string;
+                redacted: string[];
+            };
+            reminderDelivery: {
+                [key: string]: number;
+            };
+            topTenants: {
+                meetings: number;
+                tenant: {
+                    id: string;
+                    name: string;
+                    slug: string;
+                    status: string;
+                } | null;
+            }[];
+        };
+        SiteMeetingReminderLog: {
+            attempts: number;
+            channel: components["schemas"]["MeetingReminderChannel"];
+            createdAt?: string;
+            deadLetterAt?: string | null;
+            destination?: string | null;
+            failedAt?: string | null;
+            id: string;
+            lastError?: string | null;
+            lockedAt?: string | null;
+            maxAttempts: number;
+            meetingId: string;
+            nextAttemptAt: string;
+            provider?: string | null;
+            reminder?: {
+                attendeeId?: string | null;
+                id: string;
+                offsetMinutes: number;
+                templateKey?: string | null;
+            } | null;
+            reminderId?: string | null;
+            scheduledFor: string;
+            sentAt?: string | null;
+            status: components["schemas"]["MeetingReminderJobStatus"];
+            tenantId: string;
+            updatedAt?: string;
+        } & {
+            meeting: {
+                id: string;
+                startAt: string;
+                status: components["schemas"]["MeetingStatus"];
+            } & {
+                /** @enum {boolean} */
+                contentRedacted: true;
+            };
+            tenant: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            } | null;
+        };
+        SiteMeetingTenantPosture: {
+            aiUsage: {
+                estimatedCost: number;
+                requests: number;
+                totalTokens: number;
+            };
+            meetings: {
+                [key: string]: number;
+            };
+            /** @enum {string} */
+            privacy: "content_redacted";
+            reminderDelivery: {
+                [key: string]: number;
+            };
+            tenant: {
+                _count?: {
+                    auditLogs?: number;
+                    integrations?: number;
+                    projects?: number;
+                    securityEvents?: number;
+                    teams?: number;
+                    users?: number;
+                    workspaces?: number;
+                };
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            } & {
+                meetingIntegrationSettings?: components["schemas"]["MeetingIntegrationSettings"] | null;
+            };
+        };
+        SiteMessageActivity: {
+            _count?: {
+                reactions?: number;
+                readReceipts?: number;
+            };
+            attachmentCount: number;
+            attachments?: unknown;
+            /** @enum {boolean} */
+            bodyRedacted: true;
+            conversation: {
+                id: string;
+                isGroup: boolean;
+                tenant?: {
+                    id: string;
+                    name: string;
+                    slug: string;
+                    status: string;
+                } | null;
+                tenantId: string;
+                title?: string | null;
+            };
+            conversationId: string;
+            createdAt: string;
+            forwardedFromMessageId?: string | null;
+            id: string;
+            metadata?: unknown;
+            parentMessageId?: string | null;
+            pinnedAt?: string | null;
+            senderId: string;
+            updatedAt: string;
+        };
+        SiteObservabilityOverview: {
+            api: {
+                errorRateSignals: number;
+                errors: {
+                    [key: string]: number;
+                };
+                recentRequests: {
+                    [key: string]: unknown;
+                }[];
+                slowEndpoints: {
+                    [key: string]: unknown;
+                }[];
+            };
+            live: {
+                environment?: string;
+                service?: string;
+                startedAt?: string;
+                status: string;
+                uptimeSeconds?: number;
+            };
+            queues: {
+                compliance: {
+                    [key: string]: number;
+                };
+                metrics: unknown;
+                webhooks: {
+                    [key: string]: number;
+                };
+                workflows: {
+                    [key: string]: number;
+                };
+            };
+            ready: {
+                database: {
+                    latencyMs: number;
+                    status: string;
+                };
+                realtime: components["schemas"]["SiteRealtimeSnapshot"];
+                status: string;
+            };
+            securityEvents: {
+                open: number;
+                recentApiSecurityEvents: components["schemas"]["SecurityEvent"][];
+            };
+            sessions: {
+                active: number;
+            };
+            workers: {
+                [key: string]: string;
+            };
+        };
+        SitePlanFeaturePayload: {
+            config?: unknown;
+            enabled?: boolean;
+            featureId: string;
+            limit?: number;
+        };
+        /** @enum {string} */
+        SitePlatformSearchCategory: "ALL" | "TENANTS" | "USERS" | "PROJECTS" | "TASKS" | "EVENTS" | "AUDIT";
+        SitePlatformSearchResponse: {
+            data: components["schemas"]["SitePlatformSearchResult"][];
+            meta: {
+                limit: number;
+                page: number;
+                total: number;
+                totalPages: number;
+            };
+        } & {
+            facets: {
+                [key: string]: number;
+            };
+            query: {
+                category: string;
+                search: string;
+                tenantId?: string;
+            };
+        };
+        SitePlatformSearchResult: {
+            id: string;
+            metadata?: unknown;
+            subtitle?: string | null;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            } | null;
+            title: string;
+            type: string;
+            updatedAt?: string;
+            url: string;
+        };
+        SiteRealtimeOverview: {
+            abuseAndRateLimit: {
+                events: number;
+                recentEvents: components["schemas"]["SecurityEvent"][];
+            };
+            conversations: {
+                direct: number;
+                group: number;
+                total: number;
+            };
+            deliveryHealth: {
+                privateContentPolicy: string;
+                readReceiptRatio: number;
+            };
+            messages: {
+                last24h: number;
+                pinned: number;
+                reactions: number;
+                readReceiptsLast24h: number;
+            };
+            realtime: components["schemas"]["SiteRealtimeSnapshot"];
+            recentRooms: components["schemas"]["SiteConversationMetadata"][];
+        };
+        SiteRealtimeSnapshot: {
+            authMethods: {
+                [key: string]: number;
+            };
+            connections: number;
+            namespace: string;
+            rooms: {
+                conversation: number;
+                memberships: number;
+                task: number;
+                tenant: number;
+                total: number;
+                user: number;
+            };
+            status: string;
+            tenants: {
+                [key: string]: number;
+            };
+        };
+        SiteReport: components["schemas"]["Report"] & {
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+        };
+        SiteReportExecution: components["schemas"]["ReportExecution"] & {
+            requestedBy?: components["schemas"]["UserSummary"] | null;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+        };
+        SiteReportExport: components["schemas"]["ReportExport"] & {
+            requestedBy?: components["schemas"]["UserSummary"] | null;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+        };
+        SiteReportingOverview: {
+            budget: {
+                actual: number;
+                planned: number;
+            };
+            dashboards: {
+                [key: string]: number;
+            };
+            executions: {
+                [key: string]: number;
+            };
+            exports: {
+                [key: string]: number;
+            };
+            recentExecutions: components["schemas"]["SiteReportExecution"][];
+            recentExports: components["schemas"]["SiteReportExport"][];
+            reports: {
+                byStatus: {
+                    [key: string]: number;
+                };
+                byType: {
+                    [key: string]: number;
+                };
+            };
+            tenantHealth: {
+                completedTasksLast30d: number;
+                projects: {
+                    [key: string]: number;
+                };
+                tasks: {
+                    [key: string]: number;
+                };
+            };
+            velocity: {
+                completedAt?: string | null;
+                completedTasks: number;
+                id: string;
+                name: string;
+                project?: {
+                    id: string;
+                    key: string;
+                    name: string;
+                    tenantId?: string;
+                };
+                storyPoints: number;
+            }[];
+        };
+        SiteSecurityPolicy: {
+            allowedLoginMethods: string[];
+            allowedUploadMimeTypes: string[];
+            auditRetentionDays: number;
+            createdAt: string;
+            dataRetentionDays?: number | null;
+            domainDiscoveryEnabled: boolean;
+            enforceIpAllowlist: boolean;
+            id: string;
+            ipAllowlist: string[];
+            maxSessionsPerUser?: number | null;
+            maxUploadBytes?: number | null;
+            metadata?: unknown;
+            mfaRequired: boolean;
+            passwordHistoryCount: number;
+            passwordMinLength: number;
+            passwordRequireLower: boolean;
+            passwordRequireNumber: boolean;
+            passwordRequireSymbol: boolean;
+            passwordRequireUpper: boolean;
+            sessionTtlMinutes: number;
+            ssoRequired: boolean;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+            tenantId: string;
+            trustedDeviceTtlDays: number;
+            updatedAt: string;
+        };
+        SiteSession: components["schemas"]["AuthSession"] & {
+            authMethod: string;
+            deviceFingerprint?: string | null;
+            deviceName?: string | null;
+            mfaVerifiedAt?: string | null;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+            trustedDevice?: {
+                id: string;
+                lastUsedAt?: string | null;
+                name?: string | null;
+                revokedAt?: string | null;
+                status: string;
+            } | null;
+            trustedDeviceId?: string | null;
+        };
+        SiteSessionsResponse: {
+            data: components["schemas"]["SiteSession"][];
+            meta: {
+                limit: number;
+                page: number;
+                total: number;
+                totalPages: number;
+            };
+        } & {
+            summary: {
+                active: number;
+                byMethod: {
+                    [key: string]: number;
+                };
+                revoked: number;
+            };
+        };
+        SiteSsoProvider: {
+            _count?: {
+                accounts?: number;
+                loginStates?: number;
+            };
+            allowedDomains: string[];
+            authorizationUrl?: string | null;
+            buttonLabel?: string | null;
+            clientId?: string | null;
+            createdAt: string;
+            id: string;
+            issuerUrl?: string | null;
+            metadata?: unknown;
+            name: string;
+            redirectUri?: string | null;
+            scopes: string[];
+            status: string;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+            tenantId: string;
+            tokenUrl?: string | null;
+            type: string;
+            updatedAt: string;
+            userInfoUrl?: string | null;
+        };
+        SiteSubscription: {
+            _count?: {
+                invoices?: number;
+                usageRecords?: number;
+            };
+            cancelAtPeriodEnd: boolean;
+            canceledAt?: string | null;
+            createdAt: string;
+            currentPeriodEnd?: string | null;
+            currentPeriodStart?: string | null;
+            id: string;
+            metadata?: unknown;
+            plan?: components["schemas"]["SiteBillingPlan"];
+            planId: string;
+            provider: string;
+            providerCustomerId?: string | null;
+            providerSubscriptionId?: string | null;
+            seatCount: number;
+            status: string;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+            tenantId: string;
+            trialEndsAt?: string | null;
+            updatedAt: string;
+        };
+        SiteTenantDetail: {
+            indices: {
+                delivery: {
+                    actualBudget: number;
+                    boards: number;
+                    budgetVariance: number;
+                    milestones: number;
+                    openRisks: number;
+                    plannedBudget: number;
+                    sprints: number;
+                };
+                projects: {
+                    byStatus: {
+                        [key: string]: number;
+                    };
+                    byVisibility: {
+                        [key: string]: number;
+                    };
+                    overdue: number;
+                    total: number;
+                };
+                security: {
+                    activeSessions: number;
+                    apiKeys: number;
+                    auditLogs: number;
+                    mfaFactors: number;
+                    openSecurityEvents: number;
+                    platformAuditLogs: number;
+                    revokedSessions: number;
+                    ssoProviders: number;
+                    totalSecurityEvents: number;
+                    trustedDevices: number;
+                };
+                tasks: {
+                    byPriority: {
+                        [key: string]: number;
+                    };
+                    byStatus: {
+                        [key: string]: number;
+                    };
+                    byType: {
+                        [key: string]: number;
+                    };
+                    open: number;
+                    overdue: number;
+                    total: number;
+                };
+                workspace: {
+                    aiAgents: number;
+                    dashboards: number;
+                    files: number;
+                    integrations: number;
+                    reports: number;
+                    teams: number;
+                    webhooks: number;
+                    workspaces: number;
+                };
+            };
+            projects: {
+                _count?: {
+                    budgets?: number;
+                    changeRequests?: number;
+                    decisions?: number;
+                    dependencies?: number;
+                    documents?: number;
+                    members?: number;
+                    milestones?: number;
+                    risks?: number;
+                    sprints?: number;
+                    stakeholders?: number;
+                    tasks?: number;
+                };
+                completedAt?: string | null;
+                createdAt?: string;
+                description?: string | null;
+                dueDate?: string | null;
+                id: string;
+                key: string;
+                name: string;
+                progress: number;
+                startDate?: string | null;
+                status: components["schemas"]["ProjectStatus"];
+                team?: {
+                    id: string;
+                    name: string;
+                } | null;
+                updatedAt?: string;
+                visibility?: components["schemas"]["Visibility"];
+                workspace?: {
+                    id: string;
+                    name: string;
+                    slug: string;
+                };
+            }[];
+            recentSecurityEvents: components["schemas"]["SecurityEvent"][];
+            recentTasks: ({
+                dueDate?: string | null;
+                id: string;
+                key: string;
+                priority: components["schemas"]["TaskPriority"];
+                status: components["schemas"]["TaskStatus"];
+                storyPoints?: number | null;
+                title: string;
+                type: components["schemas"]["TaskType"];
+                updatedAt?: string;
+            } & {
+                _count?: {
+                    assignees?: number;
+                    attachments?: number;
+                    checklists?: number;
+                    comments?: number;
+                };
+                project: {
+                    id: string;
+                    key: string;
+                    name: string;
+                };
+            })[];
+            recentUsers: components["schemas"]["TenantUser"][];
+            securityEvents: {
+                open: number;
+                total?: number;
+            };
+            sessions: {
+                active: number;
+                revoked?: number;
+            };
+            tenant: components["schemas"]["Tenant"];
+            users: {
+                [key: string]: number;
+            };
+        };
+        /** @enum {string} */
+        SiteTenantResourceSection: "users" | "projects" | "workspaces" | "teams" | "sessions" | "security" | "billing" | "integrations" | "files" | "ai" | "reports" | "activity";
+        SiteTrustedDevice: {
+            _count?: {
+                sessions?: number;
+            };
+            createdAt: string;
+            expiresAt: string;
+            id: string;
+            ipAddress?: string | null;
+            lastUsedAt?: string | null;
+            name?: string | null;
+            revokedAt?: string | null;
+            status: string;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+            tenantId: string;
+            updatedAt: string;
+            user?: components["schemas"]["UserSummary"];
+            userAgent?: string | null;
+            userId: string;
+        };
+        SiteUsageRecord: {
+            createdAt: string;
+            featureId?: string | null;
+            featureKey: string;
+            id: string;
+            periodEnd: string;
+            periodStart: string;
+            quantity: number;
+            source: string;
+            subscription?: {
+                id: string;
+                status: string;
+            } & {
+                plan?: {
+                    id: string;
+                    name: string;
+                    slug: string;
+                };
+            };
+            subscriptionId?: string | null;
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+            tenantId: string;
+            unit?: string | null;
+        };
+        SiteUserDetail: {
+            platformAuditLogs: components["schemas"]["PlatformAuditLog"][];
+            securityEvents: components["schemas"]["SecurityEvent"][];
+            tenantAuditLogs: components["schemas"]["AuditLog"][];
+            user: components["schemas"]["TenantUser"] & {
+                _count?: {
+                    [key: string]: number;
+                };
+                assignedTasks?: {
+                    id: string;
+                    task: {
+                        dueDate?: string | null;
+                        id: string;
+                        key: string;
+                        priority: components["schemas"]["TaskPriority"];
+                        status: components["schemas"]["TaskStatus"];
+                        title: string;
+                        type: components["schemas"]["TaskType"];
+                        updatedAt?: string;
+                    } & {
+                        project: {
+                            id: string;
+                            key: string;
+                            name: string;
+                        };
+                    };
+                }[];
+                authSessions?: (components["schemas"]["AuthSession"] & {
+                    authMethod?: string;
+                    deviceName?: string | null;
+                    mfaVerifiedAt?: string | null;
+                    trustedDevice?: {
+                        id: string;
+                        lastUsedAt?: string | null;
+                        name?: string | null;
+                        status: string;
+                    } | null;
+                })[];
+                avatarUrl?: string | null;
+                emailVerificationTokens?: {
+                    createdAt: string;
+                    expiresAt: string;
+                    id: string;
+                    usedAt?: string | null;
+                }[];
+                failedLoginAttempts?: number;
+                lockedUntil?: string | null;
+                loginHistory?: {
+                    createdAt: string;
+                    email: string;
+                    id: string;
+                    ipAddress?: string | null;
+                    method: string;
+                    reason?: string | null;
+                    status: string;
+                    suspicious: boolean;
+                    tenantId?: string | null;
+                    tenantSlug?: string | null;
+                    userAgent?: string | null;
+                }[];
+                mfaFactors?: {
+                    createdAt: string;
+                    disabledAt?: string | null;
+                    enabledAt?: string | null;
+                    id: string;
+                    label?: string | null;
+                    lastUsedAt?: string | null;
+                    status: string;
+                    type: string;
+                    updatedAt: string;
+                }[];
+                passwordResetTokens?: {
+                    createdAt: string;
+                    expiresAt: string;
+                    id: string;
+                    usedAt?: string | null;
+                }[];
+                platformAdminProfile?: {
+                    createdAt: string;
+                    id: string;
+                    level: components["schemas"]["PlatformAdminLevel"];
+                    revokedAt?: string | null;
+                    scopes: string[];
+                    status: components["schemas"]["PlatformAdminStatus"];
+                    updatedAt: string;
+                } | null;
+                projectMembers?: {
+                    createdAt: string;
+                    id: string;
+                    project: {
+                        id: string;
+                        key: string;
+                        name: string;
+                        progress: number;
+                        status: components["schemas"]["ProjectStatus"];
+                        visibility?: components["schemas"]["Visibility"];
+                        workspace?: {
+                            id: string;
+                            name: string;
+                            slug: string;
+                        };
+                    };
+                    role?: string | null;
+                }[];
+                ssoAccounts?: {
+                    createdAt: string;
+                    displayName?: string | null;
+                    email: string;
+                    id: string;
+                    lastLoginAt?: string | null;
+                    provider?: {
+                        id: string;
+                        name: string;
+                        status: string;
+                        type: string;
+                    } | null;
+                    providerType: string;
+                    updatedAt: string;
+                }[];
+                teamMemberships?: {
+                    createdAt: string;
+                    id: string;
+                    role?: string | null;
+                    team: components["schemas"]["Team"] & {
+                        workspace?: {
+                            id: string;
+                            name: string;
+                            slug: string;
+                        } | null;
+                    };
+                }[];
+                trustedDevices?: {
+                    createdAt: string;
+                    expiresAt: string;
+                    id: string;
+                    ipAddress?: string | null;
+                    lastUsedAt?: string | null;
+                    name?: string | null;
+                    revokedAt?: string | null;
+                    status: string;
+                    updatedAt: string;
+                    userAgent?: string | null;
+                }[];
+            };
+        };
+        SiteWebhook: {
+            _count?: {
+                deliveries?: number;
+            };
+            createdAt: string;
+            createdById?: string | null;
+            description?: string | null;
+            enabled: boolean;
+            events: string[];
+            failureCount: number;
+            hasSecret?: boolean;
+            id: string;
+            lastDeliveryAt?: string | null;
+            lastError?: string | null;
+            name: string;
+            signingAlgorithm: string;
+            signingSecret?: string;
+            tenantId: string;
+            updatedAt: string;
+            url: string;
+        } & {
+            _count?: {
+                deliveries?: number;
+            };
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+        };
+        SiteWebhookDelivery: components["schemas"]["WebhookDelivery"] & {
+            webhook?: {
+                enabled: boolean;
+                events: string[];
+                id: string;
+                name: string;
+                url: string;
+            } & {
+                tenant?: {
+                    id: string;
+                    name: string;
+                    slug: string;
+                    status: string;
+                };
+            };
+        };
+        SiteWorkflow: {
+            _count?: {
+                runs?: number;
+            };
+            archivedAt?: string | null;
+            config?: unknown;
+            createdAt: string;
+            createdById?: string | null;
+            description?: string | null;
+            entityType: string;
+            eventType?: string | null;
+            id: string;
+            isActive: boolean;
+            lastRunAt?: string | null;
+            name: string;
+            tenantId: string;
+            triggerType: string;
+            updatedAt: string;
+        } & {
+            nodes?: components["schemas"]["WorkflowNode"][];
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            } | null;
+        };
+        SiteWorkflowRun: components["schemas"]["WorkflowRun"] & {
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            } | null;
+        };
+        SiteWorkflowRunLog: components["schemas"]["WorkflowRunLog"] & {
+            node?: {
+                actionType?: string | null;
+                id?: string;
+                name: string;
+                type: string;
+            } | null;
+            run?: {
+                id: string;
+                status: components["schemas"]["WorkflowRunStatus"];
+                tenantId: string;
+            } & {
+                workflow?: {
+                    id: string;
+                    name: string;
+                } | null;
+            };
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            } | null;
+        };
+        SlaAnalytics: {
+            breached: number;
+            completedOnTime: number;
+            compliancePercent: number;
+            totalWithDueDate: number;
+        };
+        Sprint: {
+            _count?: {
+                retrospectives?: number;
+                tasks?: number;
+            };
+            completedAt?: string | null;
+            createdAt?: string;
+            endDate?: string | null;
+            goal?: string | null;
+            id: string;
+            name: string;
+            project?: {
+                id: string;
+                key: string;
+                name: string;
+                tenantId?: string;
+            };
+            projectId: string;
+            startDate?: string | null;
+            updatedAt?: string;
+        };
+        SsoProvider: {
+            allowedDomains: string[];
+            authorizationUrl?: string | null;
+            buttonLabel?: string | null;
+            clientId?: string | null;
+            clientSecretConfigured: boolean;
+            createdAt: string;
+            id: string;
+            issuerUrl?: string | null;
+            metadata?: unknown;
+            name: string;
+            redirectUri?: string | null;
+            scopes: string[];
+            /** @enum {string} */
+            status: "ACTIVE" | "DISABLED";
+            tenantId: string;
+            tokenUrl?: string | null;
+            /** @enum {string} */
+            type: "GOOGLE" | "MICROSOFT" | "OIDC" | "SAML";
+            updatedAt: string;
+            userInfoUrl?: string | null;
+        };
+        Task: {
+            _count?: {
+                attachments?: number;
+                checklists?: number;
+                comments?: number;
+                dependenciesFrom?: number;
+                dependenciesTo?: number;
+                subtasks?: number;
+            };
+            actualMins?: number | null;
+            archivedAt?: string | null;
+            assignees?: components["schemas"]["TaskAssignee"][];
+            boardColumn?: {
+                id: string;
+                name: string;
+                sortOrder: number;
+                status?: components["schemas"]["TaskStatus"] | null;
+            } | null;
+            boardColumnId?: string | null;
+            card?: components["schemas"]["TaskBoardCardSummary"];
+            checklists?: components["schemas"]["TaskChecklist"][];
+            completedAt?: string | null;
+            createdAt?: string;
+            deletedAt?: string | null;
+            description?: string | null;
+            dueDate?: string | null;
+            estimateMins?: number | null;
+            id: string;
+            key: string;
+            labels?: components["schemas"]["TaskLabelAssignment"][];
+            metrics?: components["schemas"]["TaskBoardMetrics"];
+            permissions?: components["schemas"]["TaskBoardPermissions"];
+            priority: components["schemas"]["TaskPriority"];
+            project?: {
+                id: string;
+                key: string;
+                name: string;
+                teamId?: string | null;
+                workspaceId?: string | null;
+            };
+            projectId: string;
+            reporter?: components["schemas"]["UserSummary"] | null;
+            sortOrder: number;
+            sprint?: {
+                completedAt?: string | null;
+                endDate?: string | null;
+                id: string;
+                name: string;
+                startDate?: string | null;
+            } | null;
+            sprintId?: string | null;
+            startDate?: string | null;
+            status: components["schemas"]["TaskStatus"];
+            storyPoints?: number | null;
+            tenantId?: string;
+            title: string;
+            type: components["schemas"]["TaskType"];
+            updatedAt?: string;
+        };
+        TaskActivity: {
+            action: string;
+            actorId?: string | null;
+            createdAt: string;
+            id: string;
+            newValue?: unknown;
+            oldValue?: unknown;
+            taskId: string;
+        };
+        TaskAssignee: {
+            id: string;
+            user: components["schemas"]["UserSummary"];
+        };
+        TaskAttachment: {
+            createdAt: string;
+            fileName: string;
+            fileUrl: string;
+            id: string;
+            mimeType?: string | null;
+            sizeBytes?: number | null;
+            taskId: string;
+        };
+        TaskBoardCardSummary: {
+            assignees: {
+                avatarUrl?: string | null;
+                email: string;
+                firstName: string;
+                id: string;
+                lastName: string;
+                userId: string;
+            }[];
+            attachments: {
+                count: number;
+                previews: {
+                    createdAt: string;
+                    fileName: string;
+                    fileUrl: string;
+                    id: string;
+                    kind: "IMAGE" | "PDF" | "SHEET" | "SLIDE" | "DOC" | "VIDEO" | "AUDIO" | "FILE" | string;
+                    mimeType?: string | null;
+                    sizeBytes?: number | null;
+                }[];
+            };
+            checklist: {
+                checklistCount: number;
+                completed: number;
+                percent: number;
+                total: number;
+            };
+            code: string;
+            colors: {
+                priority: string;
+                rail: string;
+                status: string;
+                type: string;
+            };
+            comments: {
+                count: number;
+                latest?: {
+                    author: components["schemas"]["UserSummary"];
+                    authorId: string;
+                    body: string;
+                    createdAt: string;
+                    id: string;
+                } | null;
+            };
+            dependencies: {
+                blockedByCount: number;
+                blockers: {
+                    id: string;
+                    task: components["schemas"]["TaskReferenceSummary"];
+                    type: string;
+                }[];
+                blocking: {
+                    id: string;
+                    task: components["schemas"]["TaskReferenceSummary"];
+                    type: string;
+                }[];
+                blockingCount: number;
+                isBlocked: boolean;
+                isBlocking: boolean;
+            };
+            due: {
+                date?: string | null;
+                daysUntil?: number | null;
+                state: components["schemas"]["TaskDueState"];
+            };
+            estimate: {
+                actualMins?: number | null;
+                estimateMins?: number | null;
+                remainingMins?: number | null;
+            };
+            flags: {
+                hasAssignees: boolean;
+                hasAttachments: boolean;
+                hasChecklist: boolean;
+                hasComments: boolean;
+                hasLabels: boolean;
+                hasSubtasks: boolean;
+                isBlocked: boolean;
+                isBlocking: boolean;
+                isDueToday: boolean;
+                isHighPriority: boolean;
+                isOverdue: boolean;
+                isStale: boolean;
+            };
+            freshness: {
+                createdAgeDays: number;
+                updatedAgeDays: number;
+                updatedAt: string;
+            };
+            key: string;
+            labels: {
+                color?: string | null;
+                id: string;
+                labelId: string;
+                name: string;
+            }[];
+            priority: components["schemas"]["TaskPriority"];
+            sprint?: {
+                completedAt?: string | null;
+                endDate?: string | null;
+                id: string;
+                name: string;
+                startDate?: string | null;
+                state: "PLANNED" | "ACTIVE" | "ENDED" | "COMPLETED" | "UNSCHEDULED" | string;
+            } | null;
+            status: components["schemas"]["TaskStatus"];
+            storyPoints?: number | null;
+            title: string;
+            type: components["schemas"]["TaskType"];
+        };
+        TaskBoardMetrics: {
+            actualMins: number;
+            ageDays: number;
+            attachmentCount: number;
+            blockedByCount: number;
+            blockingCount: number;
+            checklistCompleted: number;
+            checklistTotal: number;
+            commentCount: number;
+            estimateMins: number;
+            remainingMins: number;
+            storyPoints: number;
+            updatedAgeDays: number;
+        };
+        TaskBoardPermissions: {
+            canArchive: boolean;
+            canAssign: boolean;
+            canAttach: boolean;
+            canComment: boolean;
+            canDelete: boolean;
+            canEdit: boolean;
+            canMove: boolean;
+            canView: boolean;
+        };
+        TaskChecklist: {
+            createdAt?: string;
+            id: string;
+            items: components["schemas"]["TaskChecklistItem"][];
+            taskId: string;
+            title: string;
+            updatedAt?: string;
+        };
+        TaskChecklistItem: {
+            checklistId: string;
+            id: string;
+            isDone: boolean;
+            sortOrder: number;
+            text: string;
+        };
+        TaskComment: {
+            _count?: {
+                replies?: number;
+            };
+            author: components["schemas"]["UserSummary"];
+            authorId: string;
+            body: string;
+            createdAt: string;
+            id: string;
+            parentId?: string | null;
+            taskId: string;
+            updatedAt: string;
+        };
+        TaskDependency: {
+            fromTask?: {
+                dueDate?: string | null;
+                id: string;
+                key: string;
+                priority: components["schemas"]["TaskPriority"];
+                status: components["schemas"]["TaskStatus"];
+                title: string;
+            };
+            fromTaskId: string;
+            id: string;
+            toTask?: {
+                dueDate?: string | null;
+                id: string;
+                key: string;
+                priority: components["schemas"]["TaskPriority"];
+                status: components["schemas"]["TaskStatus"];
+                title: string;
+            };
+            toTaskId: string;
+            type: string;
+        };
+        /** @enum {string} */
+        TaskDueState: "NONE" | "OVERDUE" | "TODAY" | "UPCOMING" | "DONE";
+        TaskLabel: {
+            _count?: {
+                tasks?: number;
+            };
+            color?: string | null;
+            createdAt?: string;
+            id: string;
+            name: string;
+            tenantId?: string;
+        };
+        TaskLabelAssignment: {
+            id: string;
+            label: components["schemas"]["TaskLabel"];
+        };
+        /** @enum {string} */
+        TaskPriority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" | "CRITICAL";
+        TaskReferenceSummary: {
+            id: string;
+            key: string;
+            priority: components["schemas"]["TaskPriority"];
+            status: components["schemas"]["TaskStatus"];
+            title: string;
+        };
+        TaskSavedView: {
+            columns?: {
+                [key: string]: unknown;
+            } | null;
+            createdAt: string;
+            description?: string | null;
+            filters: {
+                [key: string]: unknown;
+            };
+            id: string;
+            isDefault: boolean;
+            name: string;
+            owner?: components["schemas"]["UserSummary"];
+            ownerId: string;
+            project?: {
+                id: string;
+                key: string;
+                name: string;
+            } | null;
+            projectId?: string | null;
+            sortBy?: string | null;
+            /** @enum {string|null} */
+            sortDirection?: "asc" | "desc" | null;
+            tenantId: string;
+            updatedAt: string;
+            visibility: components["schemas"]["Visibility"];
+        };
+        /** @enum {string} */
+        TaskStatus: "BACKLOG" | "TODO" | "IN_PROGRESS" | "REVIEW" | "TESTING" | "DONE" | "CANCELLED";
+        TaskTaxonomy: {
+            customFieldEntityTypes: string[];
+            dependencyTypes: {
+                inverseLabel: string;
+                label: string;
+                value: string;
+            }[];
+            priorities: components["schemas"]["TaskPriority"][];
+            sortFields: string[];
+            statuses: components["schemas"]["TaskStatus"][];
+            taskTypes: {
+                category: string;
+                label: string;
+                value: components["schemas"]["TaskType"];
+                workflow: components["schemas"]["TaskStatus"][];
+            }[];
+        };
+        /** @enum {string} */
+        TaskType: "TASK" | "BUG" | "STORY" | "EPIC" | "FEATURE" | "INCIDENT" | "APPROVAL" | "CHANGE_REQUEST" | "MILESTONE";
+        TaskWatcher: {
+            id: string;
+            user?: components["schemas"]["UserSummary"] | null;
+            userId?: string;
+        };
+        Team: {
+            _count?: {
+                members?: number;
+                projects?: number;
+            };
+            description?: string | null;
+            id: string;
+            name: string;
+            tenantId: string;
+            workspace?: {
+                id: string;
+                name: string;
+                slug: string;
+            } | null;
+            workspaceId?: string | null;
+        };
+        TeamMember: {
+            createdAt?: string;
+            id: string;
+            role?: string | null;
+            teamId: string;
+            user: components["schemas"]["UserSummary"] & {
+                roles?: {
+                    role: components["schemas"]["Role"];
+                }[];
+            };
+            userId: string;
+        };
+        TeamPerformanceAnalytics: {
+            data: ({
+                id: string;
+                name: string;
+            } & {
+                _count?: {
+                    members?: number;
+                    projects?: number;
+                };
+                completionRate: number;
+                doneTasks: number;
+                minutes: number;
+                tasks: number;
+            })[];
+            total: number;
+        };
+        Tenant: {
+            _count?: {
+                auditLogs?: number;
+                integrations?: number;
+                projects?: number;
+                securityEvents?: number;
+                teams?: number;
+                users?: number;
+                workspaces?: number;
+            };
+            createdAt: string;
+            id: string;
+            logoUrl?: string | null;
+            name: string;
+            slug: string;
+            status: string;
+            updatedAt: string;
+            website?: string | null;
+        };
+        TenantUser: components["schemas"]["UserSummary"] & {
+            createdAt?: string;
+            emailVerifiedAt?: string | null;
+            lastLoginAt?: string | null;
+            locale?: string | null;
+            roles?: {
+                role: {
+                    description?: string | null;
+                    id: string;
+                    isSystem: boolean;
+                    name: string;
+                };
+            }[];
+            tenant?: {
+                id: string;
+                name: string;
+                slug: string;
+                status: string;
+            };
+            tenantId: string;
+            timezone?: string | null;
+            updatedAt?: string;
+        };
+        TotpSetupResponse: {
+            factorId: string;
+            issuer: string;
+            otpauthUrl: string;
+            secret: string;
+        };
+        UploadIntent: {
+            bucket?: string;
+            entityId?: string | null;
+            entityType: string;
+            expiresAt: string;
+            fields: {
+                [key: string]: string | number;
+            };
+            fileName: string;
+            fileUrl: string;
+            headers: {
+                [key: string]: string;
+            };
+            maxUploadBytes: number;
+            method: "POST" | "PUT" | string;
+            mimeType?: string | null;
+            note?: string;
+            provider: "local" | "s3" | "cloudinary" | string;
+            region?: string;
+            scope: string;
+            sizeBytes?: number | null;
+            storageKey: string;
+            uploadUrl?: string | null;
+            visibility: components["schemas"]["Visibility"];
+        };
+        UserSummary: {
+            avatarUrl?: string | null;
+            email: string;
+            firstName: string;
+            id: string;
+            lastName: string;
+            status?: string;
+        };
+        VelocityAnalytics: {
+            averageStoryPoints: number;
+            data: ({
+                completedAt?: string | null;
+                endDate?: string | null;
+                id: string;
+                name: string;
+                projectId: string;
+                startDate?: string | null;
+            } & {
+                completedTasks: number;
+                project?: {
+                    key: string;
+                    name: string;
+                };
+                storyPoints: number;
+            })[];
+            total: number;
+        };
+        /** @enum {string} */
+        Visibility: "PRIVATE" | "TEAM" | "WORKSPACE" | "ORGANIZATION" | "PUBLIC";
+        Webhook: {
+            _count?: {
+                deliveries?: number;
+            };
+            createdAt: string;
+            createdById?: string | null;
+            description?: string | null;
+            enabled: boolean;
+            events: string[];
+            failureCount: number;
+            hasSecret?: boolean;
+            id: string;
+            lastDeliveryAt?: string | null;
+            lastError?: string | null;
+            name: string;
+            signingAlgorithm: string;
+            signingSecret?: string;
+            tenantId: string;
+            updatedAt: string;
+            url: string;
+        };
+        WebhookDelivery: {
+            attempts: number;
+            createdAt: string;
+            deliveredAt?: string | null;
+            eventType: string;
+            id: string;
+            lastError?: string | null;
+            nextAttemptAt?: string | null;
+            payload?: unknown;
+            requestHeaders?: unknown;
+            responseBody?: string | null;
+            responseStatus?: number | null;
+            status: components["schemas"]["WebhookDeliveryStatus"];
+            tenantId: string;
+            updatedAt: string;
+            webhook?: {
+                enabled: boolean;
+                events: string[];
+                id: string;
+                name: string;
+                url: string;
+            };
+            webhookId: string;
+        };
+        /** @enum {string} */
+        WebhookDeliveryStatus: "PENDING" | "DELIVERED" | "FAILED" | "CANCELLED";
+        Workflow: {
+            _count?: {
+                runs?: number;
+            };
+            archivedAt?: string | null;
+            config?: unknown;
+            createdAt: string;
+            createdById?: string | null;
+            description?: string | null;
+            entityType: string;
+            eventType?: string | null;
+            id: string;
+            isActive: boolean;
+            lastRunAt?: string | null;
+            name: string;
+            nodes: components["schemas"]["WorkflowNode"][];
+            tenantId: string;
+            triggerType: string;
+            updatedAt: string;
+        };
+        WorkflowNode: {
+            actionType?: string | null;
+            config?: unknown;
+            createdAt?: string;
+            dependsOn?: unknown;
+            enabled?: boolean;
+            id?: string;
+            key?: string | null;
+            name: string;
+            onFailure?: string | null;
+            positionX?: number | null;
+            positionY?: number | null;
+            retryAttempts?: number;
+            sortOrder?: number;
+            timeoutSeconds?: number | null;
+            type: string;
+            updatedAt?: string;
+            workflowId?: string;
+        };
+        WorkflowRun: {
+            approvals?: {
+                createdAt: string;
+                currentStep: number;
+                id: string;
+                status: string;
+                title: string;
+                updatedAt: string;
+            }[];
+            completedAt?: string | null;
+            context?: unknown;
+            createdAt: string;
+            entityId: string;
+            entityType?: string | null;
+            error?: string | null;
+            eventType?: string | null;
+            id: string;
+            idempotencyKey?: string | null;
+            logs?: components["schemas"]["WorkflowRunLog"][];
+            startedAt?: string | null;
+            status: components["schemas"]["WorkflowRunStatus"];
+            tenantId: string;
+            triggerType?: string | null;
+            updatedAt: string;
+            workflow?: {
+                entityType: string;
+                eventType?: string | null;
+                id: string;
+                name: string;
+                triggerType: string;
+            };
+            workflowId: string;
+        };
+        WorkflowRunLog: {
+            createdAt: string;
+            data?: unknown;
+            finishedAt?: string | null;
+            id: string;
+            level: string;
+            message: string;
+            nodeId?: string | null;
+            runId: string;
+            startedAt?: string | null;
+        };
+        /** @enum {string} */
+        WorkflowRunStatus: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED" | "CANCELLED";
+        Workspace: {
+            _count?: {
+                projects?: number;
+                teams?: number;
+            };
+            description?: string | null;
+            icon?: string | null;
+            id: string;
+            name: string;
+            slug: string;
+            tenantId: string;
+        };
+        WorkspaceDocument: {
+            _count?: {
+                versions?: number;
+            };
+            archivedAt?: string | null;
+            body?: string | null;
+            createdAt: string;
+            createdById?: string | null;
+            documentType: string;
+            folder?: {
+                id: string;
+                name: string;
+                parentId?: string | null;
+            } | null;
+            folderId?: string | null;
+            id: string;
+            project?: {
+                id: string;
+                key: string;
+                name: string;
+            } | null;
+            projectId?: string | null;
+            publishedAt?: string | null;
+            slug?: string | null;
+            status: components["schemas"]["DocumentStatus"];
+            summary?: string | null;
+            tags?: string[] | null;
+            tenantId: string;
+            title: string;
+            updatedAt: string;
+            updatedById?: string | null;
+            visibility: components["schemas"]["Visibility"];
+        };
         UpdateSecurityPolicyDto: {
             enforceIpAllowlist?: boolean;
             ipAllowlist?: string[];
@@ -11819,7 +16359,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReadinessResponse"];
+                };
             };
         };
     };
@@ -11853,7 +16395,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AdminOverview"];
+                };
             };
         };
     };
@@ -11870,7 +16414,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SecurityChecks"];
+                };
             };
         };
     };
@@ -11899,7 +16445,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["AuditLog"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -11935,7 +16491,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SecurityPolicy"];
+                };
             };
         };
     };
@@ -11956,7 +16514,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SecurityPolicy"];
+                };
             };
         };
     };
@@ -11983,7 +16543,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["AuthSession"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -12002,7 +16570,12 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        revokedSessions: number;
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -12040,7 +16613,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AuthSession"];
+                };
             };
         };
     };
@@ -12069,7 +16644,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SecurityEvent"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -12133,7 +16716,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SecurityEvent"];
+                };
             };
         };
     };
@@ -12160,7 +16745,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ComplianceJob"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -12182,7 +16777,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ComplianceJob"];
+                };
             };
         };
     };
@@ -12224,7 +16821,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ComplianceJob"];
+                };
             };
         };
     };
@@ -12247,7 +16846,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ComplianceJob"];
+                };
             };
         };
     };
@@ -12266,7 +16867,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ComplianceJob"];
+                };
             };
         };
     };
@@ -12285,7 +16888,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ComplianceJob"];
+                };
             };
         };
     };
@@ -12311,7 +16916,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ApiKey"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -12332,7 +16945,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CreatedApiKey"];
+                };
             };
         };
     };
@@ -12370,7 +16985,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ApiKey"];
+                };
             };
         };
     };
@@ -12405,7 +17022,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteAdminProfile"];
+                };
             };
         };
     };
@@ -12422,7 +17041,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteAdminOverview"];
+                };
             };
         };
     };
@@ -12439,7 +17060,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteIdentitySecurityOverview"];
+                };
             };
         };
     };
@@ -12466,7 +17089,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteLoginHistory"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -12491,7 +17124,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteTrustedDevice"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -12514,7 +17157,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteTrustedDevice"];
+                };
             };
         };
     };
@@ -12537,7 +17182,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteSsoProvider"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -12559,7 +17214,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteSecurityPolicy"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -12578,7 +17243,16 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        devLink?: string;
+                        message: string;
+                        provider?: string;
+                        sent: boolean;
+                        skipped?: boolean;
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -12605,7 +17279,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteSessionsResponse"];
+                };
             };
         };
     };
@@ -12628,7 +17304,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteSession"];
+                };
             };
         };
     };
@@ -12645,7 +17323,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteBillingOverview"];
+                };
             };
         };
     };
@@ -12667,7 +17347,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteBillingPlan"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -12689,7 +17379,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteBillingPlan"];
+                };
             };
         };
     };
@@ -12712,7 +17404,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteBillingPlan"];
+                };
             };
         };
     };
@@ -12731,7 +17425,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteBillingPlan"];
+                };
             };
         };
     };
@@ -12750,7 +17446,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteBillingPlan"];
+                };
             };
         };
     };
@@ -12769,7 +17467,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteBillingPlan"];
+                };
             };
         };
     };
@@ -12815,7 +17515,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteBillingPlan"];
+                };
             };
         };
     };
@@ -12835,7 +17537,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteBillingPlan"];
+                };
             };
         };
     };
@@ -12859,7 +17563,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteBillingPlan"];
+                };
             };
         };
     };
@@ -12881,7 +17587,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteBillingFeature"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -12903,7 +17619,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteBillingFeature"];
+                };
             };
         };
     };
@@ -12926,7 +17644,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteBillingFeature"];
+                };
             };
         };
     };
@@ -12945,7 +17665,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteBillingFeature"];
+                };
             };
         };
     };
@@ -12964,7 +17686,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteBillingFeature"];
+                };
             };
         };
     };
@@ -12987,7 +17711,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteSubscription"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13010,7 +17744,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteSubscription"];
+                };
             };
         };
     };
@@ -13033,7 +17769,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteSubscription"];
+                };
             };
         };
     };
@@ -13056,7 +17794,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteSubscription"];
+                };
             };
         };
     };
@@ -13079,7 +17819,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteSubscription"];
+                };
             };
         };
     };
@@ -13102,7 +17844,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteSubscription"];
+                };
             };
         };
     };
@@ -13124,7 +17868,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteInvoice"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13146,7 +17900,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteUsageRecord"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13171,7 +17935,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteBillingEvent"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13193,7 +17967,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteBillingEntitlement"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13216,7 +18000,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SitePlatformSearchResponse"];
+                };
             };
         };
     };
@@ -13233,7 +18019,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteAutomationOverview"];
+                };
             };
         };
     };
@@ -13259,7 +18047,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteWorkflow"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13286,7 +18084,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteWorkflowRun"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13305,7 +18113,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteWorkflowRun"];
+                };
             };
         };
     };
@@ -13324,7 +18134,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteWorkflowRun"];
+                };
             };
         };
     };
@@ -13348,7 +18160,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteApprovalDefinition"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13372,7 +18194,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteApproval"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13399,7 +18231,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteWorkflowRunLog"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13416,7 +18258,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteAiOverview"];
+                };
             };
         };
     };
@@ -13441,7 +18285,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteAiSettings"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13467,7 +18321,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteAiAgent"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13491,7 +18355,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteAiConversation"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13516,7 +18390,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteAiAction"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13543,7 +18427,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteAiUsageLog"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13560,7 +18454,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteReportingOverview"];
+                };
             };
         };
     };
@@ -13584,7 +18480,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteDashboard"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13608,7 +18514,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteReport"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13635,7 +18551,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteReportExecution"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13659,7 +18585,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteReportExport"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13676,7 +18612,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteHardeningOverview"];
+                };
             };
         };
     };
@@ -13693,7 +18631,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteIntegrationsOverview"];
+                };
             };
         };
     };
@@ -13719,7 +18659,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteIntegration"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13742,7 +18692,12 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        generatedSecret?: string;
+                        integration: components["schemas"]["SiteIntegration"];
+                    };
+                };
             };
         };
     };
@@ -13766,7 +18721,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteWebhook"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13793,7 +18758,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteWebhookDelivery"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13812,7 +18787,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteWebhookDelivery"];
+                };
             };
         };
     };
@@ -13835,7 +18812,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteWebhook"] & {
+                        signingSecret?: string;
+                    };
+                };
             };
         };
     };
@@ -13852,7 +18833,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteObservabilityOverview"];
+                };
             };
         };
     };
@@ -13869,7 +18852,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteRealtimeOverview"];
+                };
             };
         };
     };
@@ -13895,7 +18880,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteConversationMetadata"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13921,7 +18916,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteMessageActivity"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13946,7 +18951,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteMeetingOperationsOverview"];
+                };
             };
         };
     };
@@ -13971,7 +18978,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteMeetingTenantPosture"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -13996,7 +19013,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteMeetingReminderLog"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -14013,7 +19040,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteComplianceOverview"];
+                };
             };
         };
     };
@@ -14041,7 +19070,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SiteComplianceJob"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -14064,7 +19103,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteComplianceJob"];
+                };
             };
         };
     };
@@ -14087,7 +19128,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteComplianceJob"];
+                };
             };
         };
     };
@@ -14106,7 +19149,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteComplianceJob"];
+                };
             };
         };
     };
@@ -14129,7 +19174,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteComplianceJob"];
+                };
             };
         };
     };
@@ -14151,7 +19198,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Tenant"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -14174,7 +19231,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TenantUser"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -14193,7 +19260,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteUserDetail"];
+                };
             };
         };
     };
@@ -14216,7 +19285,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TenantUser"];
+                };
             };
         };
     };
@@ -14239,7 +19310,12 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        sessionsRevoked: number;
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -14258,7 +19334,16 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        devLink?: string;
+                        message: string;
+                        provider?: string;
+                        sent: boolean;
+                        skipped?: boolean;
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -14277,7 +19362,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteTenantDetail"];
+                };
             };
         };
     };
@@ -14300,7 +19387,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Tenant"];
+                };
             };
         };
     };
@@ -14324,7 +19413,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TenantUser"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -14347,7 +19446,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -14370,7 +19471,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -14393,7 +19496,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -14416,7 +19521,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -14439,7 +19546,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -14462,7 +19571,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -14485,7 +19596,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -14508,7 +19621,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -14531,7 +19646,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -14554,7 +19671,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -14577,7 +19696,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -14602,7 +19723,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SecurityEvent"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -14625,7 +19756,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SecurityEvent"];
+                };
             };
         };
     };
@@ -14649,7 +19782,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PlatformAuditLog"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -14672,7 +19815,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["PlatformAdminGrant"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -14694,7 +19847,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PlatformAdminGrant"];
+                };
             };
         };
     };
@@ -14717,7 +19872,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PlatformAdminGrant"] | null;
+                };
             };
         };
     };
@@ -14734,7 +19891,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["IdentitySecurityOverview"];
+                };
             };
         };
     };
@@ -14755,7 +19914,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TotpSetupResponse"];
+                };
             };
         };
     };
@@ -14776,7 +19937,12 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        backupCodes: string[];
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -14797,7 +19963,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -14818,7 +19988,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        backupCodes: string[];
+                    };
+                };
             };
         };
     };
@@ -14837,7 +20011,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -14854,7 +20032,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SsoProvider"][];
+                };
             };
         };
     };
@@ -14875,7 +20055,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SsoProvider"][];
+                };
             };
         };
     };
@@ -14896,7 +20078,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        allowedLoginMethods: string[];
+                        domainDiscoveryEnabled: boolean;
+                        mfaRequired: boolean;
+                        ssoRequired: boolean;
+                        trustedDeviceTtlDays: number;
+                    };
+                };
             };
         };
     };
@@ -14916,7 +20106,19 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        loginMethods: string[];
+                        mfaRequired?: boolean;
+                        providers: components["schemas"]["SsoProvider"][];
+                        ssoRequired?: boolean;
+                        tenant: {
+                            id: string;
+                            name: string;
+                            slug: string;
+                        } | null;
+                    };
+                };
             };
         };
     };
@@ -14937,7 +20139,12 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        authorizationUrl: string;
+                        stateExpiresAt: string;
+                    };
+                };
             };
         };
     };
@@ -14976,7 +20183,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuthResponseDto"];
+                    "application/json": components["schemas"]["AuthResponse"] | components["schemas"]["AuthLifecycleResponse"];
                 };
             };
         };
@@ -14999,7 +20206,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuthResponseDto"];
+                    "application/json": components["schemas"]["AuthResponse"];
                 };
             };
         };
@@ -15022,7 +20229,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AuthLifecycleResponse"];
+                };
             };
         };
     };
@@ -15044,7 +20253,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuthResponseDto"];
+                    "application/json": components["schemas"]["AuthResponse"];
                 };
             };
         };
@@ -15067,7 +20276,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuthResponseDto"];
+                    "application/json": components["schemas"]["AuthResponse"] | components["schemas"]["MfaChallengeResponse"];
                 };
             };
             /** @description Invalid credentials or inactive account */
@@ -15097,7 +20306,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuthResponseDto"];
+                    "application/json": components["schemas"]["AuthResponse"];
                 };
             };
         };
@@ -15120,7 +20329,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuthResponseDto"];
+                    "application/json": components["schemas"]["AuthResponse"];
                 };
             };
         };
@@ -15143,7 +20352,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuthResponseDto"];
+                    "application/json": components["schemas"]["AuthResponse"];
                 };
             };
             /** @description Invalid or revoked refresh token */
@@ -15169,7 +20378,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        success: boolean;
+                    };
                 };
             };
         };
@@ -15192,7 +20403,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AuthLifecycleResponse"];
+                };
             };
         };
     };
@@ -15214,7 +20427,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        message: string;
+                        success: boolean;
+                    };
                 };
             };
         };
@@ -15237,7 +20453,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        message: string;
+                        success: boolean;
+                    };
                 };
             };
         };
@@ -15256,7 +20475,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AuthUser"];
+                };
             };
         };
     };
@@ -15274,7 +20495,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Permission"][];
+                };
             };
         };
     };
@@ -15292,7 +20515,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Role"][];
+                };
             };
         };
     };
@@ -15314,7 +20539,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Role"];
+                };
             };
         };
     };
@@ -15334,7 +20561,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        success: boolean;
+                    };
                 };
             };
         };
@@ -15359,7 +20588,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Role"];
+                };
             };
         };
     };
@@ -15381,7 +20612,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        success: boolean;
+                    };
                 };
             };
         };
@@ -15403,7 +20636,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        success: boolean;
+                    };
                 };
             };
         };
@@ -15439,7 +20674,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Tenant"];
+                };
             };
         };
     };
@@ -15461,7 +20698,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Tenant"];
+                };
             };
         };
     };
@@ -15500,7 +20739,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TenantUser"];
+                };
             };
         };
     };
@@ -15522,7 +20763,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TenantUser"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -15544,7 +20793,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TenantUser"];
+                };
             };
         };
     };
@@ -15566,7 +20817,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BulkInviteUsersResponse"];
+                };
             };
         };
     };
@@ -15649,7 +20902,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Workspace"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -15776,7 +21037,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Team"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -15798,7 +21067,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Team"];
+                };
             };
         };
     };
@@ -15883,7 +21154,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TeamMember"][];
+                };
             };
         };
     };
@@ -15907,7 +21180,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TeamMember"];
+                };
             };
         };
     };
@@ -15931,7 +21206,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TeamMember"];
+                };
             };
         };
     };
@@ -15952,7 +21229,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        success: boolean;
+                    };
                 };
             };
         };
@@ -15996,7 +21275,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Project"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -16018,7 +21305,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Project"];
+                };
             };
         };
     };
@@ -16038,7 +21327,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectPermissionMatrix"];
+                };
             };
         };
     };
@@ -16057,7 +21348,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Project"];
+                };
             };
         };
     };
@@ -16076,7 +21369,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -16099,7 +21396,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Project"];
+                };
             };
         };
     };
@@ -16118,7 +21417,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectMember"][];
+                };
             };
         };
     };
@@ -16141,7 +21442,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectMember"];
+                };
             };
         };
     };
@@ -16161,7 +21464,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -16180,7 +21487,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectMilestone"][];
+                };
             };
         };
     };
@@ -16203,7 +21512,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectMilestone"];
+                };
             };
         };
     };
@@ -16223,7 +21534,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -16247,7 +21562,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectMilestone"];
+                };
             };
         };
     };
@@ -16266,7 +21583,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectRisk"][];
+                };
             };
         };
     };
@@ -16289,7 +21608,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectRisk"];
+                };
             };
         };
     };
@@ -16309,7 +21630,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -16333,7 +21658,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectRisk"];
+                };
             };
         };
     };
@@ -16352,7 +21679,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectBudget"][];
+                };
             };
         };
     };
@@ -16375,7 +21704,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectBudget"];
+                };
             };
         };
     };
@@ -16395,7 +21726,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -16419,7 +21754,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectBudget"];
+                };
             };
         };
     };
@@ -16438,7 +21775,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectStakeholder"][];
+                };
             };
         };
     };
@@ -16461,7 +21800,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectStakeholder"];
+                };
             };
         };
     };
@@ -16481,7 +21822,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -16505,7 +21850,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectStakeholder"];
+                };
             };
         };
     };
@@ -16524,7 +21871,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectDependency"][];
+                };
             };
         };
     };
@@ -16547,7 +21896,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectDependency"];
+                };
             };
         };
     };
@@ -16567,7 +21918,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -16591,7 +21946,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectDependency"];
+                };
             };
         };
     };
@@ -16610,7 +21967,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectDecision"][];
+                };
             };
         };
     };
@@ -16633,7 +21992,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectDecision"];
+                };
             };
         };
     };
@@ -16653,7 +22014,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -16677,7 +22042,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectDecision"];
+                };
             };
         };
     };
@@ -16696,7 +22063,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectChangeRequest"][];
+                };
             };
         };
     };
@@ -16719,7 +22088,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectChangeRequest"];
+                };
             };
         };
     };
@@ -16739,7 +22110,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -16763,7 +22138,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectChangeRequest"];
+                };
             };
         };
     };
@@ -16798,7 +22175,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskLabel"][];
+                };
             };
         };
     };
@@ -16820,7 +22199,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskLabel"];
+                };
             };
         };
     };
@@ -16839,7 +22220,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -16862,7 +22247,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskLabel"];
+                };
             };
         };
     };
@@ -16879,7 +22266,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskTaxonomy"];
+                };
             };
         };
     };
@@ -16904,7 +22293,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CustomField"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -16925,7 +22322,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CustomField"];
+                };
             };
         };
     };
@@ -16944,7 +22343,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    } | components["schemas"]["CustomField"];
+                };
             };
         };
     };
@@ -16967,7 +22370,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CustomField"];
+                };
             };
         };
     };
@@ -16986,7 +22391,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CustomField"];
+                };
             };
         };
     };
@@ -17005,7 +22412,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CustomField"];
+                };
             };
         };
     };
@@ -17028,7 +22437,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["TaskSavedView"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -17049,7 +22466,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskSavedView"];
+                };
             };
         };
     };
@@ -17068,7 +22487,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -17091,7 +22514,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskSavedView"];
+                };
             };
         };
     };
@@ -17112,7 +22537,13 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        count: number;
+                        operation: string;
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -17180,7 +22611,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Task"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -17202,7 +22641,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Task"];
+                };
             };
         };
     };
@@ -17221,7 +22662,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Task"];
+                };
             };
         };
     };
@@ -17240,7 +22683,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Task"];
+                };
             };
         };
     };
@@ -17263,7 +22708,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Task"];
+                };
             };
         };
     };
@@ -17282,7 +22729,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Task"];
+                };
             };
         };
     };
@@ -17301,7 +22750,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Task"];
+                };
             };
         };
     };
@@ -17320,7 +22771,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskAssignee"][];
+                };
             };
         };
     };
@@ -17343,7 +22796,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskAssignee"];
+                };
             };
         };
     };
@@ -17363,7 +22818,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -17382,7 +22841,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskWatcher"][];
+                };
             };
         };
     };
@@ -17405,7 +22866,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskWatcher"];
+                };
             };
         };
     };
@@ -17425,7 +22888,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -17444,7 +22911,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskComment"][];
+                };
             };
         };
     };
@@ -17467,7 +22936,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskComment"];
+                };
             };
         };
     };
@@ -17487,7 +22958,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -17530,7 +23005,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskAttachment"][];
+                };
             };
         };
     };
@@ -17553,7 +23030,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskAttachment"];
+                };
             };
         };
     };
@@ -17573,7 +23052,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -17592,7 +23075,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskChecklist"][];
+                };
             };
         };
     };
@@ -17615,7 +23100,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskChecklist"];
+                };
             };
         };
     };
@@ -17635,7 +23122,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -17683,7 +23174,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskChecklistItem"];
+                };
             };
         };
     };
@@ -17704,7 +23197,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -17729,7 +23226,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskChecklistItem"];
+                };
             };
         };
     };
@@ -17748,7 +23247,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskLabelAssignment"][];
+                };
             };
         };
     };
@@ -17771,7 +23272,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskLabelAssignment"];
+                };
             };
         };
     };
@@ -17791,7 +23294,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -17810,7 +23317,12 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        blockedBy: components["schemas"]["TaskDependency"][];
+                        blocking: components["schemas"]["TaskDependency"][];
+                    };
+                };
             };
         };
     };
@@ -17833,7 +23345,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskDependency"];
+                };
             };
         };
     };
@@ -17853,7 +23367,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -17872,7 +23390,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TaskActivity"][];
+                };
             };
         };
     };
@@ -17975,7 +23495,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Conversation"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -17997,7 +23525,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Conversation"];
+                };
             };
         };
     };
@@ -18016,7 +23546,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Conversation"];
+                };
             };
         };
     };
@@ -18035,7 +23567,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -18058,7 +23594,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Conversation"];
+                };
             };
         };
     };
@@ -18077,7 +23615,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ConversationMember"][];
+                };
             };
         };
     };
@@ -18100,7 +23640,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ConversationMember"][];
+                };
             };
         };
     };
@@ -18120,7 +23662,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -18143,7 +23689,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Message"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -18166,7 +23720,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Message"];
+                };
             };
         };
     };
@@ -18185,7 +23741,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Message"][];
+                };
             };
         };
     };
@@ -18204,7 +23762,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -18227,7 +23789,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Message"];
+                };
             };
         };
     };
@@ -18246,7 +23810,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Message"];
+                };
             };
         };
     };
@@ -18265,7 +23831,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Message"];
+                };
             };
         };
     };
@@ -18288,7 +23856,12 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Message"][];
+                        forwarded: number;
+                    };
+                };
             };
         };
     };
@@ -18311,7 +23884,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MessageReaction"];
+                };
             };
         };
     };
@@ -18331,7 +23906,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -18350,7 +23929,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MessageReadReceipt"][];
+                };
             };
         };
     };
@@ -18369,7 +23950,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MessageReadReceipt"];
+                };
             };
         };
     };
@@ -18410,7 +23993,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Sprint"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -18432,7 +24023,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Sprint"];
+                };
             };
         };
     };
@@ -18470,7 +24063,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -18493,7 +24090,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Sprint"];
+                };
             };
         };
     };
@@ -18512,7 +24111,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Sprint"];
+                };
             };
         };
     };
@@ -18535,7 +24136,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Sprint"];
+                };
             };
         };
     };
@@ -18581,7 +24184,12 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        count: number;
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -18601,7 +24209,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -18748,7 +24360,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectBoard"];
+                };
             };
         };
     };
@@ -18855,7 +24469,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BoardColumn"];
+                };
             };
         };
     };
@@ -18878,7 +24494,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectBoard"];
+                };
             };
         };
     };
@@ -18898,7 +24516,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -18922,7 +24544,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BoardColumn"];
+                };
             };
         };
     };
@@ -18945,7 +24569,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Task"];
+                };
             };
         };
     };
@@ -18968,7 +24594,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Task"];
+                };
             };
         };
     };
@@ -19024,7 +24652,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailFolderSummary"];
+                };
             };
         };
     };
@@ -19048,7 +24678,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["InternalMailbox"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -19070,7 +24708,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailbox"];
+                };
             };
         };
     };
@@ -19094,7 +24734,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailbox"];
+                };
             };
         };
     };
@@ -19118,7 +24760,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailboxAlias"];
+                };
             };
         };
     };
@@ -19142,7 +24786,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailboxMember"];
+                };
             };
         };
     };
@@ -19163,7 +24809,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -19190,7 +24840,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["InternalMailThread"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -19212,7 +24870,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailThread"];
+                };
             };
         };
     };
@@ -19233,7 +24893,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailThread"];
+                };
             };
         };
     };
@@ -19252,7 +24914,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailParticipant"];
+                };
             };
         };
     };
@@ -19275,7 +24939,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailThread"];
+                };
             };
         };
     };
@@ -19294,7 +24960,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailParticipant"];
+                };
             };
         };
     };
@@ -19313,7 +24981,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailParticipant"];
+                };
             };
         };
     };
@@ -19336,7 +25006,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailParticipant"];
+                };
             };
         };
     };
@@ -19359,7 +25031,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailParticipant"];
+                };
             };
         };
     };
@@ -19382,7 +25056,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailParticipant"];
+                };
             };
         };
     };
@@ -19405,7 +25081,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailParticipant"];
+                };
             };
         };
     };
@@ -19428,7 +25106,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailParticipant"];
+                };
             };
         };
     };
@@ -19447,7 +25127,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailParticipant"];
+                };
             };
         };
     };
@@ -19466,7 +25148,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["InternalMailParticipant"];
+                };
             };
         };
     };
@@ -19494,7 +25178,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["BookingPage"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -19516,7 +25208,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BookingPage"];
+                };
             };
         };
     };
@@ -19558,7 +25252,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BookingPage"];
+                };
             };
         };
     };
@@ -19581,7 +25277,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BookingFormField"];
+                };
             };
         };
     };
@@ -19601,7 +25299,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -19625,7 +25327,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BookingFormField"];
+                };
             };
         };
     };
@@ -19653,7 +25357,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["BookingRequest"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -19674,7 +25386,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PublicBookingPageResponse"];
+                };
             };
         };
     };
@@ -19697,7 +25411,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PublicBookingSlotsResponse"];
+                };
             };
         };
     };
@@ -19720,7 +25436,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PublicBookingCreateResponse"];
+                };
             };
         };
     };
@@ -19743,7 +25461,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BookingRequest"];
+                };
             };
         };
     };
@@ -19766,7 +25486,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PublicBookingCreateResponse"];
+                };
             };
         };
     };
@@ -19783,7 +25505,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingIntegrationStatus"];
+                };
             };
         };
     };
@@ -19800,7 +25524,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingIntegrationSettings"];
+                };
             };
         };
     };
@@ -19821,7 +25547,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingIntegrationSettings"];
+                };
             };
         };
     };
@@ -19848,7 +25576,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MeetingReminderJob"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -19869,7 +25605,20 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        deadLetter: number;
+                        failed: number;
+                        processed: number;
+                        results: {
+                            error?: string;
+                            id: string;
+                            provider?: string;
+                            status: string;
+                        }[];
+                        sent: number;
+                    };
+                };
             };
         };
     };
@@ -19888,7 +25637,12 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        job: components["schemas"]["MeetingReminderJob"];
+                        previousStatus: components["schemas"]["MeetingReminderJobStatus"];
+                    };
+                };
             };
         };
     };
@@ -19912,7 +25666,13 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        meeting: unknown;
+                        message: string;
+                        provider: components["schemas"]["MeetingConferenceProvider"];
+                    };
+                };
             };
         };
     };
@@ -19935,7 +25695,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAdminOverview"];
+                };
             };
         };
     };
@@ -19952,7 +25714,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingPolicy"];
+                };
             };
         };
     };
@@ -19973,7 +25737,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingPolicy"];
+                };
             };
         };
     };
@@ -19996,7 +25762,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAdminAnalytics"];
+                };
             };
         };
     };
@@ -20062,7 +25830,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MeetingReminderJob"][];
+                        meta: {
+                            limit: number;
+                            page: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
+                };
             };
         };
     };
@@ -20131,7 +25909,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAiState"];
+                };
             };
         };
     };
@@ -20154,7 +25934,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAiState"];
+                };
             };
         };
     };
@@ -20177,7 +25959,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAiState"];
+                };
             };
         };
     };
@@ -20200,7 +25984,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAiState"];
+                };
             };
         };
     };
@@ -20223,7 +26009,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAiState"];
+                };
             };
         };
     };
@@ -20246,7 +26034,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAiState"];
+                };
             };
         };
     };
@@ -20269,7 +26059,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAiState"];
+                };
             };
         };
     };
@@ -20292,7 +26084,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAiState"];
+                };
             };
         };
     };
@@ -20315,7 +26109,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAiState"];
+                };
             };
         };
     };
@@ -20338,7 +26134,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAiState"];
+                };
             };
         };
     };
@@ -20361,7 +26159,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAiState"];
+                };
             };
         };
     };
@@ -20384,7 +26184,14 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        actionItems: components["schemas"]["MeetingAiActionItem"][];
+                        converted: number;
+                        meetingId: string;
+                        tasks: components["schemas"]["Task"][];
+                    };
+                };
             };
         };
     };
@@ -20407,7 +26214,13 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        actionItems: components["schemas"]["MeetingAiActionItem"][];
+                        created: components["schemas"]["MeetingReminder"][];
+                        meetingId: string;
+                    };
+                };
             };
         };
     };
@@ -20427,7 +26240,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingWorkspace"];
+                };
             };
         };
     };
@@ -20450,7 +26265,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": unknown;
+                };
             };
         };
     };
@@ -20474,7 +26291,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingComment"];
+                };
             };
         };
     };
@@ -20494,7 +26313,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -20518,7 +26341,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingComment"];
+                };
             };
         };
     };
@@ -20542,7 +26367,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingDecision"];
+                };
             };
         };
     };
@@ -20562,7 +26389,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -20586,7 +26417,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingDecision"];
+                };
             };
         };
     };
@@ -20610,7 +26443,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingChecklistItem"];
+                };
             };
         };
     };
@@ -20630,7 +26465,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -20654,7 +26493,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingChecklistItem"];
+                };
             };
         };
     };
@@ -20678,7 +26519,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAttendee"];
+                };
             };
         };
     };
@@ -20697,7 +26540,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Meeting"];
+                };
             };
         };
     };
@@ -20720,7 +26565,12 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        actionItemId?: string | null;
+                        task: components["schemas"]["Task"];
+                    };
+                };
             };
         };
     };
@@ -20743,7 +26593,12 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        queued: number;
+                        reminders: components["schemas"]["MeetingReminder"][];
+                    };
+                };
             };
         };
     };
@@ -20766,7 +26621,14 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        meeting: components["schemas"]["Meeting"];
+                        runtimeState: {
+                            [key: string]: unknown;
+                        };
+                    };
+                };
             };
         };
     };
@@ -20824,7 +26686,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MeetingType"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -20846,7 +26716,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingType"];
+                };
             };
         };
     };
@@ -20869,7 +26741,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingType"];
+                };
             };
         };
     };
@@ -20890,7 +26764,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAvailability"];
+                };
             };
         };
     };
@@ -20911,7 +26787,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAvailabilityWindow"];
+                };
             };
         };
     };
@@ -20930,7 +26808,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -21046,7 +26928,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Meeting"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -21068,7 +26958,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Meeting"];
+                };
             };
         };
     };
@@ -21087,7 +26979,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Meeting"];
+                };
             };
         };
     };
@@ -21110,7 +27004,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Meeting"];
+                };
             };
         };
     };
@@ -21133,7 +27029,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Meeting"];
+                };
             };
         };
     };
@@ -21152,7 +27050,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Meeting"];
+                };
             };
         };
     };
@@ -21171,7 +27071,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Meeting"];
+                };
             };
         };
     };
@@ -21190,7 +27092,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Meeting"];
+                };
             };
         };
     };
@@ -21209,7 +27113,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Meeting"];
+                };
             };
         };
     };
@@ -21251,7 +27157,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAttendee"];
+                };
             };
         };
     };
@@ -21295,7 +27203,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAttendee"];
+                };
             };
         };
     };
@@ -21318,7 +27228,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAgendaItem"];
+                };
             };
         };
     };
@@ -21362,7 +27274,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingAgendaItem"];
+                };
             };
         };
     };
@@ -21385,7 +27299,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingReminder"];
+                };
             };
         };
     };
@@ -21448,7 +27364,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["MeetingActivity"][];
+                };
             };
         };
     };
@@ -21490,7 +27408,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Notification"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -21529,7 +27455,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        total: number;
+                    };
+                };
             };
         };
     };
@@ -21546,7 +27476,12 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                        updated: number;
+                    };
+                };
             };
         };
     };
@@ -21563,7 +27498,12 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        deleted: number;
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -21601,7 +27541,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -21620,7 +27564,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Notification"];
+                };
             };
         };
     };
@@ -21639,7 +27585,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Notification"];
+                };
             };
         };
     };
@@ -21656,7 +27604,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["NotificationPreference"][];
+                };
             };
         };
     };
@@ -21677,7 +27627,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["NotificationPreference"][];
+                };
             };
         };
     };
@@ -21864,7 +27816,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DocumentFolder"][];
+                };
             };
         };
     };
@@ -21888,7 +27842,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["DocumentFolder"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -21910,7 +27872,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DocumentFolder"];
+                };
             };
         };
     };
@@ -21948,7 +27912,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -21971,7 +27939,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DocumentFolder"];
+                };
             };
         };
     };
@@ -21990,7 +27960,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DocumentFolder"];
+                };
             };
         };
     };
@@ -22009,7 +27981,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DocumentFolder"];
+                };
             };
         };
     };
@@ -22036,7 +28010,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WorkspaceDocument"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -22057,7 +28039,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDocument"];
+                };
             };
         };
     };
@@ -22076,7 +28060,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDocument"];
+                };
             };
         };
     };
@@ -22118,7 +28104,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDocument"];
+                };
             };
         };
     };
@@ -22137,7 +28125,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDocument"];
+                };
             };
         };
     };
@@ -22156,7 +28146,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDocument"];
+                };
             };
         };
     };
@@ -22175,7 +28167,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDocument"];
+                };
             };
         };
     };
@@ -22194,7 +28188,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -22213,7 +28211,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DocumentVersion"][];
+                };
             };
         };
     };
@@ -22257,7 +28257,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDocument"];
+                };
             };
         };
     };
@@ -22295,7 +28297,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["UploadIntent"];
+                };
             };
         };
     };
@@ -22328,7 +28332,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FileAsset"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -22350,7 +28362,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["FileAsset"];
+                };
             };
         };
     };
@@ -22388,7 +28402,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["FileAsset"];
+                };
             };
         };
     };
@@ -22407,7 +28423,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["FileAsset"];
+                };
             };
         };
     };
@@ -22426,7 +28444,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["FileAsset"];
+                };
             };
         };
     };
@@ -23346,7 +29366,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Workflow"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -23368,7 +29396,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Workflow"];
+                };
             };
         };
     };
@@ -23427,7 +29457,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -23450,7 +29484,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Workflow"];
+                };
             };
         };
     };
@@ -23469,7 +29505,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Workflow"];
+                };
             };
         };
     };
@@ -23488,7 +29526,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Workflow"];
+                };
             };
         };
     };
@@ -23511,7 +29551,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Workflow"];
+                };
             };
         };
     };
@@ -23601,7 +29643,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WorkflowRun"];
+                };
             };
         };
     };
@@ -23628,7 +29672,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WorkflowRun"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -23655,7 +29707,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WorkflowRun"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -23693,7 +29753,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WorkflowRunLog"][];
+                };
             };
         };
     };
@@ -23712,7 +29774,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WorkflowRun"];
+                };
             };
         };
     };
@@ -23731,7 +29795,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WorkflowRun"];
+                };
             };
         };
     };
@@ -23750,7 +29816,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WorkflowRun"];
+                };
             };
         };
     };
@@ -24084,7 +30152,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BillingAccountStatus"];
+                };
             };
         };
     };
@@ -24110,7 +30180,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["BillingPlan"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -24488,7 +30566,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteSubscription"] | null;
+                };
             };
         };
     };
@@ -24553,7 +30633,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteSubscription"];
+                };
             };
         };
     };
@@ -24572,7 +30654,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteSubscription"];
+                };
             };
         };
     };
@@ -24591,7 +30675,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteSubscription"];
+                };
             };
         };
     };
@@ -24636,7 +30722,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["BillingInvoice"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -24716,7 +30810,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BillingEntitlements"];
+                };
             };
         };
     };
@@ -24760,7 +30856,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["BillingUsageRecord"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -24806,7 +30910,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BillingUsageSummary"];
+                };
             };
         };
     };
@@ -24827,7 +30933,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BillingCheckoutSession"];
+                };
             };
         };
     };
@@ -24848,7 +30956,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SiteSubscription"];
+                };
             };
         };
     };
@@ -24869,7 +30979,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BillingPortalSession"];
+                };
             };
         };
     };
@@ -24994,7 +31106,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Integration"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -25016,7 +31136,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Integration"];
+                };
             };
         };
     };
@@ -25054,7 +31176,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -25077,7 +31203,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Integration"];
+                };
             };
         };
     };
@@ -25096,7 +31224,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Integration"];
+                };
             };
         };
     };
@@ -25115,7 +31245,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Integration"];
+                };
             };
         };
     };
@@ -25138,7 +31270,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Integration"];
+                };
             };
         };
     };
@@ -25161,7 +31295,13 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        integration: components["schemas"]["Integration"];
+                        message?: string;
+                        queued: boolean;
+                    };
+                };
             };
         };
     };
@@ -25188,7 +31328,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["IntegrationLog"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -25211,7 +31359,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Webhook"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -25232,7 +31388,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Webhook"];
+                };
             };
         };
     };
@@ -25270,7 +31428,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
             };
         };
     };
@@ -25293,7 +31455,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Webhook"];
+                };
             };
         };
     };
@@ -25312,7 +31476,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Webhook"];
+                };
             };
         };
     };
@@ -25331,7 +31497,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Webhook"];
+                };
             };
         };
     };
@@ -25354,7 +31522,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Webhook"];
+                };
             };
         };
     };
@@ -25375,7 +31545,16 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        deliveries: {
+                            delivery: components["schemas"]["WebhookDelivery"];
+                            dispatched: boolean;
+                        }[];
+                        event: unknown;
+                        matched: number;
+                    };
+                };
             };
         };
     };
@@ -25396,7 +31575,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["OmoFlowRuntimeResult"];
+                };
             };
         };
     };
@@ -25422,7 +31603,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebhookDelivery"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -25460,7 +31649,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WebhookDelivery"];
+                };
             };
         };
     };
@@ -25517,7 +31708,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiSettings"];
+                };
             };
         };
     };
@@ -25538,7 +31731,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiSettings"];
+                };
             };
         };
     };
@@ -25564,7 +31759,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["AiAgent"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -25586,7 +31789,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiAgent"];
+                };
             };
         };
     };
@@ -25624,7 +31829,11 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    } | components["schemas"]["AiAgent"];
+                };
             };
         };
     };
@@ -25647,7 +31856,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiAgent"];
+                };
             };
         };
     };
@@ -25666,7 +31877,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiAgent"];
+                };
             };
         };
     };
@@ -25685,7 +31898,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AiAgent"];
+                };
             };
         };
     };
@@ -26370,7 +32585,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Report"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -26392,7 +32615,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Report"];
+                };
             };
         };
     };
@@ -26413,7 +32638,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReportExecution"];
+                };
             };
         };
     };
@@ -26535,7 +32762,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReportExecution"];
+                };
             };
         };
     };
@@ -26558,7 +32787,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ReportExport"];
+                };
             };
         };
     };
@@ -26584,7 +32815,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ReportExecution"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -26629,7 +32868,15 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["ReportExport"][];
+                        limit: number;
+                        page: number;
+                        total: number;
+                        totalPages: number;
+                    };
+                };
             };
         };
     };
@@ -26671,7 +32918,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AnalyticsOverview"];
+                };
             };
         };
     };
@@ -26694,7 +32943,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProjectHealthAnalytics"];
+                };
             };
         };
     };
@@ -26717,7 +32968,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["TeamPerformanceAnalytics"];
+                };
             };
         };
     };
@@ -26740,7 +32993,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CycleTimeAnalytics"];
+                };
             };
         };
     };
@@ -26763,7 +33018,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["VelocityAnalytics"];
+                };
             };
         };
     };
@@ -26786,7 +33043,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["BudgetAnalytics"];
+                };
             };
         };
     };
@@ -26809,7 +33068,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SlaAnalytics"];
+                };
             };
         };
     };
@@ -26854,7 +33115,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["GlobalSearchResponse"];
+                };
             };
         };
     };
