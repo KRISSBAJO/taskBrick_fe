@@ -1,21 +1,8 @@
-import type {
-  PaginatedResponse,
-  Project,
-  ProjectBudget,
-  ProjectChangeRequest,
-  ProjectDecision,
-  ProjectDependency,
-  ProjectMember,
-  ProjectMilestone,
-  ProjectPermissionMatrix,
-  ProjectRisk,
-  ProjectStakeholder,
-} from "../api";
 import {
-  boundedLimit,
-  openApiRequest,
-  type OpenApiJsonBody,
-  type OpenApiQuery,
+boundedLimit,
+openApiRequest,
+type OpenApiJsonBody,
+type OpenApiQuery,
 } from "./request";
 
 type ListProjectsQuery = OpenApiQuery<"/api/v1/projects", "get">;
@@ -40,7 +27,7 @@ export function listProjects(
   token: string,
   query: ListProjectsQuery = {},
 ) {
-  return openApiRequest<PaginatedResponse<Project>, "/api/v1/projects", "get">("/api/v1/projects", "get", {
+  return openApiRequest("/api/v1/projects", "get", {
     pathParams: {},
     query: {
       ...query,
@@ -53,7 +40,7 @@ export function listProjects(
 }
 
 export function getProject(token: string, projectId: string) {
-  return openApiRequest<Project, "/api/v1/projects/{projectId}", "get">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}",
     "get",
     {
@@ -65,7 +52,7 @@ export function getProject(token: string, projectId: string) {
 }
 
 export function getProjectPermissions(token: string, projectId: string) {
-  return openApiRequest<ProjectPermissionMatrix, "/api/v1/projects/{projectId}/permissions", "get">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/permissions",
     "get",
     {
@@ -81,7 +68,7 @@ export function updateProject(
   projectId: string,
   payload: UpdateProjectPayload,
 ) {
-  return openApiRequest<Project, "/api/v1/projects/{projectId}", "patch">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}",
     "patch",
     {
@@ -93,7 +80,7 @@ export function updateProject(
 }
 
 export function deleteProject(token: string, projectId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}", "delete">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}",
     "delete",
     {
@@ -104,7 +91,7 @@ export function deleteProject(token: string, projectId: string) {
 }
 
 export function listProjectMembers(token: string, projectId: string) {
-  return openApiRequest<ProjectMember[], "/api/v1/projects/{projectId}/members", "get">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/members",
     "get",
     {
@@ -116,7 +103,7 @@ export function listProjectMembers(token: string, projectId: string) {
 }
 
 export function upsertProjectMember(token: string, projectId: string, payload: AddProjectMemberPayload) {
-  return openApiRequest<ProjectMember, "/api/v1/projects/{projectId}/members", "post">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/members",
     "post",
     {
@@ -128,7 +115,7 @@ export function upsertProjectMember(token: string, projectId: string, payload: A
 }
 
 export function removeProjectMember(token: string, projectId: string, userId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}/members/{userId}", "delete">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/members/{userId}",
     "delete",
     {
@@ -139,7 +126,7 @@ export function removeProjectMember(token: string, projectId: string, userId: st
 }
 
 export function listProjectMilestones(token: string, projectId: string) {
-  return openApiRequest<ProjectMilestone[], "/api/v1/projects/{projectId}/milestones", "get">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/milestones",
     "get",
     {
@@ -155,7 +142,7 @@ export function createProjectMilestone(
   projectId: string,
   payload: CreateProjectMilestonePayload,
 ) {
-  return openApiRequest<ProjectMilestone, "/api/v1/projects/{projectId}/milestones", "post">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/milestones",
     "post",
     {
@@ -172,7 +159,7 @@ export function updateProjectMilestone(
   milestoneId: string,
   payload: UpdateProjectMilestonePayload,
 ) {
-  return openApiRequest<ProjectMilestone, "/api/v1/projects/{projectId}/milestones/{milestoneId}", "patch">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/milestones/{milestoneId}",
     "patch",
     {
@@ -184,7 +171,7 @@ export function updateProjectMilestone(
 }
 
 export function deleteProjectMilestone(token: string, projectId: string, milestoneId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}/milestones/{milestoneId}", "delete">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/milestones/{milestoneId}",
     "delete",
     {
@@ -195,7 +182,7 @@ export function deleteProjectMilestone(token: string, projectId: string, milesto
 }
 
 export function listProjectRisks(token: string, projectId: string) {
-  return openApiRequest<ProjectRisk[], "/api/v1/projects/{projectId}/risks", "get">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/risks",
     "get",
     {
@@ -211,7 +198,7 @@ export function createProjectRisk(
   projectId: string,
   payload: CreateProjectRiskPayload,
 ) {
-  return openApiRequest<ProjectRisk, "/api/v1/projects/{projectId}/risks", "post">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/risks",
     "post",
     {
@@ -228,7 +215,7 @@ export function updateProjectRisk(
   riskId: string,
   payload: UpdateProjectRiskPayload,
 ) {
-  return openApiRequest<ProjectRisk, "/api/v1/projects/{projectId}/risks/{riskId}", "patch">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/risks/{riskId}",
     "patch",
     {
@@ -240,7 +227,7 @@ export function updateProjectRisk(
 }
 
 export function deleteProjectRisk(token: string, projectId: string, riskId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}/risks/{riskId}", "delete">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/risks/{riskId}",
     "delete",
     {
@@ -251,7 +238,7 @@ export function deleteProjectRisk(token: string, projectId: string, riskId: stri
 }
 
 export function listProjectBudgets(token: string, projectId: string) {
-  return openApiRequest<ProjectBudget[], "/api/v1/projects/{projectId}/budgets", "get">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/budgets",
     "get",
     {
@@ -267,7 +254,7 @@ export function createProjectBudget(
   projectId: string,
   payload: CreateProjectBudgetPayload,
 ) {
-  return openApiRequest<ProjectBudget, "/api/v1/projects/{projectId}/budgets", "post">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/budgets",
     "post",
     {
@@ -284,7 +271,7 @@ export function updateProjectBudget(
   budgetId: string,
   payload: UpdateProjectBudgetPayload,
 ) {
-  return openApiRequest<ProjectBudget, "/api/v1/projects/{projectId}/budgets/{budgetId}", "patch">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/budgets/{budgetId}",
     "patch",
     {
@@ -296,7 +283,7 @@ export function updateProjectBudget(
 }
 
 export function deleteProjectBudget(token: string, projectId: string, budgetId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}/budgets/{budgetId}", "delete">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/budgets/{budgetId}",
     "delete",
     {
@@ -307,7 +294,7 @@ export function deleteProjectBudget(token: string, projectId: string, budgetId: 
 }
 
 export function listProjectStakeholders(token: string, projectId: string) {
-  return openApiRequest<ProjectStakeholder[], "/api/v1/projects/{projectId}/stakeholders", "get">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/stakeholders",
     "get",
     {
@@ -323,7 +310,7 @@ export function createProjectStakeholder(
   projectId: string,
   payload: CreateProjectStakeholderPayload,
 ) {
-  return openApiRequest<ProjectStakeholder, "/api/v1/projects/{projectId}/stakeholders", "post">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/stakeholders",
     "post",
     {
@@ -340,7 +327,7 @@ export function updateProjectStakeholder(
   stakeholderId: string,
   payload: UpdateProjectStakeholderPayload,
 ) {
-  return openApiRequest<ProjectStakeholder, "/api/v1/projects/{projectId}/stakeholders/{stakeholderId}", "patch">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/stakeholders/{stakeholderId}",
     "patch",
     {
@@ -352,7 +339,7 @@ export function updateProjectStakeholder(
 }
 
 export function deleteProjectStakeholder(token: string, projectId: string, stakeholderId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}/stakeholders/{stakeholderId}", "delete">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/stakeholders/{stakeholderId}",
     "delete",
     {
@@ -363,7 +350,7 @@ export function deleteProjectStakeholder(token: string, projectId: string, stake
 }
 
 export function listProjectDependencies(token: string, projectId: string) {
-  return openApiRequest<ProjectDependency[], "/api/v1/projects/{projectId}/dependencies", "get">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/dependencies",
     "get",
     {
@@ -379,7 +366,7 @@ export function createProjectDependency(
   projectId: string,
   payload: CreateProjectDependencyPayload,
 ) {
-  return openApiRequest<ProjectDependency, "/api/v1/projects/{projectId}/dependencies", "post">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/dependencies",
     "post",
     {
@@ -396,7 +383,7 @@ export function updateProjectDependency(
   dependencyId: string,
   payload: UpdateProjectDependencyPayload,
 ) {
-  return openApiRequest<ProjectDependency, "/api/v1/projects/{projectId}/dependencies/{dependencyId}", "patch">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/dependencies/{dependencyId}",
     "patch",
     {
@@ -408,7 +395,7 @@ export function updateProjectDependency(
 }
 
 export function deleteProjectDependency(token: string, projectId: string, dependencyId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}/dependencies/{dependencyId}", "delete">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/dependencies/{dependencyId}",
     "delete",
     {
@@ -419,7 +406,7 @@ export function deleteProjectDependency(token: string, projectId: string, depend
 }
 
 export function listProjectDecisions(token: string, projectId: string) {
-  return openApiRequest<ProjectDecision[], "/api/v1/projects/{projectId}/decisions", "get">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/decisions",
     "get",
     {
@@ -435,7 +422,7 @@ export function createProjectDecision(
   projectId: string,
   payload: CreateProjectDecisionPayload,
 ) {
-  return openApiRequest<ProjectDecision, "/api/v1/projects/{projectId}/decisions", "post">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/decisions",
     "post",
     {
@@ -452,7 +439,7 @@ export function updateProjectDecision(
   decisionId: string,
   payload: UpdateProjectDecisionPayload,
 ) {
-  return openApiRequest<ProjectDecision, "/api/v1/projects/{projectId}/decisions/{decisionId}", "patch">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/decisions/{decisionId}",
     "patch",
     {
@@ -464,7 +451,7 @@ export function updateProjectDecision(
 }
 
 export function deleteProjectDecision(token: string, projectId: string, decisionId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}/decisions/{decisionId}", "delete">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/decisions/{decisionId}",
     "delete",
     {
@@ -475,7 +462,7 @@ export function deleteProjectDecision(token: string, projectId: string, decision
 }
 
 export function listProjectChangeRequests(token: string, projectId: string) {
-  return openApiRequest<ProjectChangeRequest[], "/api/v1/projects/{projectId}/change-requests", "get">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/change-requests",
     "get",
     {
@@ -491,7 +478,7 @@ export function createProjectChangeRequest(
   projectId: string,
   payload: CreateProjectChangeRequestPayload,
 ) {
-  return openApiRequest<ProjectChangeRequest, "/api/v1/projects/{projectId}/change-requests", "post">(
+  return openApiRequest(
     "/api/v1/projects/{projectId}/change-requests",
     "post",
     {
@@ -508,11 +495,7 @@ export function updateProjectChangeRequest(
   changeRequestId: string,
   payload: UpdateProjectChangeRequestPayload,
 ) {
-  return openApiRequest<
-    ProjectChangeRequest,
-    "/api/v1/projects/{projectId}/change-requests/{changeRequestId}",
-    "patch"
-  >("/api/v1/projects/{projectId}/change-requests/{changeRequestId}", "patch", {
+  return openApiRequest("/api/v1/projects/{projectId}/change-requests/{changeRequestId}", "patch", {
     pathParams: { projectId, changeRequestId },
     token,
     body: payload,
@@ -520,11 +503,7 @@ export function updateProjectChangeRequest(
 }
 
 export function deleteProjectChangeRequest(token: string, projectId: string, changeRequestId: string) {
-  return openApiRequest<
-    { success: boolean },
-    "/api/v1/projects/{projectId}/change-requests/{changeRequestId}",
-    "delete"
-  >("/api/v1/projects/{projectId}/change-requests/{changeRequestId}", "delete", {
+  return openApiRequest("/api/v1/projects/{projectId}/change-requests/{changeRequestId}", "delete", {
     pathParams: { projectId, changeRequestId },
     token,
   });
@@ -534,7 +513,7 @@ export function createProject(
   token: string,
   payload: CreateProjectPayload,
 ) {
-  return openApiRequest<Project, "/api/v1/projects", "post">("/api/v1/projects", "post", {
+  return openApiRequest("/api/v1/projects", "post", {
     pathParams: {},
     token,
     body: payload,

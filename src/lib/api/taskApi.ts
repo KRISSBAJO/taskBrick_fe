@@ -1,28 +1,13 @@
 import type {
-  CustomField,
-  PaginatedResponse,
-  Task,
-  TaskActivity,
-  TaskAssignee,
-  TaskAttachment,
-  TaskChecklist,
-  TaskChecklistItem,
-  TaskComment,
-  TaskDependency,
-  TaskLabel,
-  TaskLabelAssignment,
-  TaskPriority,
-  TaskSavedView,
-  TaskStatus,
-  TaskTaxonomy,
-  TaskType,
-  TaskWatcher,
+TaskPriority,
+TaskStatus,
+TaskType
 } from "../api";
 import {
-  boundedLimit,
-  openApiRequest,
-  type OpenApiJsonBody,
-  type OpenApiQuery,
+boundedLimit,
+openApiRequest,
+type OpenApiJsonBody,
+type OpenApiQuery,
 } from "./request";
 
 type ListTasksOpenApiQuery = OpenApiQuery<"/api/v1/tasks", "get">;
@@ -54,7 +39,7 @@ export function createTask(
   token: string,
   payload: CreateTaskPayload,
 ) {
-  return openApiRequest<Task, "/api/v1/tasks", "post">("/api/v1/tasks", "post", {
+  return openApiRequest("/api/v1/tasks", "post", {
     pathParams: {},
     token,
     body: payload,
@@ -62,7 +47,7 @@ export function createTask(
 }
 
 export function getTask(token: string, taskId: string) {
-  return openApiRequest<Task, "/api/v1/tasks/{taskId}", "get">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}",
     "get",
     {
@@ -78,7 +63,7 @@ export function updateTask(
   taskId: string,
   payload: UpdateTaskPayload,
 ) {
-  return openApiRequest<Task, "/api/v1/tasks/{taskId}", "patch">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}",
     "patch",
     {
@@ -90,14 +75,14 @@ export function updateTask(
 }
 
 export function deleteTask(token: string, taskId: string) {
-  return openApiRequest<Task, "/api/v1/tasks/{taskId}", "delete">("/api/v1/tasks/{taskId}", "delete", {
+  return openApiRequest("/api/v1/tasks/{taskId}", "delete", {
     pathParams: { taskId },
     token,
   });
 }
 
 export function archiveTask(token: string, taskId: string) {
-  return openApiRequest<Task, "/api/v1/tasks/{taskId}/archive", "post">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/archive",
     "post",
     {
@@ -108,7 +93,7 @@ export function archiveTask(token: string, taskId: string) {
 }
 
 export function restoreTask(token: string, taskId: string) {
-  return openApiRequest<Task, "/api/v1/tasks/{taskId}/restore", "post">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/restore",
     "post",
     {
@@ -119,7 +104,7 @@ export function restoreTask(token: string, taskId: string) {
 }
 
 export function listTaskComments(token: string, taskId: string) {
-  return openApiRequest<TaskComment[], "/api/v1/tasks/{taskId}/comments", "get">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/comments",
     "get",
     {
@@ -131,7 +116,7 @@ export function listTaskComments(token: string, taskId: string) {
 }
 
 export function createTaskComment(token: string, taskId: string, payload: CreateTaskCommentPayload) {
-  return openApiRequest<TaskComment, "/api/v1/tasks/{taskId}/comments", "post">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/comments",
     "post",
     {
@@ -143,7 +128,7 @@ export function createTaskComment(token: string, taskId: string, payload: Create
 }
 
 export function deleteTaskComment(token: string, taskId: string, commentId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/tasks/{taskId}/comments/{commentId}", "delete">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/comments/{commentId}",
     "delete",
     {
@@ -154,7 +139,7 @@ export function deleteTaskComment(token: string, taskId: string, commentId: stri
 }
 
 export function listTaskChecklists(token: string, taskId: string) {
-  return openApiRequest<TaskChecklist[], "/api/v1/tasks/{taskId}/checklists", "get">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/checklists",
     "get",
     {
@@ -166,7 +151,7 @@ export function listTaskChecklists(token: string, taskId: string) {
 }
 
 export function createTaskChecklist(token: string, taskId: string, payload: CreateTaskChecklistPayload) {
-  return openApiRequest<TaskChecklist, "/api/v1/tasks/{taskId}/checklists", "post">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/checklists",
     "post",
     {
@@ -178,7 +163,7 @@ export function createTaskChecklist(token: string, taskId: string, payload: Crea
 }
 
 export function deleteTaskChecklist(token: string, taskId: string, checklistId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/tasks/{taskId}/checklists/{checklistId}", "delete">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/checklists/{checklistId}",
     "delete",
     {
@@ -194,7 +179,7 @@ export function createTaskChecklistItem(
   checklistId: string,
   payload: CreateTaskChecklistItemPayload,
 ) {
-  return openApiRequest<TaskChecklistItem, "/api/v1/tasks/{taskId}/checklists/{checklistId}/items", "post">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/checklists/{checklistId}/items",
     "post",
     {
@@ -212,11 +197,7 @@ export function updateTaskChecklistItem(
   itemId: string,
   payload: UpdateTaskChecklistItemPayload,
 ) {
-  return openApiRequest<
-    TaskChecklistItem,
-    "/api/v1/tasks/{taskId}/checklists/{checklistId}/items/{itemId}",
-    "patch"
-  >("/api/v1/tasks/{taskId}/checklists/{checklistId}/items/{itemId}", "patch", {
+  return openApiRequest("/api/v1/tasks/{taskId}/checklists/{checklistId}/items/{itemId}", "patch", {
     pathParams: { taskId, checklistId, itemId },
     token,
     body: payload,
@@ -229,18 +210,14 @@ export function deleteTaskChecklistItem(
   checklistId: string,
   itemId: string,
 ) {
-  return openApiRequest<
-    { success: boolean },
-    "/api/v1/tasks/{taskId}/checklists/{checklistId}/items/{itemId}",
-    "delete"
-  >("/api/v1/tasks/{taskId}/checklists/{checklistId}/items/{itemId}", "delete", {
+  return openApiRequest("/api/v1/tasks/{taskId}/checklists/{checklistId}/items/{itemId}", "delete", {
     pathParams: { taskId, checklistId, itemId },
     token,
   });
 }
 
 export function listTaskActivities(token: string, taskId: string) {
-  return openApiRequest<TaskActivity[], "/api/v1/tasks/{taskId}/activities", "get">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/activities",
     "get",
     {
@@ -252,7 +229,7 @@ export function listTaskActivities(token: string, taskId: string) {
 }
 
 export function listTaskAttachments(token: string, taskId: string) {
-  return openApiRequest<TaskAttachment[], "/api/v1/tasks/{taskId}/attachments", "get">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/attachments",
     "get",
     {
@@ -268,7 +245,7 @@ export function createTaskAttachment(
   taskId: string,
   payload: CreateTaskAttachmentPayload,
 ) {
-  return openApiRequest<TaskAttachment, "/api/v1/tasks/{taskId}/attachments", "post">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/attachments",
     "post",
     {
@@ -280,7 +257,7 @@ export function createTaskAttachment(
 }
 
 export function deleteTaskAttachment(token: string, taskId: string, attachmentId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/tasks/{taskId}/attachments/{attachmentId}", "delete">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/attachments/{attachmentId}",
     "delete",
     {
@@ -291,7 +268,7 @@ export function deleteTaskAttachment(token: string, taskId: string, attachmentId
 }
 
 export function listTaskDependencies(token: string, taskId: string) {
-  return openApiRequest<{ blocking: TaskDependency[]; blockedBy: TaskDependency[] }, "/api/v1/tasks/{taskId}/dependencies", "get">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/dependencies",
     "get",
     {
@@ -307,7 +284,7 @@ export function createTaskDependency(
   taskId: string,
   payload: CreateTaskDependencyPayload,
 ) {
-  return openApiRequest<TaskDependency, "/api/v1/tasks/{taskId}/dependencies", "post">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/dependencies",
     "post",
     {
@@ -319,7 +296,7 @@ export function createTaskDependency(
 }
 
 export function deleteTaskDependency(token: string, taskId: string, dependencyId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/tasks/{taskId}/dependencies/{dependencyId}", "delete">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/dependencies/{dependencyId}",
     "delete",
     {
@@ -330,7 +307,7 @@ export function deleteTaskDependency(token: string, taskId: string, dependencyId
 }
 
 export function getTaskTaxonomy(token: string) {
-  return openApiRequest<TaskTaxonomy, "/api/v1/tasks/taxonomy", "get">("/api/v1/tasks/taxonomy", "get", {
+  return openApiRequest("/api/v1/tasks/taxonomy", "get", {
     pathParams: {},
     token,
     cache: "no-store",
@@ -341,7 +318,7 @@ export function listCustomFields(
   token: string,
   query: ListCustomFieldsQuery = {},
 ) {
-  return openApiRequest<PaginatedResponse<CustomField>, "/api/v1/tasks/custom-fields", "get">(
+  return openApiRequest(
     "/api/v1/tasks/custom-fields",
     "get",
     {
@@ -358,7 +335,7 @@ export function listCustomFields(
 }
 
 export function createCustomField(token: string, payload: CreateCustomFieldPayload) {
-  return openApiRequest<CustomField, "/api/v1/tasks/custom-fields", "post">(
+  return openApiRequest(
     "/api/v1/tasks/custom-fields",
     "post",
     {
@@ -370,7 +347,7 @@ export function createCustomField(token: string, payload: CreateCustomFieldPaylo
 }
 
 export function updateCustomField(token: string, customFieldId: string, payload: UpdateCustomFieldPayload) {
-  return openApiRequest<CustomField, "/api/v1/tasks/custom-fields/{customFieldId}", "patch">(
+  return openApiRequest(
     "/api/v1/tasks/custom-fields/{customFieldId}",
     "patch",
     {
@@ -382,7 +359,7 @@ export function updateCustomField(token: string, customFieldId: string, payload:
 }
 
 export function archiveCustomField(token: string, customFieldId: string) {
-  return openApiRequest<CustomField, "/api/v1/tasks/custom-fields/{customFieldId}/archive", "post">(
+  return openApiRequest(
     "/api/v1/tasks/custom-fields/{customFieldId}/archive",
     "post",
     {
@@ -393,7 +370,7 @@ export function archiveCustomField(token: string, customFieldId: string) {
 }
 
 export function restoreCustomField(token: string, customFieldId: string) {
-  return openApiRequest<CustomField, "/api/v1/tasks/custom-fields/{customFieldId}/restore", "post">(
+  return openApiRequest(
     "/api/v1/tasks/custom-fields/{customFieldId}/restore",
     "post",
     {
@@ -404,7 +381,7 @@ export function restoreCustomField(token: string, customFieldId: string) {
 }
 
 export function deleteCustomField(token: string, customFieldId: string) {
-  return openApiRequest<{ success: boolean } | CustomField, "/api/v1/tasks/custom-fields/{customFieldId}", "delete">(
+  return openApiRequest(
     "/api/v1/tasks/custom-fields/{customFieldId}",
     "delete",
     {
@@ -418,7 +395,7 @@ export function listTaskSavedViews(
   token: string,
   query: ListTaskSavedViewsQuery = {},
 ) {
-  return openApiRequest<PaginatedResponse<TaskSavedView>, "/api/v1/tasks/saved-views", "get">(
+  return openApiRequest(
     "/api/v1/tasks/saved-views",
     "get",
     {
@@ -435,7 +412,7 @@ export function listTaskSavedViews(
 }
 
 export function createTaskSavedView(token: string, payload: CreateTaskSavedViewPayload) {
-  return openApiRequest<TaskSavedView, "/api/v1/tasks/saved-views", "post">(
+  return openApiRequest(
     "/api/v1/tasks/saved-views",
     "post",
     {
@@ -447,7 +424,7 @@ export function createTaskSavedView(token: string, payload: CreateTaskSavedViewP
 }
 
 export function updateTaskSavedView(token: string, viewId: string, payload: UpdateTaskSavedViewPayload) {
-  return openApiRequest<TaskSavedView, "/api/v1/tasks/saved-views/{viewId}", "patch">(
+  return openApiRequest(
     "/api/v1/tasks/saved-views/{viewId}",
     "patch",
     {
@@ -459,7 +436,7 @@ export function updateTaskSavedView(token: string, viewId: string, payload: Upda
 }
 
 export function deleteTaskSavedView(token: string, viewId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/tasks/saved-views/{viewId}", "delete">(
+  return openApiRequest(
     "/api/v1/tasks/saved-views/{viewId}",
     "delete",
     {
@@ -473,7 +450,7 @@ export function bulkTaskOperation(
   token: string,
   payload: BulkTaskOperationPayload,
 ) {
-  return openApiRequest<{ success: boolean; operation: string; count: number }, "/api/v1/tasks/bulk", "post">(
+  return openApiRequest(
     "/api/v1/tasks/bulk",
     "post",
     {
@@ -485,7 +462,7 @@ export function bulkTaskOperation(
 }
 
 export function listLabels(token: string) {
-  return openApiRequest<TaskLabel[], "/api/v1/tasks/labels", "get">("/api/v1/tasks/labels", "get", {
+  return openApiRequest("/api/v1/tasks/labels", "get", {
     pathParams: {},
     token,
     cache: "no-store",
@@ -493,7 +470,7 @@ export function listLabels(token: string) {
 }
 
 export function createLabel(token: string, payload: CreateLabelPayload) {
-  return openApiRequest<TaskLabel, "/api/v1/tasks/labels", "post">("/api/v1/tasks/labels", "post", {
+  return openApiRequest("/api/v1/tasks/labels", "post", {
     pathParams: {},
     token,
     body: payload,
@@ -501,7 +478,7 @@ export function createLabel(token: string, payload: CreateLabelPayload) {
 }
 
 export function updateLabel(token: string, labelId: string, payload: UpdateLabelPayload) {
-  return openApiRequest<TaskLabel, "/api/v1/tasks/labels/{labelId}", "patch">(
+  return openApiRequest(
     "/api/v1/tasks/labels/{labelId}",
     "patch",
     {
@@ -513,7 +490,7 @@ export function updateLabel(token: string, labelId: string, payload: UpdateLabel
 }
 
 export function deleteLabel(token: string, labelId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/tasks/labels/{labelId}", "delete">(
+  return openApiRequest(
     "/api/v1/tasks/labels/{labelId}",
     "delete",
     {
@@ -524,7 +501,7 @@ export function deleteLabel(token: string, labelId: string) {
 }
 
 export function listTaskLabels(token: string, taskId: string) {
-  return openApiRequest<TaskLabelAssignment[], "/api/v1/tasks/{taskId}/labels", "get">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/labels",
     "get",
     {
@@ -537,7 +514,7 @@ export function listTaskLabels(token: string, taskId: string) {
 
 export function assignTaskLabel(token: string, taskId: string, labelId: string) {
   const payload: AssignTaskLabelPayload = { labelId };
-  return openApiRequest<TaskLabelAssignment, "/api/v1/tasks/{taskId}/labels", "post">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/labels",
     "post",
     {
@@ -549,7 +526,7 @@ export function assignTaskLabel(token: string, taskId: string, labelId: string) 
 }
 
 export function removeTaskLabel(token: string, taskId: string, labelId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/tasks/{taskId}/labels/{labelId}", "delete">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/labels/{labelId}",
     "delete",
     {
@@ -560,7 +537,7 @@ export function removeTaskLabel(token: string, taskId: string, labelId: string) 
 }
 
 export function listTaskAssignees(token: string, taskId: string) {
-  return openApiRequest<TaskAssignee[], "/api/v1/tasks/{taskId}/assignees", "get">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/assignees",
     "get",
     {
@@ -573,7 +550,7 @@ export function listTaskAssignees(token: string, taskId: string) {
 
 export function addTaskAssignee(token: string, taskId: string, userId: string) {
   const payload: TaskUserPayload = { userId };
-  return openApiRequest<TaskAssignee, "/api/v1/tasks/{taskId}/assignees", "post">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/assignees",
     "post",
     {
@@ -585,7 +562,7 @@ export function addTaskAssignee(token: string, taskId: string, userId: string) {
 }
 
 export function removeTaskAssignee(token: string, taskId: string, userId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/tasks/{taskId}/assignees/{userId}", "delete">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/assignees/{userId}",
     "delete",
     {
@@ -596,7 +573,7 @@ export function removeTaskAssignee(token: string, taskId: string, userId: string
 }
 
 export function listTaskWatchers(token: string, taskId: string) {
-  return openApiRequest<TaskWatcher[], "/api/v1/tasks/{taskId}/watchers", "get">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/watchers",
     "get",
     {
@@ -609,7 +586,7 @@ export function listTaskWatchers(token: string, taskId: string) {
 
 export function addTaskWatcher(token: string, taskId: string, userId: string) {
   const payload: TaskUserPayload = { userId };
-  return openApiRequest<TaskWatcher, "/api/v1/tasks/{taskId}/watchers", "post">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/watchers",
     "post",
     {
@@ -621,7 +598,7 @@ export function addTaskWatcher(token: string, taskId: string, userId: string) {
 }
 
 export function removeTaskWatcher(token: string, taskId: string, userId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/tasks/{taskId}/watchers/{userId}", "delete">(
+  return openApiRequest(
     "/api/v1/tasks/{taskId}/watchers/{userId}",
     "delete",
     {
@@ -645,7 +622,7 @@ export function listTasks(
     types: types?.join(","),
   };
 
-  return openApiRequest<PaginatedResponse<Task>, "/api/v1/tasks", "get">("/api/v1/tasks", "get", {
+  return openApiRequest("/api/v1/tasks", "get", {
     pathParams: {},
     query: apiQuery,
     token,

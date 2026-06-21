@@ -1,15 +1,8 @@
-import type {
-  BoardColumn,
-  PaginatedResponse,
-  ProjectBoard,
-  Sprint,
-  Task,
-} from "../api";
 import {
-  boundedLimit,
-  openApiRequest,
-  type OpenApiJsonBody,
-  type OpenApiQuery,
+boundedLimit,
+openApiRequest,
+type OpenApiJsonBody,
+type OpenApiQuery,
 } from "./request";
 
 type ListSprintsQuery = OpenApiQuery<"/api/v1/agile/sprints", "get">;
@@ -23,7 +16,7 @@ type ReorderBoardColumnsPayload = OpenApiJsonBody<"/api/v1/agile/boards/{boardId
 type UpdateTaskOrderPayload = OpenApiJsonBody<"/api/v1/agile/tasks/{taskId}/order", "patch">;
 type UpdateTaskStatusPayload = OpenApiJsonBody<"/api/v1/agile/tasks/{taskId}/status", "patch">;
 export function getProjectBoard(token: string, projectId: string) {
-  return openApiRequest<ProjectBoard, "/api/v1/agile/projects/{projectId}/board", "get">(
+  return openApiRequest(
     "/api/v1/agile/projects/{projectId}/board",
     "get",
     {
@@ -35,7 +28,7 @@ export function getProjectBoard(token: string, projectId: string) {
 }
 
 export function createBoardColumn(token: string, boardId: string, payload: CreateBoardColumnPayload) {
-  return openApiRequest<BoardColumn, "/api/v1/agile/boards/{boardId}/columns", "post">(
+  return openApiRequest(
     "/api/v1/agile/boards/{boardId}/columns",
     "post",
     {
@@ -52,7 +45,7 @@ export function updateBoardColumn(
   columnId: string,
   payload: UpdateBoardColumnPayload,
 ) {
-  return openApiRequest<BoardColumn, "/api/v1/agile/boards/{boardId}/columns/{columnId}", "patch">(
+  return openApiRequest(
     "/api/v1/agile/boards/{boardId}/columns/{columnId}",
     "patch",
     {
@@ -64,7 +57,7 @@ export function updateBoardColumn(
 }
 
 export function deleteBoardColumn(token: string, boardId: string, columnId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/agile/boards/{boardId}/columns/{columnId}", "delete">(
+  return openApiRequest(
     "/api/v1/agile/boards/{boardId}/columns/{columnId}",
     "delete",
     {
@@ -79,7 +72,7 @@ export function reorderBoardColumns(
   boardId: string,
   columns: ReorderBoardColumnsPayload["columns"],
 ) {
-  return openApiRequest<ProjectBoard, "/api/v1/agile/boards/{boardId}/columns/reorder", "patch">(
+  return openApiRequest(
     "/api/v1/agile/boards/{boardId}/columns/reorder",
     "patch",
     {
@@ -91,7 +84,7 @@ export function reorderBoardColumns(
 }
 
 export function updateTaskBoardOrder(token: string, taskId: string, payload: UpdateTaskOrderPayload) {
-  return openApiRequest<Task, "/api/v1/agile/tasks/{taskId}/order", "patch">(
+  return openApiRequest(
     "/api/v1/agile/tasks/{taskId}/order",
     "patch",
     {
@@ -103,7 +96,7 @@ export function updateTaskBoardOrder(token: string, taskId: string, payload: Upd
 }
 
 export function updateTaskStatus(token: string, taskId: string, payload: UpdateTaskStatusPayload) {
-  return openApiRequest<Task, "/api/v1/agile/tasks/{taskId}/status", "patch">(
+  return openApiRequest(
     "/api/v1/agile/tasks/{taskId}/status",
     "patch",
     {
@@ -118,7 +111,7 @@ export function listSprints(
   token: string,
   query: ListSprintsQuery = {},
 ) {
-  return openApiRequest<PaginatedResponse<Sprint>, "/api/v1/agile/sprints", "get">(
+  return openApiRequest(
     "/api/v1/agile/sprints",
     "get",
     {
@@ -138,7 +131,7 @@ export function createSprint(
   token: string,
   payload: CreateSprintPayload,
 ) {
-  return openApiRequest<Sprint, "/api/v1/agile/sprints", "post">("/api/v1/agile/sprints", "post", {
+  return openApiRequest("/api/v1/agile/sprints", "post", {
     pathParams: {},
     token,
     body: payload,
@@ -150,7 +143,7 @@ export function updateSprint(
   sprintId: string,
   payload: UpdateSprintPayload,
 ) {
-  return openApiRequest<Sprint, "/api/v1/agile/sprints/{sprintId}", "patch">(
+  return openApiRequest(
     "/api/v1/agile/sprints/{sprintId}",
     "patch",
     {
@@ -162,7 +155,7 @@ export function updateSprint(
 }
 
 export function startSprint(token: string, sprintId: string) {
-  return openApiRequest<Sprint, "/api/v1/agile/sprints/{sprintId}/start", "post">(
+  return openApiRequest(
     "/api/v1/agile/sprints/{sprintId}/start",
     "post",
     {
@@ -179,7 +172,7 @@ export function completeSprint(
     moveIncompleteToBacklog: true,
   },
 ) {
-  return openApiRequest<Sprint, "/api/v1/agile/sprints/{sprintId}/complete", "post">(
+  return openApiRequest(
     "/api/v1/agile/sprints/{sprintId}/complete",
     "post",
     {
@@ -191,7 +184,7 @@ export function completeSprint(
 }
 
 export function deleteSprint(token: string, sprintId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/agile/sprints/{sprintId}", "delete">(
+  return openApiRequest(
     "/api/v1/agile/sprints/{sprintId}",
     "delete",
     {
@@ -203,7 +196,7 @@ export function deleteSprint(token: string, sprintId: string) {
 
 export function addSprintTasks(token: string, sprintId: string, taskIds: string[]) {
   const payload: SprintTaskBulkPayload = { taskIds };
-  return openApiRequest<{ success: boolean; count: number }, "/api/v1/agile/sprints/{sprintId}/tasks", "post">(
+  return openApiRequest(
     "/api/v1/agile/sprints/{sprintId}/tasks",
     "post",
     {
@@ -215,7 +208,7 @@ export function addSprintTasks(token: string, sprintId: string, taskIds: string[
 }
 
 export function removeSprintTask(token: string, sprintId: string, taskId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/agile/sprints/{sprintId}/tasks/{taskId}", "delete">(
+  return openApiRequest(
     "/api/v1/agile/sprints/{sprintId}/tasks/{taskId}",
     "delete",
     {

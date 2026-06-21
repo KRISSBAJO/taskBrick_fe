@@ -1,21 +1,12 @@
 import type {
-  AdminOverview,
-  ApiKey,
-  ApiKeyStatus,
-  AuditLog,
-  ComplianceJob,
-  ComplianceJobStatus,
-  ComplianceJobType,
-  CreatedApiKey,
-  MetaPaginatedResponse,
-  PaginatedResponse,
-  SecurityChecks,
-  SecurityEvent,
-  SecurityEventSeverity,
-  SecurityEventStatus,
-  SecurityPolicy,
+ApiKeyStatus,
+ComplianceJobStatus,
+ComplianceJobType,
+SecurityEventSeverity,
+SecurityEventStatus,
+SecurityPolicy
 } from "../api";
-import { boundedLimit, openApiRequest, type OpenApiJsonBody, type OpenApiQuery } from "./request";
+import { boundedLimit,openApiRequest,type OpenApiJsonBody,type OpenApiQuery } from "./request";
 
 function pagedQuery<TQuery extends { page?: number; limit?: number; search?: string }>(query: TQuery, fallback = 50) {
   return {
@@ -40,7 +31,7 @@ export function listAuditLogs(
     to?: string;
   } = {},
 ) {
-  return openApiRequest<MetaPaginatedResponse<AuditLog>, "/api/v1/admin/audit-logs", "get">("/api/v1/admin/audit-logs", "get", {
+  return openApiRequest("/api/v1/admin/audit-logs", "get", {
     token,
     cache: "no-store",
     pathParams: {},
@@ -49,7 +40,7 @@ export function listAuditLogs(
 }
 
 export function getAdminOverview(token: string) {
-  return openApiRequest<AdminOverview, "/api/v1/admin/overview", "get">("/api/v1/admin/overview", "get", {
+  return openApiRequest("/api/v1/admin/overview", "get", {
     token,
     cache: "no-store",
     pathParams: {},
@@ -57,7 +48,7 @@ export function getAdminOverview(token: string) {
 }
 
 export function getSecurityChecks(token: string) {
-  return openApiRequest<SecurityChecks, "/api/v1/admin/security-checks", "get">("/api/v1/admin/security-checks", "get", {
+  return openApiRequest("/api/v1/admin/security-checks", "get", {
     token,
     cache: "no-store",
     pathParams: {},
@@ -65,7 +56,7 @@ export function getSecurityChecks(token: string) {
 }
 
 export function getSecurityPolicy(token: string) {
-  return openApiRequest<SecurityPolicy, "/api/v1/admin/security-policy", "get">("/api/v1/admin/security-policy", "get", {
+  return openApiRequest("/api/v1/admin/security-policy", "get", {
     token,
     cache: "no-store",
     pathParams: {},
@@ -90,7 +81,7 @@ export function updateSecurityPolicy(token: string, payload: Partial<Pick<
   | "maxUploadBytes"
   | "allowedUploadMimeTypes"
 >> & { metadata?: unknown }) {
-  return openApiRequest<SecurityPolicy, "/api/v1/admin/security-policy", "patch">("/api/v1/admin/security-policy", "patch", {
+  return openApiRequest("/api/v1/admin/security-policy", "patch", {
     token,
     pathParams: {},
     body: payload as unknown as OpenApiJsonBody<"/api/v1/admin/security-policy", "patch">,
@@ -101,7 +92,7 @@ export function listSecurityEvents(
   token: string,
   query: { page?: number; limit?: number; search?: string; type?: string; severity?: SecurityEventSeverity; status?: SecurityEventStatus; actorId?: string; subjectType?: string; subjectId?: string; from?: string; to?: string } = {},
 ) {
-  return openApiRequest<PaginatedResponse<SecurityEvent>, "/api/v1/admin/security-events", "get">("/api/v1/admin/security-events", "get", {
+  return openApiRequest("/api/v1/admin/security-events", "get", {
     token,
     cache: "no-store",
     pathParams: {},
@@ -114,7 +105,7 @@ export function updateSecurityEvent(
   eventId: string,
   payload: { severity?: SecurityEventSeverity; status?: SecurityEventStatus; metadata?: unknown },
 ) {
-  return openApiRequest<SecurityEvent, "/api/v1/admin/security-events/{eventId}", "patch">("/api/v1/admin/security-events/{eventId}", "patch", {
+  return openApiRequest("/api/v1/admin/security-events/{eventId}", "patch", {
     token,
     pathParams: { eventId },
     body: payload as unknown as OpenApiJsonBody<"/api/v1/admin/security-events/{eventId}", "patch">,
@@ -135,7 +126,7 @@ export function listComplianceJobs(
     to?: string;
   } = {},
 ) {
-  return openApiRequest<MetaPaginatedResponse<ComplianceJob>, "/api/v1/admin/compliance-jobs", "get">("/api/v1/admin/compliance-jobs", "get", {
+  return openApiRequest("/api/v1/admin/compliance-jobs", "get", {
     token,
     cache: "no-store",
     pathParams: {},
@@ -154,7 +145,7 @@ export function createComplianceJob(
     expiresAt?: string;
   },
 ) {
-  return openApiRequest<ComplianceJob, "/api/v1/admin/compliance-jobs", "post">("/api/v1/admin/compliance-jobs", "post", {
+  return openApiRequest("/api/v1/admin/compliance-jobs", "post", {
     token,
     pathParams: {},
     body: payload as unknown as OpenApiJsonBody<"/api/v1/admin/compliance-jobs", "post">,
@@ -162,7 +153,7 @@ export function createComplianceJob(
 }
 
 export function approveComplianceJob(token: string, jobId: string, payload: { reason?: string } = {}) {
-  return openApiRequest<ComplianceJob, "/api/v1/admin/compliance-jobs/{jobId}/approve", "post">("/api/v1/admin/compliance-jobs/{jobId}/approve", "post", {
+  return openApiRequest("/api/v1/admin/compliance-jobs/{jobId}/approve", "post", {
     token,
     pathParams: { jobId },
     body: payload as unknown as OpenApiJsonBody<"/api/v1/admin/compliance-jobs/{jobId}/approve", "post">,
@@ -170,7 +161,7 @@ export function approveComplianceJob(token: string, jobId: string, payload: { re
 }
 
 export function rejectComplianceJob(token: string, jobId: string, payload: { reason?: string } = {}) {
-  return openApiRequest<ComplianceJob, "/api/v1/admin/compliance-jobs/{jobId}/reject", "post">("/api/v1/admin/compliance-jobs/{jobId}/reject", "post", {
+  return openApiRequest("/api/v1/admin/compliance-jobs/{jobId}/reject", "post", {
     token,
     pathParams: { jobId },
     body: payload as unknown as OpenApiJsonBody<"/api/v1/admin/compliance-jobs/{jobId}/reject", "post">,
@@ -178,14 +169,14 @@ export function rejectComplianceJob(token: string, jobId: string, payload: { rea
 }
 
 export function runComplianceJob(token: string, jobId: string) {
-  return openApiRequest<ComplianceJob, "/api/v1/admin/compliance-jobs/{jobId}/run", "post">("/api/v1/admin/compliance-jobs/{jobId}/run", "post", {
+  return openApiRequest("/api/v1/admin/compliance-jobs/{jobId}/run", "post", {
     token,
     pathParams: { jobId },
   });
 }
 
 export function cancelComplianceJob(token: string, jobId: string) {
-  return openApiRequest<ComplianceJob, "/api/v1/admin/compliance-jobs/{jobId}/cancel", "post">("/api/v1/admin/compliance-jobs/{jobId}/cancel", "post", {
+  return openApiRequest("/api/v1/admin/compliance-jobs/{jobId}/cancel", "post", {
     token,
     pathParams: { jobId },
   });
@@ -195,7 +186,7 @@ export function listApiKeys(
   token: string,
   query: { page?: number; limit?: number; search?: string; status?: ApiKeyStatus; scope?: string; createdById?: string; from?: string; to?: string } = {},
 ) {
-  return openApiRequest<PaginatedResponse<ApiKey>, "/api/v1/admin/api-keys", "get">("/api/v1/admin/api-keys", "get", {
+  return openApiRequest("/api/v1/admin/api-keys", "get", {
     token,
     cache: "no-store",
     pathParams: {},
@@ -207,7 +198,7 @@ export function createApiKey(
   token: string,
   payload: { name: string; scopes?: string[]; expiresAt?: string; metadata?: unknown },
 ) {
-  return openApiRequest<CreatedApiKey, "/api/v1/admin/api-keys", "post">("/api/v1/admin/api-keys", "post", {
+  return openApiRequest("/api/v1/admin/api-keys", "post", {
     token,
     pathParams: {},
     body: payload as unknown as OpenApiJsonBody<"/api/v1/admin/api-keys", "post">,
@@ -215,7 +206,7 @@ export function createApiKey(
 }
 
 export function revokeApiKey(token: string, apiKeyId: string) {
-  return openApiRequest<ApiKey, "/api/v1/admin/api-keys/{apiKeyId}/revoke", "post">("/api/v1/admin/api-keys/{apiKeyId}/revoke", "post", {
+  return openApiRequest("/api/v1/admin/api-keys/{apiKeyId}/revoke", "post", {
     token,
     pathParams: { apiKeyId },
   });

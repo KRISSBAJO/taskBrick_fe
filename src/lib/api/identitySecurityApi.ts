@@ -1,7 +1,6 @@
-import type { IdentitySecurityOverview, SsoProvider, TotpSetupResponse } from "../api";
 import {
-  openApiRequest,
-  type OpenApiJsonBody,
+openApiRequest,
+type OpenApiJsonBody,
 } from "./request";
 
 type SetupTotpPayload = OpenApiJsonBody<"/api/v1/identity-security/mfa/totp/setup", "post">;
@@ -12,7 +11,7 @@ type UpsertSsoProviderPayload = OpenApiJsonBody<"/api/v1/identity-security/sso-p
 type UpdateTenantLoginPolicyPayload = OpenApiJsonBody<"/api/v1/identity-security/login-policy", "patch">;
 
 export function getIdentitySecurityOverview(token: string) {
-  return openApiRequest<IdentitySecurityOverview, "/api/v1/identity-security/overview", "get">("/api/v1/identity-security/overview", "get", {
+  return openApiRequest("/api/v1/identity-security/overview", "get", {
     token,
     cache: "no-store",
     pathParams: {},
@@ -20,7 +19,7 @@ export function getIdentitySecurityOverview(token: string) {
 }
 
 export function setupTotp(token: string, payload: SetupTotpPayload = {}) {
-  return openApiRequest<TotpSetupResponse, "/api/v1/identity-security/mfa/totp/setup", "post">("/api/v1/identity-security/mfa/totp/setup", "post", {
+  return openApiRequest("/api/v1/identity-security/mfa/totp/setup", "post", {
     token,
     pathParams: {},
     body: payload,
@@ -28,7 +27,7 @@ export function setupTotp(token: string, payload: SetupTotpPayload = {}) {
 }
 
 export function enableTotp(token: string, payload: EnableTotpPayload) {
-  return openApiRequest<{ success: boolean; backupCodes: string[] }, "/api/v1/identity-security/mfa/totp/enable", "post">("/api/v1/identity-security/mfa/totp/enable", "post", {
+  return openApiRequest("/api/v1/identity-security/mfa/totp/enable", "post", {
     token,
     pathParams: {},
     body: payload,
@@ -36,7 +35,7 @@ export function enableTotp(token: string, payload: EnableTotpPayload) {
 }
 
 export function disableMfa(token: string, payload: DisableMfaPayload) {
-  return openApiRequest<{ success: boolean }, "/api/v1/identity-security/mfa/disable", "post">("/api/v1/identity-security/mfa/disable", "post", {
+  return openApiRequest("/api/v1/identity-security/mfa/disable", "post", {
     token,
     pathParams: {},
     body: payload,
@@ -44,7 +43,7 @@ export function disableMfa(token: string, payload: DisableMfaPayload) {
 }
 
 export function regenerateBackupCodes(token: string, payload: RegenerateBackupCodesPayload) {
-  return openApiRequest<{ backupCodes: string[] }, "/api/v1/identity-security/mfa/backup-codes/regenerate", "post">("/api/v1/identity-security/mfa/backup-codes/regenerate", "post", {
+  return openApiRequest("/api/v1/identity-security/mfa/backup-codes/regenerate", "post", {
     token,
     pathParams: {},
     body: payload,
@@ -52,14 +51,14 @@ export function regenerateBackupCodes(token: string, payload: RegenerateBackupCo
 }
 
 export function revokeTrustedDevice(token: string, deviceId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/identity-security/trusted-devices/{deviceId}", "delete">("/api/v1/identity-security/trusted-devices/{deviceId}", "delete", {
+  return openApiRequest("/api/v1/identity-security/trusted-devices/{deviceId}", "delete", {
     token,
     pathParams: { deviceId },
   });
 }
 
 export function listSsoProviders(token: string) {
-  return openApiRequest<SsoProvider[], "/api/v1/identity-security/sso-providers", "get">("/api/v1/identity-security/sso-providers", "get", {
+  return openApiRequest("/api/v1/identity-security/sso-providers", "get", {
     token,
     cache: "no-store",
     pathParams: {},
@@ -67,7 +66,7 @@ export function listSsoProviders(token: string) {
 }
 
 export function upsertSsoProvider(token: string, payload: UpsertSsoProviderPayload) {
-  return openApiRequest<SsoProvider[], "/api/v1/identity-security/sso-providers", "post">("/api/v1/identity-security/sso-providers", "post", {
+  return openApiRequest("/api/v1/identity-security/sso-providers", "post", {
     token,
     pathParams: {},
     body: payload,
@@ -75,13 +74,7 @@ export function upsertSsoProvider(token: string, payload: UpsertSsoProviderPaylo
 }
 
 export function updateTenantLoginPolicy(token: string, payload: UpdateTenantLoginPolicyPayload) {
-  return openApiRequest<{
-    mfaRequired: boolean;
-    allowedLoginMethods: string[];
-    ssoRequired: boolean;
-    domainDiscoveryEnabled: boolean;
-    trustedDeviceTtlDays: number;
-  }, "/api/v1/identity-security/login-policy", "patch">("/api/v1/identity-security/login-policy", "patch", {
+  return openApiRequest("/api/v1/identity-security/login-policy", "patch", {
     token,
     pathParams: {},
     body: payload,

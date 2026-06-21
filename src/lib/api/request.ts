@@ -1,4 +1,5 @@
 import type { paths } from "@/lib/generated/openapi";
+import type { AuthResponse, AuthUser, StoredAuth } from "../types";
 
 const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4070/api/v1";
 
@@ -27,54 +28,6 @@ const USER_KEY = "taskbricks.user";
 const LEGACY_TRUSTED_DEVICE_KEY = "taskbricks.trustedDeviceToken";
 export const AUTH_UPDATED_EVENT = "taskbricks.auth.updated";
 
-export type PlatformAdminLevel = "OWNER" | "ADMIN" | "SUPPORT" | "AUDITOR";
-
-export type AuthUser = {
-  id: string;
-  tenantId: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  avatarUrl?: string | null;
-  timezone?: string | null;
-  locale?: string | null;
-  status: string;
-  roles: string[];
-  permissions: string[];
-  isPlatformAdmin?: boolean;
-  platformAdminLevel?: PlatformAdminLevel | null;
-  platformAdminScopes?: string[];
-};
-
-export type AuthResponse = {
-  accessToken: string;
-  refreshToken?: string;
-  user: AuthUser;
-  trustedDeviceToken?: string;
-};
-
-export type MfaChallengeResponse = {
-  requiresMfa: true;
-  mfaToken: string;
-  methods: string[];
-  expiresAt: string;
-  message: string;
-};
-
-export type AuthLifecycleResponse = {
-  success: boolean;
-  message: string;
-  email?: string;
-  tenantSlug?: string;
-  requiresEmailVerification?: boolean;
-  devLink?: string;
-};
-
-export type StoredAuth = {
-  accessToken: string;
-  user: AuthUser;
-};
-
 export type RequestOptions = RequestInit & {
   token?: string | null;
   skipAuthRefresh?: boolean;
@@ -91,6 +44,21 @@ export type OpenApiQuery<TPath extends OpenApiPath, TMethod extends OpenApiMetho
 export type OpenApiJsonBody<TPath extends OpenApiPath, TMethod extends OpenApiMethod<TPath>> =
   OpenApiOperation<TPath, TMethod> extends { requestBody: { content: { "application/json": infer TBody } } }
     ? TBody
+    : never;
+type OpenApiJsonResponseBody<TResponse> =
+  TResponse extends { content: { "application/json": infer TBody } } ? TBody : null;
+type OpenApiStatusResponse<TResponses, TStatus extends number> =
+  TStatus extends keyof TResponses
+    ? OpenApiJsonResponseBody<TResponses[TStatus]>
+    : `${TStatus}` extends keyof TResponses
+      ? OpenApiJsonResponseBody<TResponses[`${TStatus}`]>
+      : never;
+export type OpenApiResponse<TPath extends OpenApiPath, TMethod extends OpenApiMethod<TPath>> =
+  OpenApiOperation<TPath, TMethod> extends { responses: infer TResponses }
+    ? OpenApiStatusResponse<TResponses, 200>
+      | OpenApiStatusResponse<TResponses, 201>
+      | OpenApiStatusResponse<TResponses, 202>
+      | OpenApiStatusResponse<TResponses, 204>
     : never;
 
 export class ApiError extends Error {
@@ -151,7 +119,6 @@ function resolveOpenApiQueryString(query: Record<string, unknown> | undefined) {
 }
 
 export function openApiRequest<
-  TResult,
   TPath extends OpenApiPath,
   TMethod extends OpenApiMethod<TPath>,
 >(
@@ -162,11 +129,11 @@ export function openApiRequest<
     pathParams: OpenApiPathParams<TPath, TMethod>;
     query?: OpenApiQuery<TPath, TMethod>;
   },
-) {
+): Promise<OpenApiResponse<TPath, TMethod>> {
   const { body, pathParams, query, ...requestOptions } = options;
   const requestPath = `${resolveOpenApiPath<TPath, TMethod>(path, pathParams)}${resolveOpenApiQueryString(query)}`;
 
-  return apiRequest<TResult>(requestPath, {
+  return apiRequest<OpenApiResponse<TPath, TMethod>>(requestPath, {
     ...requestOptions,
     method: method.toUpperCase(),
     body: body === undefined ? undefined : JSON.stringify(body),

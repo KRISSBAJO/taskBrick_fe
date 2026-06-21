@@ -1,5 +1,5 @@
-import type { AiAgent, AiSettings, PaginatedResponse } from "../api";
-import { boundedLimit, openApiRequest, type OpenApiJsonBody, type OpenApiQuery } from "./request";
+import type { AiAgent,AiSettings } from "../api";
+import { boundedLimit,openApiRequest,type OpenApiJsonBody,type OpenApiQuery } from "./request";
 
 type AiSettingsPayload = Partial<Pick<
   AiSettings,
@@ -43,7 +43,7 @@ type UpdateAiAgentPayload = Partial<Pick<
 >>;
 
 export function getAiSettings(token: string) {
-  return openApiRequest<AiSettings, "/api/v1/ai/settings", "get">("/api/v1/ai/settings", "get", {
+  return openApiRequest("/api/v1/ai/settings", "get", {
     token,
     cache: "no-store",
     pathParams: {},
@@ -51,7 +51,7 @@ export function getAiSettings(token: string) {
 }
 
 export function updateAiSettings(token: string, payload: AiSettingsPayload) {
-  return openApiRequest<AiSettings, "/api/v1/ai/settings", "patch">("/api/v1/ai/settings", "patch", {
+  return openApiRequest("/api/v1/ai/settings", "patch", {
     token,
     pathParams: {},
     body: payload as unknown as OpenApiJsonBody<"/api/v1/ai/settings", "patch">,
@@ -70,7 +70,7 @@ export function listAiAgents(
     includeArchived?: boolean;
   } = {},
 ) {
-  return openApiRequest<PaginatedResponse<AiAgent>, "/api/v1/ai/agents", "get">("/api/v1/ai/agents", "get", {
+  return openApiRequest("/api/v1/ai/agents", "get", {
     token,
     cache: "no-store",
     pathParams: {},
@@ -83,7 +83,7 @@ export function listAiAgents(
 }
 
 export function createAiAgent(token: string, payload: CreateAiAgentPayload) {
-  return openApiRequest<AiAgent, "/api/v1/ai/agents", "post">("/api/v1/ai/agents", "post", {
+  return openApiRequest("/api/v1/ai/agents", "post", {
     token,
     pathParams: {},
     body: payload as unknown as OpenApiJsonBody<"/api/v1/ai/agents", "post">,
@@ -91,7 +91,7 @@ export function createAiAgent(token: string, payload: CreateAiAgentPayload) {
 }
 
 export function updateAiAgent(token: string, agentId: string, payload: UpdateAiAgentPayload) {
-  return openApiRequest<AiAgent, "/api/v1/ai/agents/{agentId}", "patch">("/api/v1/ai/agents/{agentId}", "patch", {
+  return openApiRequest("/api/v1/ai/agents/{agentId}", "patch", {
     token,
     pathParams: { agentId },
     body: payload as unknown as OpenApiJsonBody<"/api/v1/ai/agents/{agentId}", "patch">,
@@ -99,21 +99,21 @@ export function updateAiAgent(token: string, agentId: string, payload: UpdateAiA
 }
 
 export function archiveAiAgent(token: string, agentId: string) {
-  return openApiRequest<AiAgent, "/api/v1/ai/agents/{agentId}/archive", "post">("/api/v1/ai/agents/{agentId}/archive", "post", {
+  return openApiRequest("/api/v1/ai/agents/{agentId}/archive", "post", {
     token,
     pathParams: { agentId },
   });
 }
 
 export function restoreAiAgent(token: string, agentId: string) {
-  return openApiRequest<AiAgent, "/api/v1/ai/agents/{agentId}/restore", "post">("/api/v1/ai/agents/{agentId}/restore", "post", {
+  return openApiRequest("/api/v1/ai/agents/{agentId}/restore", "post", {
     token,
     pathParams: { agentId },
   });
 }
 
 export function deleteAiAgent(token: string, agentId: string) {
-  return openApiRequest<{ success: boolean } | AiAgent, "/api/v1/ai/agents/{agentId}", "delete">("/api/v1/ai/agents/{agentId}", "delete", {
+  return openApiRequest("/api/v1/ai/agents/{agentId}", "delete", {
     token,
     pathParams: { agentId },
   });

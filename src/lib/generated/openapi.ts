@@ -19447,7 +19447,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        tenant: components["schemas"]["Tenant"];
+                        /** @enum {string} */
+                        section: "projects";
+                        summary: {
+                            total?: number;
+                            overdue?: number;
+                            byStatus?: {
+                                [key: string]: number;
+                            };
+                            byVisibility?: {
+                                [key: string]: number;
+                            };
+                        } & {
+                            [key: string]: unknown;
+                        };
+                        data: components["schemas"]["Project"][];
+                        meta: {
+                            page: number;
+                            limit: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
                 };
             };
         };
@@ -19472,7 +19495,23 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        tenant: components["schemas"]["Tenant"];
+                        /** @enum {string} */
+                        section: "workspaces";
+                        summary: {
+                            total?: number;
+                        } & {
+                            [key: string]: unknown;
+                        };
+                        data: components["schemas"]["Workspace"][];
+                        meta: {
+                            page: number;
+                            limit: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
                 };
             };
         };
@@ -19497,7 +19536,23 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        tenant: components["schemas"]["Tenant"];
+                        /** @enum {string} */
+                        section: "teams";
+                        summary: {
+                            total?: number;
+                        } & {
+                            [key: string]: unknown;
+                        };
+                        data: components["schemas"]["Team"][];
+                        meta: {
+                            page: number;
+                            limit: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
                 };
             };
         };
@@ -19522,7 +19577,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        tenant: components["schemas"]["Tenant"];
+                        /** @enum {string} */
+                        section: "sessions";
+                        summary: {
+                            total?: number;
+                            active?: number;
+                            revoked?: number;
+                            expired?: number;
+                        } & {
+                            [key: string]: unknown;
+                        };
+                        data: components["schemas"]["AuthSession"][];
+                        meta: {
+                            page: number;
+                            limit: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
                 };
             };
         };
@@ -19547,7 +19621,36 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        tenant: components["schemas"]["Tenant"];
+                        /** @enum {string} */
+                        section: "security";
+                        summary: {
+                            total?: number;
+                            open?: number;
+                            bySeverity?: {
+                                [key: string]: number;
+                            };
+                            byStatus?: {
+                                [key: string]: number;
+                            };
+                            apiKeys?: number;
+                            ssoProviders?: number;
+                            mfaFactors?: number;
+                            trustedDevices?: number;
+                            mfaRequired?: boolean;
+                            ssoRequired?: boolean;
+                        } & {
+                            [key: string]: unknown;
+                        };
+                        data: components["schemas"]["SecurityEvent"][];
+                        meta: {
+                            page: number;
+                            limit: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
                 };
             };
         };
@@ -19572,7 +19675,40 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        tenant: components["schemas"]["Tenant"];
+                        /** @enum {string} */
+                        section: "billing";
+                        summary: {
+                            subscriptionStatus?: string;
+                            plan?: string | null;
+                            seats?: number;
+                            invoices?: number;
+                            usageRecords?: number;
+                            billingEvents?: number;
+                        } & {
+                            [key: string]: unknown;
+                        };
+                        data: ((components["schemas"]["SiteSubscription"] & {
+                            /** @enum {string} */
+                            kind: "subscription";
+                        }) | (components["schemas"]["SiteInvoice"] & {
+                            /** @enum {string} */
+                            kind: "invoice";
+                        }) | (components["schemas"]["SiteUsageRecord"] & {
+                            /** @enum {string} */
+                            kind: "usage";
+                        }) | (components["schemas"]["SiteBillingEvent"] & {
+                            /** @enum {string} */
+                            kind: "billingEvent";
+                        }))[];
+                        meta: {
+                            page: number;
+                            limit: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
                 };
             };
         };
@@ -19597,7 +19733,40 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        tenant: components["schemas"]["Tenant"];
+                        /** @enum {string} */
+                        section: "integrations";
+                        summary: {
+                            total?: number;
+                            webhooks?: number;
+                            recentDeliveries?: number;
+                            byProvider?: {
+                                [key: string]: number;
+                            };
+                            byStatus?: {
+                                [key: string]: number;
+                            };
+                        } & {
+                            [key: string]: unknown;
+                        };
+                        data: ((components["schemas"]["Integration"] & {
+                            /** @enum {string} */
+                            kind: "integration";
+                        }) | (components["schemas"]["Webhook"] & {
+                            /** @enum {string} */
+                            kind: "webhook";
+                        }) | (components["schemas"]["WebhookDelivery"] & {
+                            /** @enum {string} */
+                            kind: "webhookDelivery";
+                        }))[];
+                        meta: {
+                            page: number;
+                            limit: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
                 };
             };
         };
@@ -19622,7 +19791,33 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        tenant: components["schemas"]["Tenant"];
+                        /** @enum {string} */
+                        section: "files";
+                        summary: {
+                            total?: number;
+                            active?: number;
+                            archived?: number;
+                            deleted?: number;
+                            bytes?: number;
+                            byScope?: {
+                                [key: string]: number;
+                            };
+                            byProvider?: {
+                                [key: string]: number;
+                            };
+                        } & {
+                            [key: string]: unknown;
+                        };
+                        data: components["schemas"]["FileAsset"][];
+                        meta: {
+                            page: number;
+                            limit: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
                 };
             };
         };
@@ -19647,7 +19842,47 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        tenant: components["schemas"]["Tenant"];
+                        /** @enum {string} */
+                        section: "ai";
+                        summary: {
+                            enabled?: boolean;
+                            agents?: number;
+                            usageLogs?: number;
+                            inputTokens?: number;
+                            outputTokens?: number;
+                            totalTokens?: number;
+                            estimatedCost?: number;
+                            byUsageStatus?: {
+                                [key: string]: number;
+                            };
+                            byActionStatus?: {
+                                [key: string]: number;
+                            };
+                            byConversationStatus?: {
+                                [key: string]: number;
+                            };
+                        } & {
+                            [key: string]: unknown;
+                        };
+                        data: ((components["schemas"]["SiteAiSettings"] & {
+                            /** @enum {string} */
+                            kind: "settings";
+                        }) | (components["schemas"]["SiteAiAgent"] & {
+                            /** @enum {string} */
+                            kind: "agent";
+                        }) | (components["schemas"]["SiteAiUsageLog"] & {
+                            /** @enum {string} */
+                            kind: "usage";
+                        }))[];
+                        meta: {
+                            page: number;
+                            limit: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
                 };
             };
         };
@@ -19672,7 +19907,44 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        tenant: components["schemas"]["Tenant"];
+                        /** @enum {string} */
+                        section: "reports";
+                        summary: {
+                            reports?: number;
+                            dashboards?: number;
+                            executions?: number;
+                            exports?: number;
+                            byReportStatus?: {
+                                [key: string]: number;
+                            };
+                            byDashboardVisibility?: {
+                                [key: string]: number;
+                            };
+                        } & {
+                            [key: string]: unknown;
+                        };
+                        data: ((components["schemas"]["SiteReport"] & {
+                            /** @enum {string} */
+                            kind: "report";
+                        }) | (components["schemas"]["SiteDashboard"] & {
+                            /** @enum {string} */
+                            kind: "dashboard";
+                        }) | (components["schemas"]["SiteReportExecution"] & {
+                            /** @enum {string} */
+                            kind: "execution";
+                        }) | (components["schemas"]["SiteReportExport"] & {
+                            /** @enum {string} */
+                            kind: "export";
+                        }))[];
+                        meta: {
+                            page: number;
+                            limit: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
                 };
             };
         };
@@ -19697,7 +19969,37 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        tenant: components["schemas"]["Tenant"];
+                        /** @enum {string} */
+                        section: "activity";
+                        summary: {
+                            tenantAuditLogs?: number;
+                            platformAuditLogs?: number;
+                            securityEvents?: number;
+                            byAction?: {
+                                [key: string]: number;
+                            };
+                        } & {
+                            [key: string]: unknown;
+                        };
+                        data: ((components["schemas"]["AuditLog"] & {
+                            /** @enum {string} */
+                            kind: "tenantAudit";
+                        }) | (components["schemas"]["PlatformAuditLog"] & {
+                            /** @enum {string} */
+                            kind: "platformAudit";
+                        }) | (components["schemas"]["SecurityEvent"] & {
+                            /** @enum {string} */
+                            kind: "securityEvent";
+                        }))[];
+                        meta: {
+                            page: number;
+                            limit: number;
+                            total: number;
+                            totalPages: number;
+                        };
+                    };
                 };
             };
         };
@@ -26266,7 +26568,15 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        notes: string;
+                        version: number;
+                        updatedAt?: string | null;
+                        updatedBy?: components["schemas"]["UserSummary"] | null;
+                        runtimeState: {
+                            [key: string]: unknown;
+                        };
+                    };
                 };
             };
         };

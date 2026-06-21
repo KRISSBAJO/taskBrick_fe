@@ -1,14 +1,8 @@
-import type {
-  DocumentFolder,
-  DocumentVersion,
-  PaginatedResponse,
-  WorkspaceDocument,
-} from "../api";
 import {
-  boundedLimit,
-  openApiRequest,
-  type OpenApiJsonBody,
-  type OpenApiQuery,
+boundedLimit,
+openApiRequest,
+type OpenApiJsonBody,
+type OpenApiQuery,
 } from "./request";
 
 type ListDocumentFoldersQuery = OpenApiQuery<"/api/v1/document-folders", "get">;
@@ -21,7 +15,7 @@ type UpdateDocumentPayload = OpenApiJsonBody<"/api/v1/documents/{documentId}", "
 type RestoreDocumentVersionPayload = OpenApiJsonBody<"/api/v1/documents/{documentId}/versions/{version}/restore", "post">;
 
 export function listDocumentFolders(token: string, query: ListDocumentFoldersQuery = {}) {
-  return openApiRequest<PaginatedResponse<DocumentFolder>, "/api/v1/document-folders", "get">("/api/v1/document-folders", "get", {
+  return openApiRequest("/api/v1/document-folders", "get", {
     token,
     cache: "no-store",
     pathParams: {},
@@ -38,7 +32,7 @@ export function getDocumentFolderTree(token: string, query: { includeArchived?: 
     ? undefined
     : ({ includeArchived: String(query.includeArchived) } as DocumentFolderTreeQuery);
 
-  return openApiRequest<DocumentFolder[], "/api/v1/document-folders/tree", "get">("/api/v1/document-folders/tree", "get", {
+  return openApiRequest("/api/v1/document-folders/tree", "get", {
     token,
     cache: "no-store",
     pathParams: {},
@@ -47,7 +41,7 @@ export function getDocumentFolderTree(token: string, query: { includeArchived?: 
 }
 
 export function createDocumentFolder(token: string, payload: CreateDocumentFolderPayload) {
-  return openApiRequest<DocumentFolder, "/api/v1/document-folders", "post">("/api/v1/document-folders", "post", {
+  return openApiRequest("/api/v1/document-folders", "post", {
     token,
     pathParams: {},
     body: payload,
@@ -55,7 +49,7 @@ export function createDocumentFolder(token: string, payload: CreateDocumentFolde
 }
 
 export function updateDocumentFolder(token: string, folderId: string, payload: UpdateDocumentFolderPayload) {
-  return openApiRequest<DocumentFolder, "/api/v1/document-folders/{folderId}", "patch">("/api/v1/document-folders/{folderId}", "patch", {
+  return openApiRequest("/api/v1/document-folders/{folderId}", "patch", {
     token,
     pathParams: { folderId },
     body: payload,
@@ -63,28 +57,28 @@ export function updateDocumentFolder(token: string, folderId: string, payload: U
 }
 
 export function archiveDocumentFolder(token: string, folderId: string) {
-  return openApiRequest<DocumentFolder, "/api/v1/document-folders/{folderId}/archive", "post">("/api/v1/document-folders/{folderId}/archive", "post", {
+  return openApiRequest("/api/v1/document-folders/{folderId}/archive", "post", {
     token,
     pathParams: { folderId },
   });
 }
 
 export function restoreDocumentFolder(token: string, folderId: string) {
-  return openApiRequest<DocumentFolder, "/api/v1/document-folders/{folderId}/restore", "post">("/api/v1/document-folders/{folderId}/restore", "post", {
+  return openApiRequest("/api/v1/document-folders/{folderId}/restore", "post", {
     token,
     pathParams: { folderId },
   });
 }
 
 export function deleteDocumentFolder(token: string, folderId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/document-folders/{folderId}", "delete">("/api/v1/document-folders/{folderId}", "delete", {
+  return openApiRequest("/api/v1/document-folders/{folderId}", "delete", {
     token,
     pathParams: { folderId },
   });
 }
 
 export function listDocuments(token: string, query: ListDocumentsQuery = {}) {
-  return openApiRequest<PaginatedResponse<WorkspaceDocument>, "/api/v1/documents", "get">("/api/v1/documents", "get", {
+  return openApiRequest("/api/v1/documents", "get", {
     token,
     cache: "no-store",
     pathParams: {},
@@ -97,7 +91,7 @@ export function listDocuments(token: string, query: ListDocumentsQuery = {}) {
 }
 
 export function createDocument(token: string, payload: CreateDocumentPayload) {
-  return openApiRequest<WorkspaceDocument, "/api/v1/documents", "post">("/api/v1/documents", "post", {
+  return openApiRequest("/api/v1/documents", "post", {
     token,
     pathParams: {},
     body: payload,
@@ -105,7 +99,7 @@ export function createDocument(token: string, payload: CreateDocumentPayload) {
 }
 
 export function getDocument(token: string, documentId: string) {
-  return openApiRequest<WorkspaceDocument, "/api/v1/documents/{documentId}", "get">("/api/v1/documents/{documentId}", "get", {
+  return openApiRequest("/api/v1/documents/{documentId}", "get", {
     token,
     cache: "no-store",
     pathParams: { documentId },
@@ -113,7 +107,7 @@ export function getDocument(token: string, documentId: string) {
 }
 
 export function updateDocument(token: string, documentId: string, payload: UpdateDocumentPayload) {
-  return openApiRequest<WorkspaceDocument, "/api/v1/documents/{documentId}", "patch">("/api/v1/documents/{documentId}", "patch", {
+  return openApiRequest("/api/v1/documents/{documentId}", "patch", {
     token,
     pathParams: { documentId },
     body: payload,
@@ -121,35 +115,35 @@ export function updateDocument(token: string, documentId: string, payload: Updat
 }
 
 export function publishDocument(token: string, documentId: string) {
-  return openApiRequest<WorkspaceDocument, "/api/v1/documents/{documentId}/publish", "post">("/api/v1/documents/{documentId}/publish", "post", {
+  return openApiRequest("/api/v1/documents/{documentId}/publish", "post", {
     token,
     pathParams: { documentId },
   });
 }
 
 export function archiveDocument(token: string, documentId: string) {
-  return openApiRequest<WorkspaceDocument, "/api/v1/documents/{documentId}/archive", "post">("/api/v1/documents/{documentId}/archive", "post", {
+  return openApiRequest("/api/v1/documents/{documentId}/archive", "post", {
     token,
     pathParams: { documentId },
   });
 }
 
 export function restoreDocument(token: string, documentId: string) {
-  return openApiRequest<WorkspaceDocument, "/api/v1/documents/{documentId}/restore", "post">("/api/v1/documents/{documentId}/restore", "post", {
+  return openApiRequest("/api/v1/documents/{documentId}/restore", "post", {
     token,
     pathParams: { documentId },
   });
 }
 
 export function hardDeleteDocument(token: string, documentId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/documents/{documentId}/hard-delete", "delete">("/api/v1/documents/{documentId}/hard-delete", "delete", {
+  return openApiRequest("/api/v1/documents/{documentId}/hard-delete", "delete", {
     token,
     pathParams: { documentId },
   });
 }
 
 export function listDocumentVersions(token: string, documentId: string) {
-  return openApiRequest<DocumentVersion[], "/api/v1/documents/{documentId}/versions", "get">("/api/v1/documents/{documentId}/versions", "get", {
+  return openApiRequest("/api/v1/documents/{documentId}/versions", "get", {
     token,
     cache: "no-store",
     pathParams: { documentId },
@@ -162,7 +156,7 @@ export function restoreDocumentVersion(
   version: number,
   payload: RestoreDocumentVersionPayload = {},
 ) {
-  return openApiRequest<WorkspaceDocument, "/api/v1/documents/{documentId}/versions/{version}/restore", "post">("/api/v1/documents/{documentId}/versions/{version}/restore", "post", {
+  return openApiRequest("/api/v1/documents/{documentId}/versions/{version}/restore", "post", {
     token,
     pathParams: { documentId, version: String(version) },
     body: payload,

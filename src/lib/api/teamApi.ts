@@ -1,9 +1,8 @@
-import type { PaginatedResponse, Team, TeamMember } from "../api";
 import {
-  boundedLimit,
-  openApiRequest,
-  type OpenApiJsonBody,
-  type OpenApiQuery,
+boundedLimit,
+openApiRequest,
+type OpenApiJsonBody,
+type OpenApiQuery,
 } from "./request";
 
 type ListTeamsQuery = OpenApiQuery<"/api/v1/teams", "get">;
@@ -12,7 +11,7 @@ type AddTeamMemberPayload = OpenApiJsonBody<"/api/v1/teams/{teamId}/members", "p
 type InviteTeamMemberPayload = OpenApiJsonBody<"/api/v1/teams/{teamId}/invite", "post">;
 
 export function listTeams(token: string, query: ListTeamsQuery = {}) {
-  return openApiRequest<PaginatedResponse<Team>, "/api/v1/teams", "get">("/api/v1/teams", "get", {
+  return openApiRequest("/api/v1/teams", "get", {
     token,
     cache: "no-store",
     pathParams: {},
@@ -25,7 +24,7 @@ export function listTeams(token: string, query: ListTeamsQuery = {}) {
 }
 
 export function createTeam(token: string, payload: CreateTeamPayload) {
-  return openApiRequest<Team, "/api/v1/teams", "post">("/api/v1/teams", "post", {
+  return openApiRequest("/api/v1/teams", "post", {
     token,
     pathParams: {},
     body: payload,
@@ -33,7 +32,7 @@ export function createTeam(token: string, payload: CreateTeamPayload) {
 }
 
 export function listTeamMembers(token: string, teamId: string) {
-  return openApiRequest<TeamMember[], "/api/v1/teams/{teamId}/members", "get">("/api/v1/teams/{teamId}/members", "get", {
+  return openApiRequest("/api/v1/teams/{teamId}/members", "get", {
     token,
     cache: "no-store",
     pathParams: { teamId },
@@ -41,7 +40,7 @@ export function listTeamMembers(token: string, teamId: string) {
 }
 
 export function addTeamMember(token: string, teamId: string, payload: AddTeamMemberPayload) {
-  return openApiRequest<TeamMember, "/api/v1/teams/{teamId}/members", "post">("/api/v1/teams/{teamId}/members", "post", {
+  return openApiRequest("/api/v1/teams/{teamId}/members", "post", {
     token,
     pathParams: { teamId },
     body: payload,
@@ -49,7 +48,7 @@ export function addTeamMember(token: string, teamId: string, payload: AddTeamMem
 }
 
 export function updateTeamMemberRole(token: string, teamId: string, userId: string, role?: string) {
-  return openApiRequest<TeamMember, "/api/v1/teams/{teamId}/members", "post">("/api/v1/teams/{teamId}/members", "post", {
+  return openApiRequest("/api/v1/teams/{teamId}/members", "post", {
     token,
     pathParams: { teamId },
     body: { userId, role },
@@ -57,14 +56,14 @@ export function updateTeamMemberRole(token: string, teamId: string, userId: stri
 }
 
 export function removeTeamMember(token: string, teamId: string, userId: string) {
-  return openApiRequest<{ success: boolean }, "/api/v1/teams/{teamId}/members/{userId}", "delete">("/api/v1/teams/{teamId}/members/{userId}", "delete", {
+  return openApiRequest("/api/v1/teams/{teamId}/members/{userId}", "delete", {
     token,
     pathParams: { teamId, userId },
   });
 }
 
 export function inviteTeamMember(token: string, teamId: string, payload: InviteTeamMemberPayload) {
-  return openApiRequest<TeamMember, "/api/v1/teams/{teamId}/invite", "post">("/api/v1/teams/{teamId}/invite", "post", {
+  return openApiRequest("/api/v1/teams/{teamId}/invite", "post", {
     token,
     pathParams: { teamId },
     body: payload,
