@@ -4209,18 +4209,192 @@ export {
   updateWebhook,
   updateWorkflow,
 } from "./api/integrationWorkflowApi";
+export {
+  archiveAiAgent,
+  createAiAgent,
+  deleteAiAgent,
+  getAiSettings,
+  listAiAgents,
+  restoreAiAgent,
+  updateAiAgent,
+  updateAiSettings,
+} from "./api/aiApi";
+export {
+  createBillingCheckout,
+  createBillingPortal,
+  cancelTenantSubscription,
+  changeTenantSubscriptionPlan,
+  getBillingAccountStatus,
+  getCurrentTenantSubscription,
+  getTenantEntitlements,
+  getTenantUsageSummary,
+  listBillingPlans,
+  listTenantInvoices,
+  listTenantUsageRecords,
+  resumeTenantSubscription,
+  startTenantBillingTrial,
+} from "./api/billingApi";
+export {
+  addConversationMember,
+  addMessageReaction,
+  createConversation,
+  deleteConversation,
+  deleteMessage,
+  forwardMessage,
+  getConversation,
+  listConversationMembers,
+  listConversations,
+  listMessageReadReceipts,
+  listMessages,
+  listPinnedMessages,
+  markMessageRead,
+  pinMessage,
+  removeConversationMember,
+  removeMessageReaction,
+  sendMessage,
+  unpinMessage,
+  updateConversation,
+  updateMessage,
+} from "./api/conversationApi";
+export {
+  createReport,
+  exportSavedReport,
+  getAnalyticsOverview,
+  getBudgetAnalytics,
+  getCycleTimeAnalytics,
+  getProjectHealthAnalytics,
+  getSlaAnalytics,
+  getTeamPerformanceAnalytics,
+  getVelocityAnalytics,
+  listReportExecutions,
+  listReportExports,
+  listReports,
+  runAdHocReport,
+  runSavedReport,
+} from "./api/reportingApi";
+export {
+  approveComplianceJob,
+  cancelComplianceJob,
+  createApiKey,
+  createComplianceJob,
+  getAdminOverview,
+  getSecurityChecks,
+  getSecurityPolicy,
+  listApiKeys,
+  listAuditLogs,
+  listComplianceJobs,
+  listSecurityEvents,
+  rejectComplianceJob,
+  revokeApiKey,
+  runComplianceJob,
+  updateSecurityEvent,
+  updateSecurityPolicy,
+} from "./api/adminSecurityApi";
+export {
+  assignSiteBillingPlanFeature,
+  archiveSiteBillingPlan,
+  cancelSiteSubscription,
+  changeSiteSubscriptionPlan,
+  createSiteBillingFeature,
+  createSiteBillingPlan,
+  getSiteBillingOverview,
+  listSiteBillingEntitlements,
+  listSiteBillingEvents,
+  listSiteBillingFeatures,
+  listSiteBillingInvoices,
+  listSiteBillingPlans,
+  listSiteBillingSubscriptions,
+  listSiteBillingUsageRecords,
+  removeSiteBillingPlanFeature,
+  restoreSiteBillingPlan,
+  resumeSiteSubscription,
+  setSiteBillingFeatureActive,
+  startSiteTenantTrial,
+  syncSiteBillingPlanToStripe,
+  updateSiteBillingFeature,
+  updateSiteBillingPlan,
+  updateSiteBillingPlanFeature,
+  updateSiteSubscription,
+} from "./api/siteAdminBillingApi";
+export {
+  getSiteIdentitySecurityOverview,
+  listSiteLoginHistory,
+  listSiteSecurityPolicies,
+  listSiteSessions,
+  listSiteSsoProviders,
+  listSiteTrustedDevices,
+  revokeSiteSession,
+  revokeSiteTrustedDevice,
+  sendSiteAdminPasswordReset,
+} from "./api/siteAdminIdentityApi";
+export {
+  getSiteAdminOverview,
+  getSiteAdminProfile,
+  getSiteHardeningOverview,
+  getSiteTenant,
+  getSiteUser,
+  grantPlatformAdmin,
+  listPlatformAdmins,
+  listPlatformAuditLogs,
+  listSiteSecurityEvents,
+  listSiteTenantResource,
+  listSiteTenants,
+  listSiteTenantUsers,
+  listSiteUsers,
+  resendSiteUserVerification,
+  revokePlatformAdmin,
+  revokeSiteUserSessions,
+  updateSiteSecurityEvent,
+  updateSiteTenantStatus,
+  updateSiteUserStatus,
+} from "./api/siteAdminCoreApi";
+export {
+  approveSiteComplianceJob,
+  cancelSiteComplianceJob,
+  getSiteAutomationOverview,
+  getSiteComplianceOverview,
+  getSiteIntegrationsOverview,
+  getSiteMeetingOverview,
+  getSiteObservabilityOverview,
+  getSiteRealtimeOverview,
+  listSiteApprovalDefinitions,
+  listSiteApprovals,
+  listSiteComplianceJobs,
+  listSiteConversations,
+  listSiteIntegrations,
+  listSiteMeetingReminderLogs,
+  listSiteMeetingTenants,
+  listSiteMessageActivity,
+  listSiteWebhookDeliveries,
+  listSiteWebhooks,
+  listSiteWorkflowRunLogs,
+  listSiteWorkflowRuns,
+  listSiteWorkflows,
+  rejectSiteComplianceJob,
+  retrySiteWebhookDelivery,
+  retrySiteWorkflowRun,
+  rotateSiteIntegrationSecret,
+  rotateSiteWebhookSecret,
+  runSiteComplianceJob,
+  sitePlatformSearch,
+  cancelSiteWorkflowRun,
+} from "./api/siteAdminOperationsApi";
+export {
+  getSiteAiOverview,
+  getSiteReportingOverview,
+  listSiteAiActions,
+  listSiteAiAgents,
+  listSiteAiConversations,
+  listSiteAiSettings,
+  listSiteAiUsage,
+  listSiteDashboards,
+  listSiteReportExecutions,
+  listSiteReportExports,
+  listSiteReports,
+} from "./api/siteAdminAiReportingApi";
 
 function boundedLimit(value: number | undefined, fallback = 50) {
   return Math.min(Math.max(value ?? fallback, 1), 100);
-}
-
-function siteParams(query: { page?: number; limit?: number; search?: string }, fallback = 30) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, fallback)),
-  });
-  if (query.search) params.set("search", query.search);
-  return params;
 }
 
 export function listMeetingTypes(
@@ -4944,10 +5118,15 @@ export function getProject(token: string, projectId: string) {
 }
 
 export function getProjectPermissions(token: string, projectId: string) {
-  return apiRequest<ProjectPermissionMatrix>(`/projects/${projectId}/permissions`, {
-    token,
-    cache: "no-store",
-  });
+  return openApiRequest<ProjectPermissionMatrix, "/api/v1/projects/{projectId}/permissions", "get">(
+    "/api/v1/projects/{projectId}/permissions",
+    "get",
+    {
+      pathParams: { projectId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function updateProject(
@@ -4967,10 +5146,14 @@ export function updateProject(
 }
 
 export function deleteProject(token: string, projectId: string) {
-  return apiRequest<{ success: boolean }>(`/projects/${projectId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}", "delete">(
+    "/api/v1/projects/{projectId}",
+    "delete",
+    {
+      pathParams: { projectId },
+      token,
+    },
+  );
 }
 
 export function listProjectMembers(token: string, projectId: string) {
@@ -6215,1943 +6398,4 @@ export function removeSprintTask(token: string, sprintId: string, taskId: string
       token,
     },
   );
-}
-
-export function getAiSettings(token: string) {
-  return apiRequest<AiSettings>("/ai/settings", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function updateAiSettings(token: string, payload: Partial<Pick<
-  AiSettings,
-  | "enabled"
-  | "defaultProvider"
-  | "defaultModel"
-  | "allowedProviders"
-  | "monthlyTokenLimit"
-  | "monthlyCostLimit"
-  | "redactSensitiveData"
-  | "dataRetentionDays"
->> & { policy?: unknown }) {
-  return apiRequest<AiSettings>("/ai/settings", {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function listAiAgents(
-  token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    provider?: string;
-    type?: string;
-    enabled?: boolean;
-    includeArchived?: boolean;
-  } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.provider) params.set("provider", query.provider);
-  if (query.type) params.set("type", query.type);
-  if (query.enabled !== undefined) params.set("enabled", String(query.enabled));
-  if (query.includeArchived !== undefined) params.set("includeArchived", String(query.includeArchived));
-
-  return apiRequest<PaginatedResponse<AiAgent>>(`/ai/agents?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createAiAgent(
-  token: string,
-  payload: {
-    name: string;
-    description?: string;
-    type?: string;
-    provider?: string;
-    model?: string;
-    systemPrompt?: string;
-    temperature?: number;
-    maxOutputTokens?: number;
-    tools?: string[];
-    guardrails?: unknown;
-    knowledgeScope?: unknown;
-    enabled?: boolean;
-  },
-) {
-  return apiRequest<AiAgent>("/ai/agents", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function updateAiAgent(
-  token: string,
-  agentId: string,
-  payload: Partial<Pick<
-    AiAgent,
-    | "name"
-    | "description"
-    | "type"
-    | "provider"
-    | "model"
-    | "systemPrompt"
-    | "temperature"
-    | "maxOutputTokens"
-    | "tools"
-    | "guardrails"
-    | "knowledgeScope"
-    | "enabled"
-  >>,
-) {
-  return apiRequest<AiAgent>(`/ai/agents/${agentId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function archiveAiAgent(token: string, agentId: string) {
-  return apiRequest<AiAgent>(`/ai/agents/${agentId}/archive`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function restoreAiAgent(token: string, agentId: string) {
-  return apiRequest<AiAgent>(`/ai/agents/${agentId}/restore`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function deleteAiAgent(token: string, agentId: string) {
-  return apiRequest<{ success: boolean } | AiAgent>(`/ai/agents/${agentId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function listAuditLogs(
-  token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    action?: string;
-    actorId?: string;
-    entityType?: string;
-    entityId?: string;
-    ipAddress?: string;
-    from?: string;
-    to?: string;
-  } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(query.limit ?? 50),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.action) params.set("action", query.action);
-  if (query.actorId) params.set("actorId", query.actorId);
-  if (query.entityType) params.set("entityType", query.entityType);
-  if (query.entityId) params.set("entityId", query.entityId);
-  if (query.ipAddress) params.set("ipAddress", query.ipAddress);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-
-  return apiRequest<MetaPaginatedResponse<AuditLog>>(`/admin/audit-logs?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getAdminOverview(token: string) {
-  return apiRequest<AdminOverview>("/admin/overview", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getSiteAdminProfile(token: string) {
-  return apiRequest<SiteAdminProfile>("/site-admin/me", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getSiteAdminOverview(token: string) {
-  return apiRequest<SiteAdminOverview>("/site-admin/overview", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getSiteIdentitySecurityOverview(token: string) {
-  return apiRequest<SiteIdentitySecurityOverview>("/site-admin/identity-security/overview", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteLoginHistory(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; userId?: string; ipAddress?: string; method?: string; status?: string; suspicious?: boolean } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.userId) params.set("userId", query.userId);
-  if (query.ipAddress) params.set("ipAddress", query.ipAddress);
-  if (query.method) params.set("method", query.method);
-  if (query.status) params.set("status", query.status);
-  if (query.suspicious !== undefined) params.set("suspicious", String(query.suspicious));
-  return apiRequest<MetaPaginatedResponse<SiteLoginHistory>>(`/site-admin/identity-security/login-history?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteTrustedDevices(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; userId?: string; ipAddress?: string; status?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.userId) params.set("userId", query.userId);
-  if (query.ipAddress) params.set("ipAddress", query.ipAddress);
-  if (query.status) params.set("status", query.status);
-  return apiRequest<MetaPaginatedResponse<SiteTrustedDevice>>(`/site-admin/identity-security/trusted-devices?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function revokeSiteTrustedDevice(token: string, deviceId: string, payload: { reason?: string } = {}) {
-  return apiRequest<SiteTrustedDevice>(`/site-admin/identity-security/trusted-devices/${deviceId}/revoke`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function listSiteSsoProviders(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; status?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.status) params.set("status", query.status);
-  return apiRequest<MetaPaginatedResponse<SiteSsoProvider>>(`/site-admin/identity-security/sso-providers?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteSecurityPolicies(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  return apiRequest<MetaPaginatedResponse<SiteSecurityPolicy>>(`/site-admin/identity-security/policies?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function sendSiteAdminPasswordReset(token: string, userId: string) {
-  return apiRequest<{
-    success: boolean;
-    sent: boolean;
-    provider?: string;
-    skipped?: boolean;
-    message: string;
-    devLink?: string;
-  }>(`/site-admin/identity-security/users/${userId}/password-reset`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function listSiteSessions(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; userId?: string; ipAddress?: string; device?: string; authMethod?: string; active?: boolean } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.userId) params.set("userId", query.userId);
-  if (query.ipAddress) params.set("ipAddress", query.ipAddress);
-  if (query.device) params.set("device", query.device);
-  if (query.authMethod) params.set("authMethod", query.authMethod);
-  if (query.active !== undefined) params.set("active", String(query.active));
-  return apiRequest<SiteSessionsResponse>(`/site-admin/sessions?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function revokeSiteSession(token: string, sessionId: string, payload: { reason?: string } = {}) {
-  return apiRequest<SiteSession>(`/site-admin/sessions/${sessionId}/revoke`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function getBillingAccountStatus(token: string) {
-  return apiRequest<BillingAccountStatus>("/billing/account", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listBillingPlans(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; interval?: string; currency?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.interval) params.set("interval", query.interval);
-  if (query.currency) params.set("currency", query.currency);
-  return apiRequest<PaginatedResponse<BillingPlan>>(`/plans?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getCurrentTenantSubscription(token: string) {
-  return apiRequest<SiteSubscription | null>("/subscriptions/current", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function startTenantBillingTrial(token: string, payload: { planId: string; seatCount?: number }) {
-  return apiRequest<SiteSubscription>("/billing/trial", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function createBillingCheckout(
-  token: string,
-  payload: {
-    planId: string;
-    seatCount?: number;
-    successUrl?: string;
-    cancelUrl?: string;
-    provider?: "stripe" | "paystack" | "local";
-  },
-) {
-  return apiRequest<BillingCheckoutSession>("/billing/checkout", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function createBillingPortal(token: string, payload: { returnUrl?: string } = {}) {
-  return apiRequest<BillingPortalSession>("/billing/portal", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function changeTenantSubscriptionPlan(
-  token: string,
-  subscriptionId: string,
-  payload: { planId: string; prorate?: boolean },
-) {
-  return apiRequest<SiteSubscription>(`/subscriptions/${subscriptionId}/change-plan`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function cancelTenantSubscription(token: string, subscriptionId: string) {
-  return apiRequest<SiteSubscription>(`/subscriptions/${subscriptionId}/cancel`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function resumeTenantSubscription(token: string, subscriptionId: string) {
-  return apiRequest<SiteSubscription>(`/subscriptions/${subscriptionId}/resume`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function listTenantInvoices(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; status?: string; subscriptionId?: string } = {},
-) {
-  const params = siteParams(query, 20);
-  if (query.status) params.set("status", query.status);
-  if (query.subscriptionId) params.set("subscriptionId", query.subscriptionId);
-  return apiRequest<PaginatedResponse<BillingInvoice>>(`/invoices?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getTenantEntitlements(token: string) {
-  return apiRequest<BillingEntitlements>("/entitlements", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listTenantUsageRecords(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; featureKey?: string; from?: string; to?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.featureKey) params.set("featureKey", query.featureKey);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  return apiRequest<PaginatedResponse<BillingUsageRecord>>(`/usage-records?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getTenantUsageSummary(
-  token: string,
-  query: { featureKey?: string; from?: string; to?: string } = {},
-) {
-  const params = new URLSearchParams();
-  if (query.featureKey) params.set("featureKey", query.featureKey);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  const suffix = params.toString();
-  return apiRequest<BillingUsageSummary>(`/usage-records/summary${suffix ? `?${suffix}` : ""}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getSiteBillingOverview(token: string) {
-  return apiRequest<SiteBillingOverview>("/site-admin/billing/overview", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteBillingPlans(token: string, query: { page?: number; limit?: number; search?: string } = {}) {
-  return apiRequest<MetaPaginatedResponse<SiteBillingPlan>>(`/site-admin/billing/plans?${siteParams(query, 30).toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createSiteBillingPlan(token: string, payload: SiteBillingPlanPayload) {
-  return apiRequest<SiteBillingPlan>("/site-admin/billing/plans", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function updateSiteBillingPlan(token: string, planId: string, payload: Partial<SiteBillingPlanPayload>) {
-  return apiRequest<SiteBillingPlan>(`/site-admin/billing/plans/${planId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function archiveSiteBillingPlan(token: string, planId: string) {
-  return apiRequest<SiteBillingPlan>(`/site-admin/billing/plans/${planId}/archive`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function restoreSiteBillingPlan(token: string, planId: string) {
-  return apiRequest<SiteBillingPlan>(`/site-admin/billing/plans/${planId}/restore`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function syncSiteBillingPlanToStripe(token: string, planId: string) {
-  return apiRequest<SiteBillingPlan>(`/site-admin/billing/plans/${planId}/sync/stripe`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function assignSiteBillingPlanFeature(token: string, planId: string, payload: SitePlanFeaturePayload) {
-  return apiRequest<SiteBillingPlan>(`/site-admin/billing/plans/${planId}/features`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function updateSiteBillingPlanFeature(
-  token: string,
-  planId: string,
-  featureId: string,
-  payload: Omit<Partial<SitePlanFeaturePayload>, "featureId">,
-) {
-  return apiRequest<SiteBillingPlan>(`/site-admin/billing/plans/${planId}/features/${featureId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function removeSiteBillingPlanFeature(token: string, planId: string, featureId: string) {
-  return apiRequest<SiteBillingPlan>(`/site-admin/billing/plans/${planId}/features/${featureId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function listSiteBillingFeatures(token: string, query: { page?: number; limit?: number; search?: string } = {}) {
-  return apiRequest<MetaPaginatedResponse<SiteBillingFeature>>(`/site-admin/billing/features?${siteParams(query, 50).toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createSiteBillingFeature(token: string, payload: SiteBillingFeaturePayload) {
-  return apiRequest<SiteBillingFeature>("/site-admin/billing/features", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function updateSiteBillingFeature(token: string, featureId: string, payload: Partial<SiteBillingFeaturePayload>) {
-  return apiRequest<SiteBillingFeature>(`/site-admin/billing/features/${featureId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function setSiteBillingFeatureActive(token: string, featureId: string, isActive: boolean) {
-  return apiRequest<SiteBillingFeature>(`/site-admin/billing/features/${featureId}/${isActive ? "enable" : "disable"}`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function listSiteBillingSubscriptions(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; status?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.status) params.set("status", query.status);
-  return apiRequest<MetaPaginatedResponse<SiteSubscription>>(`/site-admin/billing/subscriptions?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function updateSiteSubscription(
-  token: string,
-  subscriptionId: string,
-  payload: { status?: string; planId?: string; seatCount?: number; cancelAtPeriodEnd?: boolean; trialEndsAt?: string; reason?: string },
-) {
-  return apiRequest<SiteSubscription>(`/site-admin/billing/subscriptions/${subscriptionId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function changeSiteSubscriptionPlan(token: string, subscriptionId: string, payload: { planId: string; reason?: string }) {
-  return apiRequest<SiteSubscription>(`/site-admin/billing/subscriptions/${subscriptionId}/change-plan`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function cancelSiteSubscription(token: string, subscriptionId: string, payload: { reason?: string } = {}) {
-  return apiRequest<SiteSubscription>(`/site-admin/billing/subscriptions/${subscriptionId}/cancel`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function resumeSiteSubscription(token: string, subscriptionId: string, payload: { reason?: string } = {}) {
-  return apiRequest<SiteSubscription>(`/site-admin/billing/subscriptions/${subscriptionId}/resume`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function startSiteTenantTrial(token: string, tenantId: string, payload: { planId: string; reason?: string }) {
-  return apiRequest<SiteSubscription>(`/site-admin/billing/tenants/${tenantId}/start-trial`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function listSiteBillingInvoices(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  return apiRequest<MetaPaginatedResponse<SiteInvoice>>(`/site-admin/billing/invoices?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteBillingUsageRecords(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  return apiRequest<MetaPaginatedResponse<SiteUsageRecord>>(`/site-admin/billing/usage-records?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteBillingEvents(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; provider?: string; type?: string; status?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.provider) params.set("provider", query.provider);
-  if (query.type) params.set("type", query.type);
-  if (query.status) params.set("status", query.status);
-  return apiRequest<MetaPaginatedResponse<SiteBillingEvent>>(`/site-admin/billing/events?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteBillingEntitlements(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  return apiRequest<MetaPaginatedResponse<SiteBillingEntitlement>>(`/site-admin/billing/entitlements?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getSiteIntegrationsOverview(token: string) {
-  return apiRequest<SiteIntegrationsOverview>("/site-admin/integrations/overview", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteIntegrations(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; provider?: string; status?: string; enabled?: boolean } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.provider) params.set("provider", query.provider);
-  if (query.status) params.set("status", query.status);
-  if (query.enabled !== undefined) params.set("enabled", String(query.enabled));
-  return apiRequest<MetaPaginatedResponse<SiteIntegration>>(`/site-admin/integrations?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function rotateSiteIntegrationSecret(token: string, integrationId: string, payload: { key?: string; value?: string; reason?: string } = {}) {
-  return apiRequest<{ integration: SiteIntegration; generatedSecret?: string }>(`/site-admin/integrations/${integrationId}/rotate-secret`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function listSiteWebhooks(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; enabled?: boolean } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.enabled !== undefined) params.set("enabled", String(query.enabled));
-  return apiRequest<MetaPaginatedResponse<SiteWebhook>>(`/site-admin/webhooks?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteWebhookDeliveries(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; webhookId?: string; status?: string; eventType?: string; from?: string; to?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.webhookId) params.set("webhookId", query.webhookId);
-  if (query.status) params.set("status", query.status);
-  if (query.eventType) params.set("eventType", query.eventType);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  return apiRequest<MetaPaginatedResponse<SiteWebhookDelivery>>(`/site-admin/webhook-deliveries?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function retrySiteWebhookDelivery(token: string, deliveryId: string) {
-  return apiRequest<SiteWebhookDelivery>(`/site-admin/webhook-deliveries/${deliveryId}/retry`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function rotateSiteWebhookSecret(token: string, webhookId: string, payload: { value?: string; reason?: string } = {}) {
-  return apiRequest<SiteWebhook & { signingSecret?: string }>(`/site-admin/webhooks/${webhookId}/rotate-secret`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function getSiteObservabilityOverview(token: string) {
-  return apiRequest<SiteObservabilityOverview>("/site-admin/observability/overview", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getSiteRealtimeOverview(token: string) {
-  return apiRequest<SiteRealtimeOverview>("/site-admin/realtime/overview", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteConversations(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; conversationId?: string; userId?: string; from?: string; to?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.conversationId) params.set("conversationId", query.conversationId);
-  if (query.userId) params.set("userId", query.userId);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  return apiRequest<MetaPaginatedResponse<SiteConversationMetadata>>(`/site-admin/realtime/conversations?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteMessageActivity(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; conversationId?: string; userId?: string; from?: string; to?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.conversationId) params.set("conversationId", query.conversationId);
-  if (query.userId) params.set("userId", query.userId);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  return apiRequest<MetaPaginatedResponse<SiteMessageActivity>>(`/site-admin/realtime/message-activity?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getSiteMeetingOverview(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; status?: MeetingStatus; from?: string; to?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.status) params.set("status", query.status);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  return apiRequest<SiteMeetingOperationsOverview>(`/site-admin/meetings/overview?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteMeetingTenants(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; status?: MeetingStatus; from?: string; to?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.status) params.set("status", query.status);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  return apiRequest<MetaPaginatedResponse<SiteMeetingTenantPosture>>(`/site-admin/meetings/tenants?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteMeetingReminderLogs(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; status?: MeetingReminderJobStatus; from?: string; to?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.status) params.set("status", query.status);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  return apiRequest<MetaPaginatedResponse<SiteMeetingReminderLog>>(`/site-admin/meetings/reminder-logs?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getSiteComplianceOverview(token: string) {
-  return apiRequest<SiteComplianceOverview>("/site-admin/compliance/overview", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteComplianceJobs(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; type?: ComplianceJobType; status?: ComplianceJobStatus; subjectType?: string; subjectId?: string; from?: string; to?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.type) params.set("type", query.type);
-  if (query.status) params.set("status", query.status);
-  if (query.subjectType) params.set("subjectType", query.subjectType);
-  if (query.subjectId) params.set("subjectId", query.subjectId);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  return apiRequest<MetaPaginatedResponse<SiteComplianceJob>>(`/site-admin/compliance/jobs?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function approveSiteComplianceJob(token: string, jobId: string, payload: { reason?: string } = {}) {
-  return apiRequest<SiteComplianceJob>(`/site-admin/compliance/jobs/${jobId}/approve`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function rejectSiteComplianceJob(token: string, jobId: string, payload: { reason?: string } = {}) {
-  return apiRequest<SiteComplianceJob>(`/site-admin/compliance/jobs/${jobId}/reject`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function runSiteComplianceJob(token: string, jobId: string) {
-  return apiRequest<SiteComplianceJob>(`/site-admin/compliance/jobs/${jobId}/run`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function cancelSiteComplianceJob(token: string, jobId: string, payload: { reason?: string } = {}) {
-  return apiRequest<SiteComplianceJob>(`/site-admin/compliance/jobs/${jobId}/cancel`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function sitePlatformSearch(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; category?: SitePlatformSearchCategory; tenantId?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.category) params.set("category", query.category);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  return apiRequest<SitePlatformSearchResponse>(`/site-admin/search?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getSiteAutomationOverview(token: string) {
-  return apiRequest<SiteAutomationOverview>("/site-admin/automation/overview", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteWorkflows(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; entityType?: string; triggerType?: string; active?: boolean } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.entityType) params.set("entityType", query.entityType);
-  if (query.triggerType) params.set("triggerType", query.triggerType);
-  if (query.active !== undefined) params.set("active", String(query.active));
-  return apiRequest<MetaPaginatedResponse<SiteWorkflow>>(`/site-admin/automation/workflows?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteWorkflowRuns(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; workflowId?: string; runId?: string; status?: WorkflowRunStatus; from?: string; to?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.workflowId) params.set("workflowId", query.workflowId);
-  if (query.runId) params.set("runId", query.runId);
-  if (query.status) params.set("status", query.status);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  return apiRequest<MetaPaginatedResponse<SiteWorkflowRun>>(`/site-admin/automation/runs?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function retrySiteWorkflowRun(token: string, runId: string) {
-  return apiRequest<SiteWorkflowRun>(`/site-admin/automation/runs/${runId}/retry`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function cancelSiteWorkflowRun(token: string, runId: string) {
-  return apiRequest<SiteWorkflowRun>(`/site-admin/automation/runs/${runId}/cancel`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function listSiteApprovalDefinitions(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; entityType?: string; status?: ApprovalStatus } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.entityType) params.set("entityType", query.entityType);
-  if (query.status) params.set("status", query.status);
-  return apiRequest<MetaPaginatedResponse<SiteApprovalDefinition>>(`/site-admin/automation/approval-definitions?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteApprovals(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; entityType?: string; status?: ApprovalStatus } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.entityType) params.set("entityType", query.entityType);
-  if (query.status) params.set("status", query.status);
-  return apiRequest<MetaPaginatedResponse<SiteApproval>>(`/site-admin/automation/approvals?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteWorkflowRunLogs(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; workflowId?: string; runId?: string; status?: WorkflowRunStatus; from?: string; to?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.workflowId) params.set("workflowId", query.workflowId);
-  if (query.runId) params.set("runId", query.runId);
-  if (query.status) params.set("status", query.status);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  return apiRequest<MetaPaginatedResponse<SiteWorkflowRunLog>>(`/site-admin/automation/run-logs?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getSiteAiOverview(token: string) {
-  return apiRequest<SiteAiOverview>("/site-admin/ai/overview", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteAiSettings(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; provider?: string; enabled?: boolean } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.provider) params.set("provider", query.provider);
-  if (query.enabled !== undefined) params.set("enabled", String(query.enabled));
-  return apiRequest<MetaPaginatedResponse<SiteAiSettings>>(`/site-admin/ai/settings?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteAiAgents(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; provider?: string; model?: string; enabled?: boolean } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.provider) params.set("provider", query.provider);
-  if (query.model) params.set("model", query.model);
-  if (query.enabled !== undefined) params.set("enabled", String(query.enabled));
-  return apiRequest<MetaPaginatedResponse<SiteAiAgent>>(`/site-admin/ai/agents?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteAiConversations(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; agentId?: string; status?: AiConversationStatus } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.agentId) params.set("agentId", query.agentId);
-  if (query.status) params.set("status", query.status);
-  return apiRequest<MetaPaginatedResponse<SiteAiConversation>>(`/site-admin/ai/conversations?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteAiActions(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; agentId?: string; type?: string; status?: AiActionStatus } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.agentId) params.set("agentId", query.agentId);
-  if (query.type) params.set("type", query.type);
-  if (query.status) params.set("status", query.status);
-  return apiRequest<MetaPaginatedResponse<SiteAiAction>>(`/site-admin/ai/actions?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteAiUsage(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; provider?: string; model?: string; status?: AiRequestStatus; from?: string; to?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.provider) params.set("provider", query.provider);
-  if (query.model) params.set("model", query.model);
-  if (query.status) params.set("status", query.status);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  return apiRequest<MetaPaginatedResponse<SiteAiUsageLog>>(`/site-admin/ai/usage?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getSiteReportingOverview(token: string) {
-  return apiRequest<SiteReportingOverview>("/site-admin/reporting/overview", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteDashboards(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  return apiRequest<MetaPaginatedResponse<SiteDashboard>>(`/site-admin/reporting/dashboards?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteReports(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; type?: string; status?: ReportStatus } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.type) params.set("type", query.type);
-  if (query.status) params.set("status", query.status);
-  return apiRequest<MetaPaginatedResponse<SiteReport>>(`/site-admin/reporting/reports?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteReportExecutions(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; reportId?: string; type?: string; status?: ReportExecutionStatus; from?: string; to?: string } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.reportId) params.set("reportId", query.reportId);
-  if (query.type) params.set("type", query.type);
-  if (query.status) params.set("status", query.status);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  return apiRequest<MetaPaginatedResponse<SiteReportExecution>>(`/site-admin/reporting/executions?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteReportExports(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; reportId?: string; status?: ReportExportStatus } = {},
-) {
-  const params = siteParams(query, 30);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.reportId) params.set("reportId", query.reportId);
-  if (query.status) params.set("status", query.status);
-  return apiRequest<MetaPaginatedResponse<SiteReportExport>>(`/site-admin/reporting/exports?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getSiteHardeningOverview(token: string) {
-  return apiRequest<SiteHardeningOverview>("/site-admin/hardening/overview", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteTenants(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; status?: string } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 30)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.status) params.set("status", query.status);
-
-  return apiRequest<MetaPaginatedResponse<Tenant>>(`/site-admin/tenants?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteUsers(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; status?: string } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 25)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.status) params.set("status", query.status);
-
-  return apiRequest<MetaPaginatedResponse<TenantUser>>(`/site-admin/users?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getSiteUser(token: string, userId: string) {
-  return apiRequest<SiteUserDetail>(`/site-admin/users/${userId}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function updateSiteUserStatus(
-  token: string,
-  userId: string,
-  payload: { status: string; reason?: string },
-) {
-  return apiRequest<TenantUser>(`/site-admin/users/${userId}/status`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function revokeSiteUserSessions(token: string, userId: string, payload: { reason?: string } = {}) {
-  return apiRequest<{ success: boolean; sessionsRevoked: number }>(`/site-admin/users/${userId}/sessions/revoke`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function resendSiteUserVerification(token: string, userId: string) {
-  return apiRequest<{
-    success: boolean;
-    sent: boolean;
-    provider?: string;
-    skipped?: boolean;
-    message: string;
-    devLink?: string;
-  }>(`/site-admin/users/${userId}/resend-verification`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function getSiteTenant(token: string, tenantId: string) {
-  return apiRequest<SiteTenantDetail>(`/site-admin/tenants/${tenantId}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function updateSiteTenantStatus(
-  token: string,
-  tenantId: string,
-  payload: { status: string; reason?: string },
-) {
-  return apiRequest<Tenant>(`/site-admin/tenants/${tenantId}/status`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function listSiteTenantUsers(
-  token: string,
-  tenantId: string,
-  query: { page?: number; limit?: number; search?: string; status?: string } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 30)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.status) params.set("status", query.status);
-
-  return apiRequest<MetaPaginatedResponse<TenantUser>>(`/site-admin/tenants/${tenantId}/users?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listSiteTenantResource<T = Record<string, unknown>>(
-  token: string,
-  tenantId: string,
-  section: SiteTenantResourceSection,
-  query: { page?: number; limit?: number; search?: string } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 30)),
-  });
-  if (query.search) params.set("search", query.search);
-
-  if (section === "users") {
-    return Promise.all([
-      apiRequest<MetaPaginatedResponse<TenantUser>>(`/site-admin/tenants/${tenantId}/users?${params.toString()}`, {
-        token,
-        cache: "no-store",
-      }),
-      getSiteTenant(token, tenantId),
-    ]).then(([response, detail]) => ({
-      tenant: detail.tenant,
-      section,
-      summary: { total: response.meta.total, byStatus: detail.users },
-      data: response.data as T[],
-      meta: response.meta,
-    }));
-  }
-
-  return apiRequest<SiteTenantResourceResponse<T>>(
-    `/site-admin/tenants/${tenantId}/${section}?${params.toString()}`,
-    {
-      token,
-      cache: "no-store",
-    },
-  );
-}
-
-export function listSiteSecurityEvents(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; tenantId?: string; type?: string; severity?: SecurityEventSeverity; status?: SecurityEventStatus } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 30)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.type) params.set("type", query.type);
-  if (query.severity) params.set("severity", query.severity);
-  if (query.status) params.set("status", query.status);
-
-  return apiRequest<MetaPaginatedResponse<SecurityEvent>>(`/site-admin/security-events?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function updateSiteSecurityEvent(
-  token: string,
-  eventId: string,
-  payload: { status?: SecurityEventStatus; severity?: SecurityEventSeverity; metadata?: unknown },
-) {
-  return apiRequest<SecurityEvent>(`/site-admin/security-events/${eventId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function listPlatformAuditLogs(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; actorId?: string; tenantId?: string; action?: string } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 30)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.actorId) params.set("actorId", query.actorId);
-  if (query.tenantId) params.set("tenantId", query.tenantId);
-  if (query.action) params.set("action", query.action);
-
-  return apiRequest<MetaPaginatedResponse<PlatformAuditLog>>(`/site-admin/audit-logs?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listPlatformAdmins(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; level?: PlatformAdminLevel; status?: PlatformAdminStatus } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 30)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.level) params.set("level", query.level);
-  if (query.status) params.set("status", query.status);
-
-  return apiRequest<MetaPaginatedResponse<PlatformAdminGrant>>(`/site-admin/platform-admins?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function grantPlatformAdmin(
-  token: string,
-  payload: { userId: string; level: PlatformAdminLevel; scopes?: string[]; notes?: string },
-) {
-  return apiRequest<PlatformAdminGrant>("/site-admin/platform-admins", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function revokePlatformAdmin(token: string, platformAdminId: string, payload: { reason?: string } = {}) {
-  return apiRequest<PlatformAdminGrant | null>(`/site-admin/platform-admins/${platformAdminId}/revoke`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function getSecurityChecks(token: string) {
-  return apiRequest<SecurityChecks>("/admin/security-checks", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getSecurityPolicy(token: string) {
-  return apiRequest<SecurityPolicy>("/admin/security-policy", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function updateSecurityPolicy(token: string, payload: Partial<Pick<
-  SecurityPolicy,
-  | "enforceIpAllowlist"
-  | "ipAllowlist"
-  | "sessionTtlMinutes"
-  | "maxSessionsPerUser"
-  | "passwordMinLength"
-  | "passwordRequireUpper"
-  | "passwordRequireLower"
-  | "passwordRequireNumber"
-  | "passwordRequireSymbol"
-  | "passwordHistoryCount"
-  | "mfaRequired"
-  | "auditRetentionDays"
-  | "dataRetentionDays"
-  | "maxUploadBytes"
-  | "allowedUploadMimeTypes"
->> & { metadata?: unknown }) {
-  return apiRequest<SecurityPolicy>("/admin/security-policy", {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function listSecurityEvents(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; type?: string; severity?: SecurityEventSeverity; status?: SecurityEventStatus; actorId?: string; subjectType?: string; subjectId?: string; from?: string; to?: string } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(Math.min(Math.max(query.limit ?? 50, 1), 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.type) params.set("type", query.type);
-  if (query.severity) params.set("severity", query.severity);
-  if (query.status) params.set("status", query.status);
-  if (query.actorId) params.set("actorId", query.actorId);
-  if (query.subjectType) params.set("subjectType", query.subjectType);
-  if (query.subjectId) params.set("subjectId", query.subjectId);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-
-  return apiRequest<PaginatedResponse<SecurityEvent>>(`/admin/security-events?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function updateSecurityEvent(
-  token: string,
-  eventId: string,
-  payload: { severity?: SecurityEventSeverity; status?: SecurityEventStatus; metadata?: unknown },
-) {
-  return apiRequest<SecurityEvent>(`/admin/security-events/${eventId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function listComplianceJobs(
-  token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    type?: ComplianceJobType;
-    status?: ComplianceJobStatus;
-    subjectType?: string;
-    subjectId?: string;
-    from?: string;
-    to?: string;
-  } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 30)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.type) params.set("type", query.type);
-  if (query.status) params.set("status", query.status);
-  if (query.subjectType) params.set("subjectType", query.subjectType);
-  if (query.subjectId) params.set("subjectId", query.subjectId);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-
-  return apiRequest<MetaPaginatedResponse<ComplianceJob>>(`/admin/compliance-jobs?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createComplianceJob(
-  token: string,
-  payload: {
-    type: ComplianceJobType;
-    subjectType?: string;
-    subjectId?: string;
-    reason?: string;
-    parameters?: unknown;
-    expiresAt?: string;
-  },
-) {
-  return apiRequest<ComplianceJob>("/admin/compliance-jobs", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function approveComplianceJob(token: string, jobId: string, payload: { reason?: string } = {}) {
-  return apiRequest<ComplianceJob>(`/admin/compliance-jobs/${jobId}/approve`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function rejectComplianceJob(token: string, jobId: string, payload: { reason?: string } = {}) {
-  return apiRequest<ComplianceJob>(`/admin/compliance-jobs/${jobId}/reject`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function runComplianceJob(token: string, jobId: string) {
-  return apiRequest<ComplianceJob>(`/admin/compliance-jobs/${jobId}/run`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function cancelComplianceJob(token: string, jobId: string) {
-  return apiRequest<ComplianceJob>(`/admin/compliance-jobs/${jobId}/cancel`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function listApiKeys(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; status?: ApiKeyStatus; scope?: string; createdById?: string; from?: string; to?: string } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(Math.min(Math.max(query.limit ?? 50, 1), 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.status) params.set("status", query.status);
-  if (query.scope) params.set("scope", query.scope);
-  if (query.createdById) params.set("createdById", query.createdById);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-
-  return apiRequest<PaginatedResponse<ApiKey>>(`/admin/api-keys?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createApiKey(
-  token: string,
-  payload: { name: string; scopes?: string[]; expiresAt?: string; metadata?: unknown },
-) {
-  return apiRequest<CreatedApiKey>("/admin/api-keys", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function revokeApiKey(token: string, apiKeyId: string) {
-  return apiRequest<ApiKey>(`/admin/api-keys/${apiKeyId}/revoke`, {
-    method: "POST",
-    token,
-  });
-}
-
-function appendAnalyticsParams(params: URLSearchParams, query: AnalyticsQuery) {
-  if (query.projectId) params.set("projectId", query.projectId);
-  if (query.teamId) params.set("teamId", query.teamId);
-  if (query.workspaceId) params.set("workspaceId", query.workspaceId);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-}
-
-export function listReports(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; type?: string; status?: ReportStatus; includeArchived?: boolean } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(Math.min(Math.max(query.limit ?? 50, 1), 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.type) params.set("type", query.type);
-  if (query.status) params.set("status", query.status);
-  if (query.includeArchived !== undefined) params.set("includeArchived", String(query.includeArchived));
-
-  return apiRequest<PaginatedResponse<Report>>(`/reporting/reports?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createReport(
-  token: string,
-  payload: {
-    name: string;
-    description?: string;
-    type: string;
-    status?: ReportStatus;
-    query?: unknown;
-    schedule?: string;
-    timezone?: string;
-    recipients?: string[];
-    cacheTtlSeconds?: number;
-    nextRunAt?: string;
-    metadata?: unknown;
-  },
-) {
-  return apiRequest<Report>("/reporting/reports", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function runAdHocReport(
-  token: string,
-  payload: { type?: string; parameters?: AnalyticsQuery; cacheKey?: string },
-) {
-  return apiRequest<ReportExecution>("/reporting/reports/run", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function runSavedReport(
-  token: string,
-  reportId: string,
-  payload: { parameters?: AnalyticsQuery; cacheKey?: string } = {},
-) {
-  return apiRequest<ReportExecution>(`/reporting/reports/${reportId}/run`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function exportSavedReport(
-  token: string,
-  reportId: string,
-  payload: { format: ReportExportFormat; parameters?: AnalyticsQuery },
-) {
-  return apiRequest<ReportExport>(`/reporting/reports/${reportId}/exports`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function listReportExecutions(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; reportId?: string; type?: string; status?: ReportExecutionStatus; from?: string; to?: string } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(Math.min(Math.max(query.limit ?? 20, 1), 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.reportId) params.set("reportId", query.reportId);
-  if (query.type) params.set("type", query.type);
-  if (query.status) params.set("status", query.status);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-
-  return apiRequest<PaginatedResponse<ReportExecution>>(`/reporting/executions?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listReportExports(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; reportId?: string; format?: ReportExportFormat; status?: ReportExportStatus; from?: string; to?: string } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(Math.min(Math.max(query.limit ?? 20, 1), 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.reportId) params.set("reportId", query.reportId);
-  if (query.format) params.set("format", query.format);
-  if (query.status) params.set("status", query.status);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-
-  return apiRequest<PaginatedResponse<ReportExport>>(`/reporting/exports?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getAnalyticsOverview(token: string, query: AnalyticsQuery = {}) {
-  const params = new URLSearchParams();
-  appendAnalyticsParams(params, query);
-  return apiRequest<AnalyticsOverview>(`/reporting/analytics/overview?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getProjectHealthAnalytics(token: string, query: AnalyticsQuery = {}) {
-  const params = new URLSearchParams();
-  appendAnalyticsParams(params, query);
-  return apiRequest<ProjectHealthAnalytics>(`/reporting/analytics/project-health?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getTeamPerformanceAnalytics(token: string, query: AnalyticsQuery = {}) {
-  const params = new URLSearchParams();
-  appendAnalyticsParams(params, query);
-  return apiRequest<TeamPerformanceAnalytics>(`/reporting/analytics/team-performance?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getCycleTimeAnalytics(token: string, query: AnalyticsQuery = {}) {
-  const params = new URLSearchParams();
-  appendAnalyticsParams(params, query);
-  return apiRequest<CycleTimeAnalytics>(`/reporting/analytics/cycle-time?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getVelocityAnalytics(token: string, query: AnalyticsQuery = {}) {
-  const params = new URLSearchParams();
-  appendAnalyticsParams(params, query);
-  return apiRequest<VelocityAnalytics>(`/reporting/analytics/velocity?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getBudgetAnalytics(token: string, query: AnalyticsQuery = {}) {
-  const params = new URLSearchParams();
-  appendAnalyticsParams(params, query);
-  return apiRequest<BudgetAnalytics>(`/reporting/analytics/budget?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getSlaAnalytics(token: string, query: AnalyticsQuery = {}) {
-  const params = new URLSearchParams();
-  appendAnalyticsParams(params, query);
-  return apiRequest<SlaAnalytics>(`/reporting/analytics/sla?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listConversations(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; isGroup?: boolean } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(query.limit ?? 50),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.isGroup !== undefined) params.set("isGroup", String(query.isGroup));
-
-  return apiRequest<PaginatedResponse<Conversation>>(`/conversations?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createConversation(
-  token: string,
-  payload: { title?: string; isGroup?: boolean; memberIds: string[] },
-) {
-  return apiRequest<Conversation>("/conversations", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function getConversation(token: string, conversationId: string) {
-  return apiRequest<Conversation>(`/conversations/${conversationId}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function updateConversation(
-  token: string,
-  conversationId: string,
-  payload: Partial<Pick<Conversation, "title" | "isGroup">>,
-) {
-  return apiRequest<Conversation>(`/conversations/${conversationId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function deleteConversation(token: string, conversationId: string) {
-  return apiRequest<{ success: boolean }>(`/conversations/${conversationId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function listConversationMembers(token: string, conversationId: string) {
-  return apiRequest<ConversationMember[]>(`/conversations/${conversationId}/members`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function addConversationMember(token: string, conversationId: string, userId: string) {
-  return apiRequest<ConversationMember[]>(`/conversations/${conversationId}/members`, {
-    method: "POST",
-    token,
-    body: JSON.stringify({ userId }),
-  });
-}
-
-export function removeConversationMember(token: string, conversationId: string, userId: string) {
-  return apiRequest<{ success: boolean }>(`/conversations/${conversationId}/members/${userId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function listMessages(
-  token: string,
-  conversationId: string,
-  query: { page?: number; limit?: number; search?: string } = {},
-) {
-  const limit = Math.min(Math.max(query.limit ?? 100, 1), 100);
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(limit),
-  });
-  if (query.search) params.set("search", query.search);
-
-  return apiRequest<PaginatedResponse<Message>>(`/conversations/${conversationId}/messages?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function sendMessage(
-  token: string,
-  conversationId: string,
-  payload: {
-    body?: string;
-    attachments?: MessageAttachment[] | unknown[];
-    parentMessageId?: string;
-    forwardedFromMessageId?: string;
-    metadata?: unknown;
-  },
-) {
-  return apiRequest<Message>(`/conversations/${conversationId}/messages`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function updateMessage(token: string, messageId: string, payload: { body: string }) {
-  return apiRequest<Message>(`/messages/${messageId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function deleteMessage(token: string, messageId: string) {
-  return apiRequest<{ success: boolean }>(`/messages/${messageId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function listPinnedMessages(token: string, conversationId: string) {
-  return apiRequest<Message[]>(`/conversations/${conversationId}/messages/pinned`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function pinMessage(token: string, messageId: string) {
-  return apiRequest<Message>(`/messages/${messageId}/pin`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function unpinMessage(token: string, messageId: string) {
-  return apiRequest<Message>(`/messages/${messageId}/unpin`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function forwardMessage(
-  token: string,
-  messageId: string,
-  payload: { conversationIds: string[]; body?: string; includeAttachments?: boolean; metadata?: unknown },
-) {
-  return apiRequest<{ data: Message[]; forwarded: number }>(`/messages/${messageId}/forward`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function addMessageReaction(token: string, messageId: string, emoji: string) {
-  return apiRequest<MessageReaction>(`/messages/${messageId}/reactions`, {
-    method: "POST",
-    token,
-    body: JSON.stringify({ emoji }),
-  });
-}
-
-export function removeMessageReaction(token: string, messageId: string, emoji: string) {
-  return apiRequest<{ success: boolean }>(`/messages/${messageId}/reactions/${encodeURIComponent(emoji)}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function listMessageReadReceipts(token: string, messageId: string) {
-  return apiRequest<MessageReadReceipt[]>(`/messages/${messageId}/read-receipts`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function markMessageRead(token: string, messageId: string) {
-  return apiRequest<MessageReadReceipt>(`/messages/${messageId}/read-receipts`, {
-    method: "POST",
-    token,
-  });
 }
