@@ -3795,6 +3795,56 @@ type UpdateBoardColumnPayload = OpenApiJsonBody<"/api/v1/agile/boards/{boardId}/
 type ReorderBoardColumnsPayload = OpenApiJsonBody<"/api/v1/agile/boards/{boardId}/columns/reorder", "patch">;
 type UpdateTaskOrderPayload = OpenApiJsonBody<"/api/v1/agile/tasks/{taskId}/order", "patch">;
 type UpdateTaskStatusPayload = OpenApiJsonBody<"/api/v1/agile/tasks/{taskId}/status", "patch">;
+type ListMeetingTypesQuery = OpenApiQuery<"/api/v1/meetings/types", "get">;
+type CreateMeetingTypePayload = OpenApiJsonBody<"/api/v1/meetings/types", "post">;
+type UpdateMeetingTypePayload = OpenApiJsonBody<"/api/v1/meetings/types/{typeId}", "patch">;
+type ListMeetingsQuery = OpenApiQuery<"/api/v1/meetings", "get">;
+type CreateMeetingPayload = OpenApiJsonBody<"/api/v1/meetings", "post">;
+type UpdateMeetingPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}", "patch">;
+type CancelMeetingPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/cancel", "post">;
+type UpdateMeetingIntegrationSettingsPayload = OpenApiJsonBody<"/api/v1/meetings/integrations/settings", "patch">;
+type MeetingAdminOverviewQuery = OpenApiQuery<"/api/v1/meetings/admin/overview", "get">;
+type MeetingAdminAnalyticsQuery = OpenApiQuery<"/api/v1/meetings/admin/analytics", "get">;
+type UpdateMeetingPolicyPayload = OpenApiJsonBody<"/api/v1/meetings/admin/policy", "patch">;
+type MeetingAdminReminderLogsQuery = OpenApiQuery<"/api/v1/meetings/admin/reminder-logs", "get">;
+type CreateMeetingConferencePayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/conference", "post">;
+type ListMeetingReminderJobsQuery = OpenApiQuery<"/api/v1/meetings/reminder-jobs", "get">;
+type ProcessMeetingReminderJobsPayload = OpenApiJsonBody<"/api/v1/meetings/reminder-jobs/process", "post">;
+type LinkMeetingContextPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/ai/links", "patch">;
+export type MeetingAiGeneratePayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/ai/agenda", "post">;
+type MeetingAiRoleSummaryPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/ai/role-summary", "post">;
+type ConvertMeetingActionItemsPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/ai/action-items/convert-tasks", "post">;
+type ScheduleMeetingFollowUpsPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/ai/action-items/follow-up-reminders", "post">;
+type MeetingAvailabilityQuery = OpenApiQuery<"/api/v1/meetings/availability", "get">;
+type CreateMeetingAvailabilityWindowPayload = OpenApiJsonBody<"/api/v1/meetings/availability/windows", "post">;
+type ListBookingPagesQuery = OpenApiQuery<"/api/v1/meetings/booking/pages", "get">;
+type CreateBookingPagePayload = OpenApiJsonBody<"/api/v1/meetings/booking/pages", "post">;
+type UpdateBookingPagePayload = OpenApiJsonBody<"/api/v1/meetings/booking/pages/{pageId}", "patch">;
+type CreateBookingFormFieldPayload = OpenApiJsonBody<"/api/v1/meetings/booking/pages/{pageId}/fields", "post">;
+type UpdateBookingFormFieldPayload = OpenApiJsonBody<"/api/v1/meetings/booking/pages/{pageId}/fields/{fieldId}", "patch">;
+type ListBookingRequestsQuery = OpenApiQuery<"/api/v1/meetings/booking/requests", "get">;
+type PublicBookingPageQuery = OpenApiQuery<"/api/v1/booking/public/{tenantSlug}/page", "get">;
+type PublicBookingSlotsQuery = OpenApiQuery<"/api/v1/booking/public/{tenantSlug}/slots", "get">;
+type CreatePublicBookingPayload = OpenApiJsonBody<"/api/v1/booking/public/{tenantSlug}/book", "post">;
+type CancelPublicBookingPayload = OpenApiJsonBody<"/api/v1/booking/public/cancel/{token}", "post">;
+type ReschedulePublicBookingPayload = OpenApiJsonBody<"/api/v1/booking/public/reschedule/{token}", "post">;
+type AddMeetingAttendeePayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/attendees", "post">;
+type UpdateMeetingAttendeePayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/attendees/{attendeeId}", "patch">;
+type CreateMeetingAgendaItemPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/agenda", "post">;
+type UpdateMeetingAgendaItemPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/agenda/{itemId}", "patch">;
+type CreateMeetingReminderPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/reminders", "post">;
+type UpdateLiveMeetingNotesPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/live-notes", "patch">;
+type CreateMeetingCommentPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/comments", "post">;
+type UpdateMeetingCommentPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/comments/{commentId}", "patch">;
+type CreateMeetingDecisionPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/decisions", "post">;
+type UpdateMeetingDecisionPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/decisions/{decisionId}", "patch">;
+type CreateMeetingChecklistItemPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/checklist", "post">;
+type UpdateMeetingChecklistItemPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/checklist/{itemId}", "patch">;
+type UpdateMeetingAttendancePayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/attendance/{attendeeId}", "patch">;
+type AssignMeetingActionItemPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/action-items/assign", "post">;
+type SendMeetingFollowUpPayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/follow-up", "post">;
+type SyncMeetingRuntimePayload = OpenApiJsonBody<"/api/v1/meetings/{meetingId}/omoflow/sync", "post">;
+export type BookingPagePayload = CreateBookingPagePayload;
 
 export class ApiError extends Error {
   status: number;
@@ -4210,686 +4260,497 @@ export function listTeams(token: string, query: { page?: number; limit?: number;
 
 export function listMeetingTypes(
   token: string,
-  query: { page?: number; limit?: number; search?: string; category?: MeetingTypeCategory; isActive?: boolean } = {},
+  query: ListMeetingTypesQuery = {},
 ) {
-  const params = siteParams(query, 100);
-  if (query.category) params.set("category", query.category);
-  if (query.isActive !== undefined) params.set("isActive", String(query.isActive));
-  return apiRequest<PaginatedResponse<MeetingType>>(`/meetings/types?${params.toString()}`, {
+  return openApiRequest<PaginatedResponse<MeetingType>, "/api/v1/meetings/types", "get">("/api/v1/meetings/types", "get", {
     token,
     cache: "no-store",
+    pathParams: {},
+    query: {
+      ...query,
+      page: query.page ?? 1,
+      limit: boundedLimit(query.limit, 100),
+    },
   });
 }
 
-export function createMeetingType(
-  token: string,
-  payload: {
-    name: string;
-    slug?: string;
-    description?: string;
-    category?: MeetingTypeCategory;
-    durationMins?: number;
-    locationMode?: MeetingLocationMode;
-    defaultVisibility?: Visibility;
-    requiresApproval?: boolean;
-    defaultAgenda?: string[];
-    defaultReminderMins?: number[];
-    color?: string;
-    icon?: string;
-  },
-) {
-  return apiRequest<MeetingType>("/meetings/types", {
-    method: "POST",
+export function createMeetingType(token: string, payload: CreateMeetingTypePayload) {
+  return openApiRequest<MeetingType, "/api/v1/meetings/types", "post">("/api/v1/meetings/types", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: {},
+    body: payload,
   });
 }
 
-export function updateMeetingType(token: string, typeId: string, payload: Partial<MeetingType>) {
-  return apiRequest<MeetingType>(`/meetings/types/${typeId}`, {
-    method: "PATCH",
+export function updateMeetingType(token: string, typeId: string, payload: UpdateMeetingTypePayload) {
+  return openApiRequest<MeetingType, "/api/v1/meetings/types/{typeId}", "patch">("/api/v1/meetings/types/{typeId}", "patch", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { typeId },
+    body: payload,
   });
 }
 
 export function listMeetings(
   token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    projectId?: string;
-    taskId?: string;
-    teamId?: string;
-    hostId?: string;
-    meetingTypeId?: string;
-    status?: MeetingStatus;
-    from?: string;
-    to?: string;
-    includeArchived?: boolean;
-  } = {},
+  query: ListMeetingsQuery = {},
 ) {
-  const params = siteParams(query, 50);
-  if (query.projectId) params.set("projectId", query.projectId);
-  if (query.taskId) params.set("taskId", query.taskId);
-  if (query.teamId) params.set("teamId", query.teamId);
-  if (query.hostId) params.set("hostId", query.hostId);
-  if (query.meetingTypeId) params.set("meetingTypeId", query.meetingTypeId);
-  if (query.status) params.set("status", query.status);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  if (query.includeArchived !== undefined) params.set("includeArchived", String(query.includeArchived));
-  return apiRequest<PaginatedResponse<Meeting>>(`/meetings?${params.toString()}`, {
+  return openApiRequest<PaginatedResponse<Meeting>, "/api/v1/meetings", "get">("/api/v1/meetings", "get", {
     token,
     cache: "no-store",
+    pathParams: {},
+    query: {
+      ...query,
+      page: query.page ?? 1,
+      limit: boundedLimit(query.limit, 50),
+    },
   });
 }
 
 export function getMeeting(token: string, meetingId: string) {
-  return apiRequest<Meeting>(`/meetings/${meetingId}`, { token, cache: "no-store" });
-}
-
-export function createMeeting(
-  token: string,
-  payload: {
-    title: string;
-    description?: string;
-    meetingTypeId?: string;
-    projectId?: string;
-    sprintId?: string;
-    taskId?: string;
-    teamId?: string;
-    hostId?: string;
-    startAt: string;
-    endAt: string;
-    timezone?: string;
-    locationMode?: MeetingLocationMode;
-    locationName?: string;
-    meetingUrl?: string;
-    conferenceProvider?: string;
-    clientName?: string;
-    clientEmail?: string;
-    clientCompany?: string;
-    visibility?: Visibility;
-    attendeeIds?: string[];
-    externalAttendees?: Array<{ email: string; name?: string; role?: MeetingAttendeeRole }>;
-    agendaItems?: Array<{ title: string; notes?: string; durationMins?: number; sortOrder?: number }>;
-    reminderOffsets?: number[];
-    allowConflicts?: boolean;
-    aiEnabled?: boolean;
-  },
-) {
-  return apiRequest<Meeting>("/meetings", {
-    method: "POST",
+  return openApiRequest<Meeting, "/api/v1/meetings/{meetingId}", "get">("/api/v1/meetings/{meetingId}", "get", {
     token,
-    body: JSON.stringify(payload),
+    cache: "no-store",
+    pathParams: { meetingId },
   });
 }
 
-export function updateMeeting(token: string, meetingId: string, payload: Partial<Meeting> & { allowConflicts?: boolean }) {
-  return apiRequest<Meeting>(`/meetings/${meetingId}`, {
-    method: "PATCH",
+export function createMeeting(token: string, payload: CreateMeetingPayload) {
+  return openApiRequest<Meeting, "/api/v1/meetings", "post">("/api/v1/meetings", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: {},
+    body: payload,
   });
 }
 
-export function cancelMeeting(token: string, meetingId: string, payload: { reason?: string } = {}) {
-  return apiRequest<Meeting>(`/meetings/${meetingId}/cancel`, {
-    method: "POST",
+export function updateMeeting(token: string, meetingId: string, payload: UpdateMeetingPayload) {
+  return openApiRequest<Meeting, "/api/v1/meetings/{meetingId}", "patch">("/api/v1/meetings/{meetingId}", "patch", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
+  });
+}
+
+export function cancelMeeting(token: string, meetingId: string, payload: CancelMeetingPayload = {}) {
+  return openApiRequest<Meeting, "/api/v1/meetings/{meetingId}/cancel", "post">("/api/v1/meetings/{meetingId}/cancel", "post", {
+    token,
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
 export function completeMeeting(token: string, meetingId: string) {
-  return apiRequest<Meeting>(`/meetings/${meetingId}/complete`, {
-    method: "POST",
+  return openApiRequest<Meeting, "/api/v1/meetings/{meetingId}/complete", "post">("/api/v1/meetings/{meetingId}/complete", "post", {
     token,
+    pathParams: { meetingId },
   });
 }
 
 export function startMeeting(token: string, meetingId: string) {
-  return apiRequest<Meeting>(`/meetings/${meetingId}/start`, {
-    method: "POST",
+  return openApiRequest<Meeting, "/api/v1/meetings/{meetingId}/start", "post">("/api/v1/meetings/{meetingId}/start", "post", {
     token,
+    pathParams: { meetingId },
   });
 }
 
 export function archiveMeeting(token: string, meetingId: string) {
-  return apiRequest<Meeting>(`/meetings/${meetingId}/archive`, {
-    method: "POST",
+  return openApiRequest<Meeting, "/api/v1/meetings/{meetingId}/archive", "post">("/api/v1/meetings/{meetingId}/archive", "post", {
     token,
+    pathParams: { meetingId },
   });
 }
 
 export function restoreMeeting(token: string, meetingId: string) {
-  return apiRequest<Meeting>(`/meetings/${meetingId}/restore`, {
-    method: "POST",
+  return openApiRequest<Meeting, "/api/v1/meetings/{meetingId}/restore", "post">("/api/v1/meetings/{meetingId}/restore", "post", {
     token,
+    pathParams: { meetingId },
   });
 }
 
 export function getMeetingIntegrationStatus(token: string) {
-  return apiRequest<MeetingIntegrationStatus>("/meetings/integrations/status", {
+  return openApiRequest<MeetingIntegrationStatus, "/api/v1/meetings/integrations/status", "get">("/api/v1/meetings/integrations/status", "get", {
     token,
     cache: "no-store",
+    pathParams: {},
   });
 }
 
 export function getMeetingIntegrationSettings(token: string) {
-  return apiRequest<MeetingIntegrationSettings>("/meetings/integrations/settings", {
+  return openApiRequest<MeetingIntegrationSettings, "/api/v1/meetings/integrations/settings", "get">("/api/v1/meetings/integrations/settings", "get", {
     token,
     cache: "no-store",
+    pathParams: {},
   });
 }
 
-export function updateMeetingIntegrationSettings(token: string, payload: Partial<MeetingIntegrationSettings>) {
-  return apiRequest<MeetingIntegrationSettings>("/meetings/integrations/settings", {
-    method: "PATCH",
+export function updateMeetingIntegrationSettings(token: string, payload: UpdateMeetingIntegrationSettingsPayload) {
+  return openApiRequest<MeetingIntegrationSettings, "/api/v1/meetings/integrations/settings", "patch">("/api/v1/meetings/integrations/settings", "patch", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: {},
+    body: payload,
   });
 }
 
 export function getMeetingAdminOverview(
   token: string,
-  query: { page?: number; limit?: number; search?: string; from?: string; to?: string; hostId?: string; projectId?: string; status?: MeetingStatus } = {},
+  query: MeetingAdminOverviewQuery = {},
 ) {
-  const params = siteParams(query, 30);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  if (query.hostId) params.set("hostId", query.hostId);
-  if (query.projectId) params.set("projectId", query.projectId);
-  if (query.status) params.set("status", query.status);
-  return apiRequest<MeetingAdminOverview>(`/meetings/admin/overview?${params.toString()}`, {
+  return openApiRequest<MeetingAdminOverview, "/api/v1/meetings/admin/overview", "get">("/api/v1/meetings/admin/overview", "get", {
     token,
     cache: "no-store",
+    pathParams: {},
+    query,
   });
 }
 
 export function getMeetingPolicy(token: string) {
-  return apiRequest<MeetingPolicy>("/meetings/admin/policy", {
+  return openApiRequest<MeetingPolicy, "/api/v1/meetings/admin/policy", "get">("/api/v1/meetings/admin/policy", "get", {
     token,
     cache: "no-store",
+    pathParams: {},
   });
 }
 
-export function updateMeetingPolicy(token: string, payload: Partial<MeetingPolicy>) {
-  return apiRequest<MeetingPolicy>("/meetings/admin/policy", {
-    method: "PATCH",
+export function updateMeetingPolicy(token: string, payload: UpdateMeetingPolicyPayload) {
+  return openApiRequest<MeetingPolicy, "/api/v1/meetings/admin/policy", "patch">("/api/v1/meetings/admin/policy", "patch", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: {},
+    body: payload,
   });
 }
 
 export function getMeetingAdminAnalytics(
   token: string,
-  query: { page?: number; limit?: number; search?: string; from?: string; to?: string; hostId?: string; projectId?: string; status?: MeetingStatus } = {},
+  query: MeetingAdminAnalyticsQuery = {},
 ) {
-  const params = siteParams(query, 30);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  if (query.hostId) params.set("hostId", query.hostId);
-  if (query.projectId) params.set("projectId", query.projectId);
-  if (query.status) params.set("status", query.status);
-  return apiRequest<MeetingAdminAnalytics>(`/meetings/admin/analytics?${params.toString()}`, {
+  return openApiRequest<MeetingAdminAnalytics, "/api/v1/meetings/admin/analytics", "get">("/api/v1/meetings/admin/analytics", "get", {
     token,
     cache: "no-store",
+    pathParams: {},
+    query,
   });
 }
 
 export function listMeetingAdminReminderLogs(
   token: string,
-  query: { page?: number; limit?: number; search?: string; meetingId?: string; status?: MeetingReminderJobStatus; channel?: MeetingReminderChannel; from?: string; to?: string } = {},
+  query: MeetingAdminReminderLogsQuery = {},
 ) {
-  const params = siteParams(query, 50);
-  if (query.meetingId) params.set("meetingId", query.meetingId);
-  if (query.status) params.set("status", query.status);
-  if (query.channel) params.set("channel", query.channel);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  return apiRequest<MetaPaginatedResponse<MeetingReminderJob>>(`/meetings/admin/reminder-logs?${params.toString()}`, {
+  return openApiRequest<MetaPaginatedResponse<MeetingReminderJob>, "/api/v1/meetings/admin/reminder-logs", "get">("/api/v1/meetings/admin/reminder-logs", "get", {
     token,
     cache: "no-store",
+    pathParams: {},
+    query: {
+      ...query,
+      page: query.page ?? 1,
+      limit: boundedLimit(query.limit, 50),
+    },
   });
 }
 
-export function createMeetingConference(
-  token: string,
-  meetingId: string,
-  payload: {
-    provider?: MeetingConferenceProvider;
-    meetingUrl?: string;
-    locationName?: string;
-    calendarId?: string;
-    sendUpdates?: "all" | "externalOnly" | "none";
-    metadata?: Record<string, unknown>;
-  },
-) {
-  return apiRequest<{ meeting: Partial<Meeting>; provider: MeetingConferenceProvider; message: string }>(`/meetings/${meetingId}/conference`, {
-    method: "POST",
+export function createMeetingConference(token: string, meetingId: string, payload: CreateMeetingConferencePayload) {
+  return openApiRequest<{ meeting: Partial<Meeting>; provider: MeetingConferenceProvider; message: string }, "/api/v1/meetings/{meetingId}/conference", "post">("/api/v1/meetings/{meetingId}/conference", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
 export function listMeetingReminderJobs(
   token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    status?: MeetingReminderJobStatus;
-    channel?: MeetingReminderChannel;
-    meetingId?: string;
-    dueOnly?: boolean;
-    from?: string;
-    to?: string;
-  } = {},
+  query: ListMeetingReminderJobsQuery = {},
 ) {
-  const params = siteParams(query, 100);
-  if (query.status) params.set("status", query.status);
-  if (query.channel) params.set("channel", query.channel);
-  if (query.meetingId) params.set("meetingId", query.meetingId);
-  if (query.dueOnly !== undefined) params.set("dueOnly", String(query.dueOnly));
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  return apiRequest<PaginatedResponse<MeetingReminderJob>>(`/meetings/reminder-jobs?${params.toString()}`, {
+  return openApiRequest<PaginatedResponse<MeetingReminderJob>, "/api/v1/meetings/reminder-jobs", "get">("/api/v1/meetings/reminder-jobs", "get", {
     token,
     cache: "no-store",
+    pathParams: {},
+    query: {
+      ...query,
+      page: query.page ?? 1,
+      limit: boundedLimit(query.limit, 100),
+    },
   });
 }
 
-export function processMeetingReminderJobs(token: string, payload: { limit?: number } = {}) {
-  return apiRequest<{ processed: number; sent: number; failed: number; deadLetter: number; results: Array<{ id: string; status: string; provider?: string; error?: string }> }>("/meetings/reminder-jobs/process", {
-    method: "POST",
+export function processMeetingReminderJobs(token: string, payload: ProcessMeetingReminderJobsPayload = {}) {
+  return openApiRequest<{ processed: number; sent: number; failed: number; deadLetter: number; results: Array<{ id: string; status: string; provider?: string; error?: string }> }, "/api/v1/meetings/reminder-jobs/process", "post">("/api/v1/meetings/reminder-jobs/process", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: {},
+    body: payload,
   });
 }
 
 export function retryMeetingReminderJob(token: string, jobId: string) {
-  return apiRequest<{ job: MeetingReminderJob; previousStatus: MeetingReminderJobStatus }>(`/meetings/reminder-jobs/${jobId}/retry`, {
-    method: "POST",
+  return openApiRequest<{ job: MeetingReminderJob; previousStatus: MeetingReminderJobStatus }, "/api/v1/meetings/reminder-jobs/{jobId}/retry", "post">("/api/v1/meetings/reminder-jobs/{jobId}/retry", "post", {
     token,
+    pathParams: { jobId },
   });
 }
 
-export type MeetingAiGeneratePayload = {
-  prompt?: string;
-  transcript?: string;
-  notes?: string;
-  focusAreas?: string[];
-  metadata?: Record<string, unknown>;
-};
-
 export function getMeetingAiState(token: string, meetingId: string) {
-  return apiRequest<MeetingAiState>(`/meetings/${meetingId}/ai`, {
+  return openApiRequest<MeetingAiState, "/api/v1/meetings/{meetingId}/ai", "get">("/api/v1/meetings/{meetingId}/ai", "get", {
     token,
     cache: "no-store",
+    pathParams: { meetingId },
   });
 }
 
 export function linkMeetingAiContext(
   token: string,
   meetingId: string,
-  payload: MeetingAiState["links"],
+  payload: LinkMeetingContextPayload,
 ) {
-  return apiRequest<MeetingAiState>(`/meetings/${meetingId}/ai/links`, {
-    method: "PATCH",
+  return openApiRequest<MeetingAiState, "/api/v1/meetings/{meetingId}/ai/links", "patch">("/api/v1/meetings/{meetingId}/ai/links", "patch", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
 export function generateMeetingAiAgenda(token: string, meetingId: string, payload: MeetingAiGeneratePayload = {}) {
-  return apiRequest<MeetingAiState>(`/meetings/${meetingId}/ai/agenda`, {
-    method: "POST",
+  return openApiRequest<MeetingAiState, "/api/v1/meetings/{meetingId}/ai/agenda", "post">("/api/v1/meetings/{meetingId}/ai/agenda", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
 export function generateMeetingAiPreparationBrief(token: string, meetingId: string, payload: MeetingAiGeneratePayload = {}) {
-  return apiRequest<MeetingAiState>(`/meetings/${meetingId}/ai/preparation-brief`, {
-    method: "POST",
+  return openApiRequest<MeetingAiState, "/api/v1/meetings/{meetingId}/ai/preparation-brief", "post">("/api/v1/meetings/{meetingId}/ai/preparation-brief", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
 export function suggestMeetingAiAttendees(token: string, meetingId: string, payload: MeetingAiGeneratePayload = {}) {
-  return apiRequest<MeetingAiState>(`/meetings/${meetingId}/ai/suggest-attendees`, {
-    method: "POST",
+  return openApiRequest<MeetingAiState, "/api/v1/meetings/{meetingId}/ai/suggest-attendees", "post">("/api/v1/meetings/{meetingId}/ai/suggest-attendees", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
 export function detectMeetingAiRisks(token: string, meetingId: string, payload: MeetingAiGeneratePayload = {}) {
-  return apiRequest<MeetingAiState>(`/meetings/${meetingId}/ai/risk-detection`, {
-    method: "POST",
+  return openApiRequest<MeetingAiState, "/api/v1/meetings/{meetingId}/ai/risk-detection", "post">("/api/v1/meetings/{meetingId}/ai/risk-detection", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
 export function generateMeetingAiNotes(token: string, meetingId: string, payload: MeetingAiGeneratePayload = {}) {
-  return apiRequest<MeetingAiState>(`/meetings/${meetingId}/ai/notes`, {
-    method: "POST",
+  return openApiRequest<MeetingAiState, "/api/v1/meetings/{meetingId}/ai/notes", "post">("/api/v1/meetings/{meetingId}/ai/notes", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
 export function generateMeetingAiFollowUp(token: string, meetingId: string, payload: MeetingAiGeneratePayload = {}) {
-  return apiRequest<MeetingAiState>(`/meetings/${meetingId}/ai/follow-up`, {
-    method: "POST",
+  return openApiRequest<MeetingAiState, "/api/v1/meetings/{meetingId}/ai/follow-up", "post">("/api/v1/meetings/{meetingId}/ai/follow-up", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
 export function generateMeetingAiRoleSummary(
   token: string,
   meetingId: string,
-  payload: MeetingAiGeneratePayload & { role?: "EXECUTIVE" | "PROJECT_MANAGER" | "ASSIGNEE"; assigneeId?: string } = {},
+  payload: MeetingAiRoleSummaryPayload = {},
 ) {
-  return apiRequest<MeetingAiState>(`/meetings/${meetingId}/ai/role-summary`, {
-    method: "POST",
+  return openApiRequest<MeetingAiState, "/api/v1/meetings/{meetingId}/ai/role-summary", "post">("/api/v1/meetings/{meetingId}/ai/role-summary", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
 export function scoreMeetingAiEffectiveness(token: string, meetingId: string, payload: MeetingAiGeneratePayload = {}) {
-  return apiRequest<MeetingAiState>(`/meetings/${meetingId}/ai/effectiveness-score`, {
-    method: "POST",
+  return openApiRequest<MeetingAiState, "/api/v1/meetings/{meetingId}/ai/effectiveness-score", "post">("/api/v1/meetings/{meetingId}/ai/effectiveness-score", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
 export function detectMeetingAiMissedDecisions(token: string, meetingId: string, payload: MeetingAiGeneratePayload = {}) {
-  return apiRequest<MeetingAiState>(`/meetings/${meetingId}/ai/missed-decisions`, {
-    method: "POST",
+  return openApiRequest<MeetingAiState, "/api/v1/meetings/{meetingId}/ai/missed-decisions", "post">("/api/v1/meetings/{meetingId}/ai/missed-decisions", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
 export function convertMeetingAiActionItems(
   token: string,
   meetingId: string,
-  payload: {
-    actionItemIds?: string[];
-    defaultProjectId?: string;
-    defaultSprintId?: string;
-    defaultAssigneeId?: string;
-    defaultDueDate?: string;
-    defaultTaskType?: TaskType;
-    defaultPriority?: TaskPriority;
-    createChecklist?: boolean;
-  } = {},
+  payload: ConvertMeetingActionItemsPayload = {},
 ) {
-  return apiRequest<{ meetingId: string; converted: number; tasks: Task[]; actionItems: MeetingAiActionItem[] }>(`/meetings/${meetingId}/ai/action-items/convert-tasks`, {
-    method: "POST",
+  return openApiRequest<{ meetingId: string; converted: number; tasks: Task[]; actionItems: MeetingAiActionItem[] }, "/api/v1/meetings/{meetingId}/ai/action-items/convert-tasks", "post">("/api/v1/meetings/{meetingId}/ai/action-items/convert-tasks", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
 export function scheduleMeetingAiFollowUpReminders(
   token: string,
   meetingId: string,
-  payload: { actionItemIds?: string[]; dueOffsetMinutes?: number } = {},
+  payload: ScheduleMeetingFollowUpsPayload = {},
 ) {
-  return apiRequest<{ meetingId: string; created: MeetingReminder[]; actionItems: MeetingAiActionItem[] }>(`/meetings/${meetingId}/ai/action-items/follow-up-reminders`, {
-    method: "POST",
+  return openApiRequest<{ meetingId: string; created: MeetingReminder[]; actionItems: MeetingAiActionItem[] }, "/api/v1/meetings/{meetingId}/ai/action-items/follow-up-reminders", "post">("/api/v1/meetings/{meetingId}/ai/action-items/follow-up-reminders", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
 export function listMeetingAvailability(
   token: string,
-  query: { ownerId?: string; teamId?: string; scope?: MeetingAvailabilityScope } = {},
+  query: MeetingAvailabilityQuery = {},
 ) {
-  const params = new URLSearchParams();
-  if (query.ownerId) params.set("ownerId", query.ownerId);
-  if (query.teamId) params.set("teamId", query.teamId);
-  if (query.scope) params.set("scope", query.scope);
-  const suffix = params.toString() ? `?${params.toString()}` : "";
-  return apiRequest<MeetingAvailability>(`/meetings/availability${suffix}`, {
+  return openApiRequest<MeetingAvailability, "/api/v1/meetings/availability", "get">("/api/v1/meetings/availability", "get", {
     token,
     cache: "no-store",
+    pathParams: {},
+    query,
   });
 }
 
-export function createMeetingAvailabilityWindow(
-  token: string,
-  payload: {
-    ownerId?: string;
-    teamId?: string;
-    scope?: MeetingAvailabilityScope;
-    label?: string;
-    dayOfWeek: number;
-    startTime: string;
-    endTime: string;
-    timezone?: string;
-    capacity?: number;
-  },
-) {
-  return apiRequest<MeetingAvailabilityWindow>("/meetings/availability/windows", {
-    method: "POST",
+export function createMeetingAvailabilityWindow(token: string, payload: CreateMeetingAvailabilityWindowPayload) {
+  return openApiRequest<MeetingAvailabilityWindow, "/api/v1/meetings/availability/windows", "post">("/api/v1/meetings/availability/windows", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: {},
+    body: payload,
   });
 }
 
 export function deleteMeetingAvailabilityWindow(token: string, windowId: string) {
-  return apiRequest<{ success: boolean }>(`/meetings/availability/windows/${windowId}`, {
-    method: "DELETE",
+  return openApiRequest<{ success: boolean }, "/api/v1/meetings/availability/windows/{windowId}", "delete">("/api/v1/meetings/availability/windows/{windowId}", "delete", {
     token,
+    pathParams: { windowId },
   });
 }
 
 export function listBookingPages(
   token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    scope?: BookingPageScope;
-    routingStrategy?: BookingRoutingStrategy;
-    meetingTypeId?: string;
-    teamId?: string;
-    ownerId?: string;
-    isActive?: boolean;
-  } = {},
+  query: ListBookingPagesQuery = {},
 ) {
-  const params = siteParams(query, 50);
-  if (query.scope) params.set("scope", query.scope);
-  if (query.routingStrategy) params.set("routingStrategy", query.routingStrategy);
-  if (query.meetingTypeId) params.set("meetingTypeId", query.meetingTypeId);
-  if (query.teamId) params.set("teamId", query.teamId);
-  if (query.ownerId) params.set("ownerId", query.ownerId);
-  if (query.isActive !== undefined) params.set("isActive", String(query.isActive));
-  return apiRequest<PaginatedResponse<BookingPage>>(`/meetings/booking/pages?${params.toString()}`, {
+  return openApiRequest<PaginatedResponse<BookingPage>, "/api/v1/meetings/booking/pages", "get">("/api/v1/meetings/booking/pages", "get", {
     token,
     cache: "no-store",
+    pathParams: {},
+    query: {
+      ...query,
+      page: query.page ?? 1,
+      limit: boundedLimit(query.limit, 50),
+    },
   });
 }
-
-export type BookingPagePayload = {
-  path: string;
-  title: string;
-  subtitle?: string;
-  description?: string;
-  scope?: BookingPageScope;
-  routingStrategy?: BookingRoutingStrategy;
-  meetingTypeId?: string;
-  teamId?: string;
-  ownerId?: string;
-  department?: string;
-  durationMins?: number;
-  bufferBeforeMins?: number;
-  bufferAfterMins?: number;
-  minNoticeMins?: number;
-  rollingWindowDays?: number;
-  dailyLimit?: number;
-  weeklyLimit?: number;
-  approvalRequired?: boolean;
-  allowReschedule?: boolean;
-  allowCancel?: boolean;
-  collectCompanyName?: boolean;
-  locationMode?: MeetingLocationMode;
-  locationName?: string;
-  meetingUrl?: string;
-  conferenceProvider?: string;
-  timezone?: string;
-  brandColor?: string;
-  logoUrl?: string;
-  heroImageUrl?: string;
-  isActive?: boolean;
-  metadata?: Record<string, unknown>;
-  fields?: Array<{
-    fieldKey: string;
-    label: string;
-    type?: BookingFormFieldType;
-    required?: boolean;
-    placeholder?: string;
-    helpText?: string;
-    options?: string[];
-    sortOrder?: number;
-  }>;
-};
 
 export function createBookingPage(token: string, payload: BookingPagePayload) {
-  return apiRequest<BookingPage>("/meetings/booking/pages", {
-    method: "POST",
+  return openApiRequest<BookingPage, "/api/v1/meetings/booking/pages", "post">("/api/v1/meetings/booking/pages", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: {},
+    body: payload,
   });
 }
 
-export function updateBookingPage(token: string, pageId: string, payload: Partial<BookingPagePayload>) {
-  return apiRequest<BookingPage>(`/meetings/booking/pages/${pageId}`, {
-    method: "PATCH",
+export function updateBookingPage(token: string, pageId: string, payload: UpdateBookingPagePayload) {
+  return openApiRequest<BookingPage, "/api/v1/meetings/booking/pages/{pageId}", "patch">("/api/v1/meetings/booking/pages/{pageId}", "patch", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { pageId },
+    body: payload,
   });
 }
 
-export function createBookingFormField(token: string, pageId: string, payload: NonNullable<BookingPagePayload["fields"]>[number]) {
-  return apiRequest<BookingFormField>(`/meetings/booking/pages/${pageId}/fields`, {
-    method: "POST",
+export function createBookingFormField(token: string, pageId: string, payload: CreateBookingFormFieldPayload) {
+  return openApiRequest<BookingFormField, "/api/v1/meetings/booking/pages/{pageId}/fields", "post">("/api/v1/meetings/booking/pages/{pageId}/fields", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { pageId },
+    body: payload,
   });
 }
 
-export function updateBookingFormField(token: string, pageId: string, fieldId: string, payload: Partial<NonNullable<BookingPagePayload["fields"]>[number]> & { isActive?: boolean }) {
-  return apiRequest<BookingFormField>(`/meetings/booking/pages/${pageId}/fields/${fieldId}`, {
-    method: "PATCH",
+export function updateBookingFormField(token: string, pageId: string, fieldId: string, payload: UpdateBookingFormFieldPayload) {
+  return openApiRequest<BookingFormField, "/api/v1/meetings/booking/pages/{pageId}/fields/{fieldId}", "patch">("/api/v1/meetings/booking/pages/{pageId}/fields/{fieldId}", "patch", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { pageId, fieldId },
+    body: payload,
   });
 }
 
 export function deleteBookingFormField(token: string, pageId: string, fieldId: string) {
-  return apiRequest<{ success: boolean }>(`/meetings/booking/pages/${pageId}/fields/${fieldId}`, {
-    method: "DELETE",
+  return openApiRequest<{ success: boolean }, "/api/v1/meetings/booking/pages/{pageId}/fields/{fieldId}", "delete">("/api/v1/meetings/booking/pages/{pageId}/fields/{fieldId}", "delete", {
     token,
+    pathParams: { pageId, fieldId },
   });
 }
 
 export function listBookingRequests(
   token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    scope?: BookingPageScope;
-    routingStrategy?: BookingRoutingStrategy;
-    meetingTypeId?: string;
-    teamId?: string;
-    ownerId?: string;
-  } = {},
+  query: ListBookingRequestsQuery = {},
 ) {
-  const params = siteParams(query, 50);
-  if (query.scope) params.set("scope", query.scope);
-  if (query.routingStrategy) params.set("routingStrategy", query.routingStrategy);
-  if (query.meetingTypeId) params.set("meetingTypeId", query.meetingTypeId);
-  if (query.teamId) params.set("teamId", query.teamId);
-  if (query.ownerId) params.set("ownerId", query.ownerId);
-  return apiRequest<PaginatedResponse<BookingRequest>>(`/meetings/booking/requests?${params.toString()}`, {
+  return openApiRequest<PaginatedResponse<BookingRequest>, "/api/v1/meetings/booking/requests", "get">("/api/v1/meetings/booking/requests", "get", {
     token,
     cache: "no-store",
+    pathParams: {},
+    query: {
+      ...query,
+      page: query.page ?? 1,
+      limit: boundedLimit(query.limit, 50),
+    },
   });
 }
 
 export function resolvePublicBookingPage(tenantSlug: string, path: string) {
-  const params = new URLSearchParams({ path });
-  return apiRequest<PublicBookingPageResponse>(`/booking/public/${encodeURIComponent(tenantSlug)}/page?${params.toString()}`, {
+  const query: PublicBookingPageQuery = { path };
+  return openApiRequest<PublicBookingPageResponse, "/api/v1/booking/public/{tenantSlug}/page", "get">("/api/v1/booking/public/{tenantSlug}/page", "get", {
     cache: "no-store",
+    pathParams: { tenantSlug },
+    query,
   });
 }
 
 export function listPublicBookingSlots(tenantSlug: string, path: string, query: { from?: string; to?: string } = {}) {
-  const params = new URLSearchParams({ path });
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-  return apiRequest<PublicBookingSlotsResponse>(`/booking/public/${encodeURIComponent(tenantSlug)}/slots?${params.toString()}`, {
+  const publicQuery: PublicBookingSlotsQuery = { path, ...query };
+  return openApiRequest<PublicBookingSlotsResponse, "/api/v1/booking/public/{tenantSlug}/slots", "get">("/api/v1/booking/public/{tenantSlug}/slots", "get", {
     cache: "no-store",
+    pathParams: { tenantSlug },
+    query: publicQuery,
   });
 }
 
-export function createPublicBooking(
-  tenantSlug: string,
-  payload: {
-    path: string;
-    startAt: string;
-    hostId?: string;
-    guestName: string;
-    guestEmail: string;
-    guestPhone?: string;
-    guestCompany?: string;
-    guestTimezone?: string;
-    notes?: string;
-    intakeResponses?: Array<{ fieldKey: string; value?: unknown }>;
-  },
-) {
-  return apiRequest<PublicBookingCreateResponse>(`/booking/public/${encodeURIComponent(tenantSlug)}/book`, {
-    method: "POST",
-    body: JSON.stringify(payload),
+export function createPublicBooking(tenantSlug: string, payload: CreatePublicBookingPayload) {
+  return openApiRequest<PublicBookingCreateResponse, "/api/v1/booking/public/{tenantSlug}/book", "post">("/api/v1/booking/public/{tenantSlug}/book", "post", {
+    pathParams: { tenantSlug },
+    body: payload,
   });
 }
 
-export function cancelPublicBooking(token: string, payload: { reason?: string } = {}) {
-  return apiRequest<BookingRequest>(`/booking/public/cancel/${encodeURIComponent(token)}`, {
-    method: "POST",
-    body: JSON.stringify(payload),
+export function cancelPublicBooking(token: string, payload: CancelPublicBookingPayload = {}) {
+  return openApiRequest<BookingRequest, "/api/v1/booking/public/cancel/{token}", "post">("/api/v1/booking/public/cancel/{token}", "post", {
+    pathParams: { token },
+    body: payload,
   });
 }
 
-export function reschedulePublicBooking(token: string, payload: { startAt: string; hostId?: string }) {
-  return apiRequest<PublicBookingCreateResponse>(`/booking/public/reschedule/${encodeURIComponent(token)}`, {
-    method: "POST",
-    body: JSON.stringify(payload),
+export function reschedulePublicBooking(token: string, payload: ReschedulePublicBookingPayload) {
+  return openApiRequest<PublicBookingCreateResponse, "/api/v1/booking/public/reschedule/{token}", "post">("/api/v1/booking/public/reschedule/{token}", "post", {
+    pathParams: { token },
+    body: payload,
   });
 }
 
 export function addMeetingAttendee(
   token: string,
   meetingId: string,
-  payload: { userId?: string; email?: string; name?: string; role?: MeetingAttendeeRole },
+  payload: AddMeetingAttendeePayload,
 ) {
-  return apiRequest<MeetingAttendee>(`/meetings/${meetingId}/attendees`, {
-    method: "POST",
+  return openApiRequest<MeetingAttendee, "/api/v1/meetings/{meetingId}/attendees", "post">("/api/v1/meetings/{meetingId}/attendees", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
@@ -4897,24 +4758,24 @@ export function updateMeetingAttendee(
   token: string,
   meetingId: string,
   attendeeId: string,
-  payload: { role?: MeetingAttendeeRole; status?: MeetingAttendeeStatus; responseNote?: string | null },
+  payload: UpdateMeetingAttendeePayload,
 ) {
-  return apiRequest<MeetingAttendee>(`/meetings/${meetingId}/attendees/${attendeeId}`, {
-    method: "PATCH",
+  return openApiRequest<MeetingAttendee, "/api/v1/meetings/{meetingId}/attendees/{attendeeId}", "patch">("/api/v1/meetings/{meetingId}/attendees/{attendeeId}", "patch", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId, attendeeId },
+    body: payload,
   });
 }
 
 export function createMeetingAgendaItem(
   token: string,
   meetingId: string,
-  payload: { title: string; notes?: string; durationMins?: number; sortOrder?: number },
+  payload: CreateMeetingAgendaItemPayload,
 ) {
-  return apiRequest<MeetingAgendaItem>(`/meetings/${meetingId}/agenda`, {
-    method: "POST",
+  return openApiRequest<MeetingAgendaItem, "/api/v1/meetings/{meetingId}/agenda", "post">("/api/v1/meetings/{meetingId}/agenda", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
@@ -4922,121 +4783,106 @@ export function updateMeetingAgendaItem(
   token: string,
   meetingId: string,
   itemId: string,
-  payload: Partial<Pick<MeetingAgendaItem, "title" | "notes" | "status" | "durationMins" | "sortOrder">>,
+  payload: UpdateMeetingAgendaItemPayload,
 ) {
-  return apiRequest<MeetingAgendaItem>(`/meetings/${meetingId}/agenda/${itemId}`, {
-    method: "PATCH",
+  return openApiRequest<MeetingAgendaItem, "/api/v1/meetings/{meetingId}/agenda/{itemId}", "patch">("/api/v1/meetings/{meetingId}/agenda/{itemId}", "patch", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId, itemId },
+    body: payload,
   });
 }
 
 export function createMeetingReminder(
   token: string,
   meetingId: string,
-  payload: { channel: MeetingReminderChannel; offsetMinutes: number; attendeeId?: string; destination?: string; templateKey?: string },
+  payload: CreateMeetingReminderPayload,
 ) {
-  return apiRequest<MeetingReminder>(`/meetings/${meetingId}/reminders`, {
-    method: "POST",
+  return openApiRequest<MeetingReminder, "/api/v1/meetings/{meetingId}/reminders", "post">("/api/v1/meetings/{meetingId}/reminders", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
 export function listMeetingActivity(token: string, meetingId: string) {
-  return apiRequest<MeetingActivity[]>(`/meetings/${meetingId}/activity`, {
+  return openApiRequest<MeetingActivity[], "/api/v1/meetings/{meetingId}/activity", "get">("/api/v1/meetings/{meetingId}/activity", "get", {
     token,
     cache: "no-store",
+    pathParams: { meetingId },
   });
 }
 
 export function getMeetingWorkspace(token: string, meetingId: string) {
-  return apiRequest<MeetingWorkspace>(`/meetings/${meetingId}/workspace`, {
+  return openApiRequest<MeetingWorkspace, "/api/v1/meetings/{meetingId}/workspace", "get">("/api/v1/meetings/{meetingId}/workspace", "get", {
     token,
     cache: "no-store",
+    pathParams: { meetingId },
   });
 }
 
 export function updateLiveMeetingNotes(
   token: string,
   meetingId: string,
-  payload: { notes: string; version?: number; cursor?: Record<string, unknown> },
+  payload: UpdateLiveMeetingNotesPayload,
 ) {
-  return apiRequest<MeetingWorkspace["live"]>(`/meetings/${meetingId}/live-notes`, {
-    method: "PATCH",
+  return openApiRequest<MeetingWorkspace["live"], "/api/v1/meetings/{meetingId}/live-notes", "patch">("/api/v1/meetings/{meetingId}/live-notes", "patch", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
-export function createMeetingComment(token: string, meetingId: string, payload: { body: string; metadata?: Record<string, unknown> }) {
-  return apiRequest<MeetingComment>(`/meetings/${meetingId}/comments`, {
-    method: "POST",
+export function createMeetingComment(token: string, meetingId: string, payload: CreateMeetingCommentPayload) {
+  return openApiRequest<MeetingComment, "/api/v1/meetings/{meetingId}/comments", "post">("/api/v1/meetings/{meetingId}/comments", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
-export function updateMeetingComment(token: string, meetingId: string, commentId: string, payload: { body: string }) {
-  return apiRequest<MeetingComment>(`/meetings/${meetingId}/comments/${commentId}`, {
-    method: "PATCH",
+export function updateMeetingComment(token: string, meetingId: string, commentId: string, payload: UpdateMeetingCommentPayload) {
+  return openApiRequest<MeetingComment, "/api/v1/meetings/{meetingId}/comments/{commentId}", "patch">("/api/v1/meetings/{meetingId}/comments/{commentId}", "patch", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId, commentId },
+    body: payload,
   });
 }
 
 export function deleteMeetingComment(token: string, meetingId: string, commentId: string) {
-  return apiRequest<{ success: boolean }>(`/meetings/${meetingId}/comments/${commentId}`, {
-    method: "DELETE",
+  return openApiRequest<{ success: boolean }, "/api/v1/meetings/{meetingId}/comments/{commentId}", "delete">("/api/v1/meetings/{meetingId}/comments/{commentId}", "delete", {
     token,
+    pathParams: { meetingId, commentId },
   });
 }
 
-export function createMeetingDecision(
-  token: string,
-  meetingId: string,
-  payload: {
-    title: string;
-    summary?: string;
-    impact?: string;
-    status?: MeetingDecisionStatus;
-    ownerId?: string;
-    taskId?: string;
-    dueAt?: string;
-    metadata?: Record<string, unknown>;
-  },
-) {
-  return apiRequest<MeetingDecision>(`/meetings/${meetingId}/decisions`, {
-    method: "POST",
+export function createMeetingDecision(token: string, meetingId: string, payload: CreateMeetingDecisionPayload) {
+  return openApiRequest<MeetingDecision, "/api/v1/meetings/{meetingId}/decisions", "post">("/api/v1/meetings/{meetingId}/decisions", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
-export function updateMeetingDecision(token: string, meetingId: string, decisionId: string, payload: Partial<MeetingDecision>) {
-  return apiRequest<MeetingDecision>(`/meetings/${meetingId}/decisions/${decisionId}`, {
-    method: "PATCH",
+export function updateMeetingDecision(token: string, meetingId: string, decisionId: string, payload: UpdateMeetingDecisionPayload) {
+  return openApiRequest<MeetingDecision, "/api/v1/meetings/{meetingId}/decisions/{decisionId}", "patch">("/api/v1/meetings/{meetingId}/decisions/{decisionId}", "patch", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId, decisionId },
+    body: payload,
   });
 }
 
 export function deleteMeetingDecision(token: string, meetingId: string, decisionId: string) {
-  return apiRequest<{ success: boolean }>(`/meetings/${meetingId}/decisions/${decisionId}`, {
-    method: "DELETE",
+  return openApiRequest<{ success: boolean }, "/api/v1/meetings/{meetingId}/decisions/{decisionId}", "delete">("/api/v1/meetings/{meetingId}/decisions/{decisionId}", "delete", {
     token,
+    pathParams: { meetingId, decisionId },
   });
 }
 
-export function createMeetingChecklistItem(
-  token: string,
-  meetingId: string,
-  payload: { title: string; notes?: string; ownerId?: string; taskId?: string; dueAt?: string; sortOrder?: number; metadata?: Record<string, unknown> },
-) {
-  return apiRequest<MeetingChecklistItem>(`/meetings/${meetingId}/checklist`, {
-    method: "POST",
+export function createMeetingChecklistItem(token: string, meetingId: string, payload: CreateMeetingChecklistItemPayload) {
+  return openApiRequest<MeetingChecklistItem, "/api/v1/meetings/{meetingId}/checklist", "post">("/api/v1/meetings/{meetingId}/checklist", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
@@ -5044,19 +4890,19 @@ export function updateMeetingChecklistItem(
   token: string,
   meetingId: string,
   itemId: string,
-  payload: Partial<Pick<MeetingChecklistItem, "title" | "notes" | "isDone" | "ownerId" | "taskId" | "dueAt" | "sortOrder" | "metadata">>,
+  payload: UpdateMeetingChecklistItemPayload,
 ) {
-  return apiRequest<MeetingChecklistItem>(`/meetings/${meetingId}/checklist/${itemId}`, {
-    method: "PATCH",
+  return openApiRequest<MeetingChecklistItem, "/api/v1/meetings/{meetingId}/checklist/{itemId}", "patch">("/api/v1/meetings/{meetingId}/checklist/{itemId}", "patch", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId, itemId },
+    body: payload,
   });
 }
 
 export function deleteMeetingChecklistItem(token: string, meetingId: string, itemId: string) {
-  return apiRequest<{ success: boolean }>(`/meetings/${meetingId}/checklist/${itemId}`, {
-    method: "DELETE",
+  return openApiRequest<{ success: boolean }, "/api/v1/meetings/{meetingId}/checklist/{itemId}", "delete">("/api/v1/meetings/{meetingId}/checklist/{itemId}", "delete", {
     token,
+    pathParams: { meetingId, itemId },
   });
 }
 
@@ -5064,68 +4910,43 @@ export function updateMeetingAttendance(
   token: string,
   meetingId: string,
   attendeeId: string,
-  payload: { status: MeetingAttendeeStatus; responseNote?: string | null; metadata?: Record<string, unknown> },
+  payload: UpdateMeetingAttendancePayload,
 ) {
-  return apiRequest<MeetingAttendee>(`/meetings/${meetingId}/attendance/${attendeeId}`, {
-    method: "PATCH",
+  return openApiRequest<MeetingAttendee, "/api/v1/meetings/{meetingId}/attendance/{attendeeId}", "patch">("/api/v1/meetings/{meetingId}/attendance/{attendeeId}", "patch", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId, attendeeId },
+    body: payload,
   });
 }
 
 export function markMeetingNoShow(token: string, meetingId: string) {
-  return apiRequest<Meeting>(`/meetings/${meetingId}/no-show`, {
-    method: "POST",
+  return openApiRequest<Meeting, "/api/v1/meetings/{meetingId}/no-show", "post">("/api/v1/meetings/{meetingId}/no-show", "post", {
     token,
+    pathParams: { meetingId },
   });
 }
 
-export function assignMeetingActionItem(
-  token: string,
-  meetingId: string,
-  payload: {
-    title: string;
-    description?: string;
-    projectId?: string;
-    sprintId?: string;
-    assigneeId?: string;
-    dueDate?: string;
-    priority?: TaskPriority;
-    type?: TaskType;
-    actionItemId?: string;
-  },
-) {
-  return apiRequest<{ task: Task; actionItemId?: string | null }>(`/meetings/${meetingId}/action-items/assign`, {
-    method: "POST",
+export function assignMeetingActionItem(token: string, meetingId: string, payload: AssignMeetingActionItemPayload) {
+  return openApiRequest<{ task: Task; actionItemId?: string | null }, "/api/v1/meetings/{meetingId}/action-items/assign", "post">("/api/v1/meetings/{meetingId}/action-items/assign", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
-export function sendMeetingFollowUp(
-  token: string,
-  meetingId: string,
-  payload: {
-    subject?: string;
-    body: string;
-    channels?: MeetingReminderChannel[];
-    recipients?: string[];
-    includeActionItems?: boolean;
-    syncToOmoFlow?: boolean;
-  },
-) {
-  return apiRequest<{ queued: number; reminders: MeetingReminder[] }>(`/meetings/${meetingId}/follow-up`, {
-    method: "POST",
+export function sendMeetingFollowUp(token: string, meetingId: string, payload: SendMeetingFollowUpPayload) {
+  return openApiRequest<{ queued: number; reminders: MeetingReminder[] }, "/api/v1/meetings/{meetingId}/follow-up", "post">("/api/v1/meetings/{meetingId}/follow-up", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
-export function syncMeetingOmoFlowRuntime(token: string, meetingId: string, payload: { provider?: string; payload?: Record<string, unknown> } = {}) {
-  return apiRequest<{ meeting: Meeting; runtimeState: Record<string, unknown> }>(`/meetings/${meetingId}/omoflow/sync`, {
-    method: "POST",
+export function syncMeetingOmoFlowRuntime(token: string, meetingId: string, payload: SyncMeetingRuntimePayload = {}) {
+  return openApiRequest<{ meeting: Meeting; runtimeState: Record<string, unknown> }, "/api/v1/meetings/{meetingId}/omoflow/sync", "post">("/api/v1/meetings/{meetingId}/omoflow/sync", "post", {
     token,
-    body: JSON.stringify(payload),
+    pathParams: { meetingId },
+    body: payload,
   });
 }
 
