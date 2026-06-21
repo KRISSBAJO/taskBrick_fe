@@ -236,11 +236,7 @@ export default function AdminPage() {
     return () => window.clearTimeout(timeout);
   }, [loadAdmin]);
 
-  useEffect(() => {
-    if (!visibleTabs.some((tab) => tab.id === activeTab)) {
-      setActiveTab("overview");
-    }
-  }, [activeTab, visibleTabs]);
+  const selectedTab = visibleTabs.some((tab) => tab.id === activeTab) ? activeTab : "overview";
 
   const permissionGroups = useMemo(() => {
     const groups = new Map<string, Permission[]>();
@@ -730,7 +726,7 @@ export default function AdminPage() {
             onClick={() => setActiveTab(id)}
             className={cn(
               "flex h-10 min-w-fit flex-1 items-center justify-center gap-2 rounded-xl px-3 text-sm font-black transition",
-              activeTab === id ? "bg-[#111111] text-white" : "text-ink-soft hover:bg-panel-muted hover:text-foreground",
+              selectedTab === id ? "bg-[#111111] text-white" : "text-ink-soft hover:bg-panel-muted hover:text-foreground",
             )}
           >
             <Icon className="size-4" />
@@ -739,7 +735,7 @@ export default function AdminPage() {
         ))}
       </section>
 
-      {activeTab === "overview" && (
+      {selectedTab === "overview" && (
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(360px,0.8fr)]">
           <Panel title="Security posture" eyebrow="Runtime checks" icon={Shield}>
             <div className="grid gap-3 md:grid-cols-2">
@@ -785,7 +781,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {activeTab === "tenant" && (
+      {selectedTab === "tenant" && (
         <Panel title="Tenant settings" eyebrow="Brand and identity" icon={ServerCog}>
           <form onSubmit={saveTenant} className="grid gap-4">
             <div className="grid gap-3 lg:grid-cols-3">
@@ -813,7 +809,7 @@ export default function AdminPage() {
         </Panel>
       )}
 
-      {activeTab === "roles" && (
+      {selectedTab === "roles" && (
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_440px]">
           <Panel title="Roles and permissions" eyebrow="RBAC matrix" icon={UserCog}>
             <div className="grid gap-3">
@@ -924,7 +920,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {activeTab === "security" && (
+      {selectedTab === "security" && (
         <div className="space-y-5">
           <div className="grid gap-5 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
             <Panel title="Security policy" eyebrow="Tenant guardrails" icon={Lock}>
@@ -1084,7 +1080,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {activeTab === "compliance" && (
+      {selectedTab === "compliance" && (
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_430px]">
           <Panel title="Compliance job queue" eyebrow="Export, deletion, retention" icon={ClipboardCheck}>
             <div className="mb-4 grid gap-3 md:grid-cols-4">
@@ -1150,7 +1146,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {activeTab === "access" && (
+      {selectedTab === "access" && (
         <div className="grid gap-5 xl:grid-cols-2">
           <Panel title="Sessions" eyebrow="Auth lifecycle" icon={Fingerprint}>
             <div className="mb-3 rounded-xl border border-line bg-background p-3">
@@ -1234,7 +1230,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {activeTab === "profile" && (
+      {selectedTab === "profile" && (
         <div className="grid gap-5 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
           <Panel title="User profile" eyebrow="Personal settings" icon={Users}>
             <form onSubmit={saveProfile} className="grid gap-3">

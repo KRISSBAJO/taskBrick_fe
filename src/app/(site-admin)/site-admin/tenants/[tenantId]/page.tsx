@@ -130,7 +130,8 @@ export default function SiteAdminTenantDetailPage() {
   }, [auth.accessToken, tenantId]);
 
   useEffect(() => {
-    void loadTenant();
+    const timeout = window.setTimeout(() => void loadTenant(), 0);
+    return () => window.clearTimeout(timeout);
   }, [loadTenant]);
 
   async function changeTenantStatus(tenant: Tenant, status: string) {

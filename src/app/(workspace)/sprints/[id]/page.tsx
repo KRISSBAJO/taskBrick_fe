@@ -358,7 +358,7 @@ function SprintTaskRow({ isLast, task }: { isLast: boolean; task: Task }) {
   const assignee  = task.assignees?.[0]?.user;
   const sColor    = STATUS_COLOR[task.status]   ?? "#94a3b8";
   const priColor  = PRIORITY_COLOR[task.priority] ?? "#94a3b8";
-  const now       = Date.now();
+  const [now]     = useState(() => Date.now());
   const overdue   = task.dueDate ? now > new Date(task.dueDate).getTime() : false;
 
   return (

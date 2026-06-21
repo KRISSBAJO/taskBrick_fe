@@ -396,7 +396,10 @@ export default function ProjectDetailPage() {
   }, [loadProject]);
 
   useEffect(() => {
-    setSelectedTaskIds((current) => current.filter((taskId) => tasks.some((task) => task.id === taskId)));
+    const timeout = window.setTimeout(() => {
+      setSelectedTaskIds((current) => current.filter((taskId) => tasks.some((task) => task.id === taskId)));
+    }, 0);
+    return () => window.clearTimeout(timeout);
   }, [tasks]);
 
   // ?task= URL now renders a standalone full page (early return below)

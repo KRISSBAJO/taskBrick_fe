@@ -17,22 +17,25 @@ export function VerifyEmailPanel({ token }: { token?: string }) {
   useEffect(() => {
     if (!token) return;
     let mounted = true;
-    setLoading(true);
-    verifyEmail({ token })
-      .then((result) => {
-        if (!mounted) return;
-        setStoredAuth(result);
-        setSuccess("Email verified. Your workspace session is ready.");
-      })
-      .catch((caught) => {
-        if (!mounted) return;
-        setError(caught instanceof Error ? caught.message : "Unable to verify email");
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
+    const timeout = window.setTimeout(() => {
+      setLoading(true);
+      verifyEmail({ token })
+        .then((result) => {
+          if (!mounted) return;
+          setStoredAuth(result);
+          setSuccess("Email verified. Your workspace session is ready.");
+        })
+        .catch((caught) => {
+          if (!mounted) return;
+          setError(caught instanceof Error ? caught.message : "Unable to verify email");
+        })
+        .finally(() => {
+          if (mounted) setLoading(false);
+        });
+    }, 0);
     return () => {
       mounted = false;
+      window.clearTimeout(timeout);
     };
   }, [token]);
 

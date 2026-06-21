@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
   Activity,
   BadgeCheck,
@@ -111,11 +111,12 @@ export default function SettingsPage() {
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [profileAvatar, setProfileAvatar] = useState(user.avatarUrl ?? "");
 
-  const visibleTabs = TABS.filter((tab) => {
+  const visibleTabs = useMemo(() => TABS.filter((tab) => {
     if (tab.id === "connections") return access.canViewDeveloperConnections;
     if (tab.id === "security") return access.canViewSecurity;
     return true;
-  });
+  }), [access.canViewDeveloperConnections, access.canViewSecurity]);
+  const selectedTab = visibleTabs.some((tab) => tab.id === activeTab) ? activeTab : "profile";
 
   const loadSettings = useCallback(async () => {
     setLoading(true);
@@ -148,13 +149,8 @@ export default function SettingsPage() {
   }, [loadSettings]);
 
   useEffect(() => {
-    if (!visibleTabs.some((tab) => tab.id === activeTab)) {
-      setActiveTab("profile");
-    }
-  }, [activeTab, visibleTabs]);
-
-  useEffect(() => {
-    setProfileAvatar(user.avatarUrl ?? "");
+    const timeout = window.setTimeout(() => setProfileAvatar(user.avatarUrl ?? ""), 0);
+    return () => window.clearTimeout(timeout);
   }, [user.avatarUrl]);
 
   function copyToClipboard(value: string, key: string) {
@@ -388,7 +384,7 @@ export default function SettingsPage() {
             onClick={() => setActiveTab(id)}
             className={cn(
               "flex h-9 flex-1 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all whitespace-nowrap",
-              activeTab === id
+              selectedTab === id
                 ? "bg-foreground text-white shadow-sm"
                 : "text-ink-soft hover:bg-panel-muted hover:text-foreground",
             )}
@@ -400,7 +396,7 @@ export default function SettingsPage() {
       </div>
 
       {/* PROFILE TAB */}
-      {activeTab === "profile" && (
+      {selectedTab === "profile" && (
         <div className="space-y-4 tb-reveal">
 
           {/* identity hero */}
@@ -584,7 +580,7 @@ export default function SettingsPage() {
       )}
 
       {/* WORKSPACE TAB */}
-      {activeTab === "workspace" && (
+      {selectedTab === "workspace" && (
         <div className="space-y-4 tb-reveal">
           {!access.canViewPeopleDirectory ? (
             <SettingsCard icon={Lock} title="Workspace access" subtitle="Role-limited view">
@@ -632,7 +628,7 @@ export default function SettingsPage() {
       )}
 
       {/* CONNECTIONS TAB */}
-      {activeTab === "connections" && (
+      {selectedTab === "connections" && (
         <div className="space-y-4 tb-reveal">
           <SettingsCard icon={Globe} title="API endpoint" subtitle="TaskBricks REST API">
             <EndpointBlock
@@ -661,7 +657,7 @@ export default function SettingsPage() {
       )}
 
       {/* SECURITY TAB */}
-      {activeTab === "security" && (
+      {selectedTab === "security" && (
         <div className="space-y-4 tb-reveal">
           <SettingsCard icon={KeyRound} title="Change password" subtitle="Credential lifecycle">
             <form onSubmit={onChangePassword} className="grid gap-3">

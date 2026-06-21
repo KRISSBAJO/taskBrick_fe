@@ -964,7 +964,8 @@ export default function DocsPage() {
   }, [auth.accessToken, folderFilter, includeArchived, search, statusFilter, toast, visibilityFilter]);
 
   useEffect(() => {
-    void loadWorkspaceDocs();
+    const timeout = window.setTimeout(() => void loadWorkspaceDocs(), 0);
+    return () => window.clearTimeout(timeout);
   }, [loadWorkspaceDocs]);
 
   useEffect(() => {
@@ -1589,14 +1590,17 @@ function DocumentWorkspace({
   const lastAssistantTargetRef = useRef("");
 
   useEffect(() => {
-    if (!activePrompt) {
-      setPromptValue("");
-      setPromptCustomValue("");
-      return;
-    }
+    const timeout = window.setTimeout(() => {
+      if (!activePrompt) {
+        setPromptValue("");
+        setPromptCustomValue("");
+        return;
+      }
 
-    setPromptValue(activePrompt.kind === "options" ? activePrompt.options[0] ?? "" : "");
-    setPromptCustomValue("");
+      setPromptValue(activePrompt.kind === "options" ? activePrompt.options[0] ?? "" : "");
+      setPromptCustomValue("");
+    }, 0);
+    return () => window.clearTimeout(timeout);
   }, [activePromptKey]);
 
   useEffect(() => {
@@ -2886,7 +2890,8 @@ function StructuredTableInput({
   const lowerHeader = header.toLowerCase();
 
   useEffect(() => {
-    setDraft(normalizedValue);
+    const timeout = window.setTimeout(() => setDraft(normalizedValue), 0);
+    return () => window.clearTimeout(timeout);
   }, [normalizedValue]);
 
   const updateDraft = (nextValue: string) => {

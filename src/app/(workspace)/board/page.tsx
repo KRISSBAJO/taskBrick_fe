@@ -2343,7 +2343,7 @@ function ListView({ board, density, sprints }: {
   density: BoardDensity;
   sprints: Sprint[];
 }) {
-  const renderedAt = Date.now();
+  const [renderedAt] = useState(() => Date.now());
   const allTasks = board.columns.flatMap((col) => col.tasks ?? []);
 
   return (

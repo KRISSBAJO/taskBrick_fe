@@ -115,6 +115,7 @@ export default function DashboardPage() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [now] = useState(() => Date.now());
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
@@ -140,7 +141,7 @@ export default function DashboardPage() {
     return () => window.clearTimeout(timeout);
   }, [loadDashboard]);
 
-  const metrics = useMemo(() => buildMetrics(data), [data]);
+  const metrics = useMemo(() => buildMetrics(data, now), [data, now]);
   const trend = useMemo(() => buildTrend(data.tasks), [data.tasks]);
   const distribution = useMemo(() => buildTaskDistribution(data.tasks), [data.tasks]);
   const weekly = useMemo(() => buildWeeklyPerformance(data.tasks), [data.tasks]);
@@ -268,7 +269,7 @@ export default function DashboardPage() {
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <PortfolioPanel loading={loading} projects={projectRows} />
-        <RightNowPanel loading={loading} tasks={attentionTasks} />
+        <RightNowPanel loading={loading} now={now} tasks={attentionTasks} />
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[1fr_1fr]">
@@ -586,7 +587,7 @@ function ProjectCard({ project }: { project: Project }) {
   );
 }
 
-function RightNowPanel({ loading, tasks }: { loading: boolean; tasks: Task[] }) {
+function RightNowPanel({ loading, now, tasks }: { loading: boolean; now: number; tasks: Task[] }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
       <div className="flex items-center justify-between border-b border-line px-5 py-4">
@@ -606,7 +607,7 @@ function RightNowPanel({ loading, tasks }: { loading: boolean; tasks: Task[] }) 
       ) : tasks.length ? (
         <div className="divide-y divide-line">
           {tasks.map((task) => (
-            <AttentionRow key={task.id} task={task} />
+            <AttentionRow key={task.id} now={now} task={task} />
           ))}
         </div>
       ) : (
@@ -620,9 +621,9 @@ function RightNowPanel({ loading, tasks }: { loading: boolean; tasks: Task[] }) 
   );
 }
 
-function AttentionRow({ task }: { task: Task }) {
+function AttentionRow({ now, task }: { now: number; task: Task }) {
   const priority = priorityConfig[task.priority] ?? priorityConfig.MEDIUM;
-  const overdue = Boolean(task.dueDate && new Date(task.dueDate).getTime() < Date.now());
+  const overdue = Boolean(task.dueDate && new Date(task.dueDate).getTime() < now);
 
   return (
     <Link
@@ -935,7 +936,7 @@ async function fetchAllPages<T>(loader: (page: number) => Promise<PaginatedRespo
   return items;
 }
 
-function buildMetrics(data: DashboardData) {
+function buildMetrics(data: DashboardData, now: number) {
   const activeProjects = data.projects.filter((project) => project.status === "ACTIVE").length;
   const totalProjects = data.projects.length;
   const completedTasks = data.tasks.filter((task) => task.status === "DONE").length;
@@ -944,7 +945,7 @@ function buildMetrics(data: DashboardData) {
   const notStartedTasks = data.tasks.filter((task) => ["BACKLOG", "TODO"].includes(task.status)).length;
   const riskTasks = data.tasks.filter(isRiskTask).length;
   const atRiskProjects = data.projects.filter((project) => getProjectHealth(project) === "At risk").length;
-  const overdueTasks = data.tasks.filter((task) => isOpenTask(task) && task.dueDate && new Date(task.dueDate).getTime() < Date.now()).length;
+  const overdueTasks = data.tasks.filter((task) => isOpenTask(task) && task.dueDate && new Date(task.dueDate).getTime() < now).length;
   const totalMembers = data.teams.reduce((sum, team) => sum + (team._count?.members ?? 0), 0);
   const deliveryRate = data.tasks.length ? Math.round((completedTasks / data.tasks.length) * 100) : 0;
   const completedThisMonth = countTasksInCurrentMonth(data.tasks, (task) => task.status === "DONE", completedDateForTask);

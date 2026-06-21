@@ -20,33 +20,36 @@ function SsoCallbackContent() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const providerError = searchParams.get("error");
-    const state = searchParams.get("state");
-    const code = searchParams.get("code");
-
-    if (providerError) {
-      setError(searchParams.get("error_description") || providerError);
-      return;
-    }
-
-    if (!state || !code) {
-      setError("SSO callback is missing state or authorization code.");
-      return;
-    }
-
     let cancelled = false;
-    void completeSso({ state, code })
-      .then((auth) => {
-        if (cancelled) return;
-        setStoredAuth(auth);
-        router.replace("/dashboard");
-      })
-      .catch((caught) => {
-        if (!cancelled) setError(caught instanceof Error ? caught.message : "Unable to complete SSO sign in.");
-      });
+    const timeout = window.setTimeout(() => {
+      const providerError = searchParams.get("error");
+      const state = searchParams.get("state");
+      const code = searchParams.get("code");
+
+      if (providerError) {
+        setError(searchParams.get("error_description") || providerError);
+        return;
+      }
+
+      if (!state || !code) {
+        setError("SSO callback is missing state or authorization code.");
+        return;
+      }
+
+      void completeSso({ state, code })
+        .then((auth) => {
+          if (cancelled) return;
+          setStoredAuth(auth);
+          router.replace("/dashboard");
+        })
+        .catch((caught) => {
+          if (!cancelled) setError(caught instanceof Error ? caught.message : "Unable to complete SSO sign in.");
+        });
+    }, 0);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(timeout);
     };
   }, [router, searchParams]);
 

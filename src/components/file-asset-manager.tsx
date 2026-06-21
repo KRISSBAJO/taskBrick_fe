@@ -362,13 +362,12 @@ function FileAssetRow({
   onRestore: () => void;
   saving: boolean;
 }) {
-  const Icon = iconFor(file);
   const inactive = Boolean(file.deletedAt || file.archivedAt);
 
   return (
     <article className={cn("flex flex-wrap items-center gap-3 rounded-xl border border-line bg-background p-3", inactive && "opacity-65")}>
       <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-panel-muted text-foreground">
-        <Icon className="size-5" />
+        <FileAssetIcon file={file} />
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
@@ -455,11 +454,11 @@ async function uploadWithIntent(intent: UploadIntent, file: File) {
   return intent.fileUrl;
 }
 
-function iconFor(file: FileAsset) {
+function FileAssetIcon({ file }: { file: FileAsset }) {
   const kind = assetKind(file.fileUrl, file.mimeType ?? undefined);
-  if (kind === "image") return ImageIcon;
-  if (kind === "link") return Link2;
-  return FileText;
+  if (kind === "image") return <ImageIcon className="size-5" />;
+  if (kind === "link") return <Link2 className="size-5" />;
+  return <FileText className="size-5" />;
 }
 
 function assetKind(value: string, mimeType?: string) {

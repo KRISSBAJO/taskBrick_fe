@@ -133,15 +133,15 @@ export function Topbar() {
 
   useEffect(() => {
     const term = searchQuery.trim();
-    if (!showCommandSearch || term.length < 2) {
-      setSearchResults([]);
-      setSearching(false);
-      return;
-    }
-
     let alive = true;
-    setSearching(true);
     const timer = window.setTimeout(() => {
+      if (!showCommandSearch || term.length < 2) {
+        setSearchResults([]);
+        setSearching(false);
+        return;
+      }
+
+      setSearching(true);
       void globalSearch(auth.accessToken, {
         category: searchCategory,
         limit: 24,

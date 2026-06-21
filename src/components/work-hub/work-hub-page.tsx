@@ -239,13 +239,14 @@ export function WorkHubPage({ view }: { view: WorkHubView }) {
   );
 
   useEffect(() => {
-    void loadHub("initial");
+    const timeout = window.setTimeout(() => void loadHub("initial"), 0);
+    return () => window.clearTimeout(timeout);
   }, [loadHub]);
 
   useEffect(() => {
-    if (mailVersion > 0 || notificationVersion > 0) {
-      void loadHub("silent");
-    }
+    if (mailVersion <= 0 && notificationVersion <= 0) return;
+    const timeout = window.setTimeout(() => void loadHub("silent"), 0);
+    return () => window.clearTimeout(timeout);
   }, [loadHub, mailVersion, notificationVersion]);
 
   async function refresh() {
@@ -369,11 +370,14 @@ function InternalMailClient({
   );
 
   useEffect(() => {
-    void loadThreads(initialThreadId);
+    const timeout = window.setTimeout(() => void loadThreads(initialThreadId), 0);
+    return () => window.clearTimeout(timeout);
   }, [activeMailbox, initialThreadId, loadThreads]);
 
   useEffect(() => {
-    if (mailVersion > 0) void loadThreads();
+    if (mailVersion <= 0) return;
+    const timeout = window.setTimeout(() => void loadThreads(), 0);
+    return () => window.clearTimeout(timeout);
   }, [loadThreads, mailVersion]);
 
   async function selectThread(threadId: string) {
@@ -425,7 +429,6 @@ function InternalMailClient({
     }
   }
 
-  const ActiveMailboxIcon = mailboxIcon(activeMailbox.key);
   const activeMailboxCount = mailboxCount(folders, activeMailbox);
   const hasSelectedThread = Boolean(selectedThread);
 
@@ -445,7 +448,7 @@ function InternalMailClient({
                 </span>
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-2">
-                <ActiveMailboxIcon className="size-4 text-primary-dark" aria-hidden="true" />
+                <MailboxIcon className="size-4 text-primary-dark" modeKey={activeMailbox.key} />
                 <h2 className="truncate text-lg font-black tracking-[-0.01em] text-foreground">{activeMailbox.label}</h2>
                 <span className="rounded-full border border-line bg-white px-2 py-0.5 text-xs font-black text-ink-soft">{activeMailboxCount} items</span>
                 {folders.unread ? <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-black text-[#111111]">{folders.unread} unread</span> : null}
@@ -578,7 +581,6 @@ function MailboxList({
     <div className="space-y-1">
       {MAILBOXES.map((mailbox) => {
         const count = mailboxCount(folders, mailbox);
-        const Icon = mailboxIcon(mailbox.key);
         const selected = active.key === mailbox.key;
 
         return (
@@ -591,7 +593,7 @@ function MailboxList({
               selected ? "bg-[#dbeafe] text-[#1d4ed8]" : "text-[#3d4656] hover:bg-white",
             )}
           >
-            <Icon className="size-4 shrink-0" aria-hidden="true" />
+            <MailboxIcon className="size-4 shrink-0" modeKey={mailbox.key} />
             <span className="min-w-0 flex-1 truncate">{mailbox.label}</span>
             {count ? <span className="text-xs font-black">{count}</span> : null}
           </button>
@@ -645,7 +647,8 @@ function ReadingPane({
   const [replying, setReplying] = useState(false);
 
   useEffect(() => {
-    setReplyDraft(EMPTY_RICH_MAIL);
+    const timeout = window.setTimeout(() => setReplyDraft(EMPTY_RICH_MAIL), 0);
+    return () => window.clearTimeout(timeout);
   }, [selectedThread?.id]);
 
   async function handleReply(event: FormEvent<HTMLFormElement>) {
@@ -884,13 +887,14 @@ function ComposeModal({
 
   useEffect(() => {
     const term = recipientSearch.trim();
-    if (term.length < 2) {
-      setRecipientSuggestions([]);
-      setRecipientLoading(false);
-      return;
-    }
 
     const timeout = window.setTimeout(() => {
+      if (term.length < 2) {
+        setRecipientSuggestions([]);
+        setRecipientLoading(false);
+        return;
+      }
+
       setRecipientLoading(true);
       searchInternalMailboxes(auth.accessToken, { limit: 20, page: 1, search: term, status: "ACTIVE" })
         .then((page) => setRecipientSuggestions(page.data))
@@ -1860,17 +1864,17 @@ function mailboxCount(folders: InternalMailFolderSummary, mailbox: MailboxMode) 
   return "folder" in mailbox ? folders.counts[mailbox.folder] ?? 0 : 0;
 }
 
-function mailboxIcon(key: MailboxMode["key"]) {
-  if (key === "SENT") return Send;
-  if (key === "DRAFTS") return FileText;
-  if (key === "ARCHIVE") return Archive;
-  if (key === "DELETED") return Trash2;
-  if (key === "JUNK") return ShieldAlert;
-  if (key === "PINNED") return Pin;
-  if (key === "STARRED") return Star;
-  if (key === "FLAGGED") return Flag;
-  if (key === "SNOOZED") return Clock3;
-  return Inbox;
+function MailboxIcon({ className, modeKey }: { className?: string; modeKey: MailboxMode["key"] }) {
+  if (modeKey === "SENT") return <Send className={className} aria-hidden="true" />;
+  if (modeKey === "DRAFTS") return <FileText className={className} aria-hidden="true" />;
+  if (modeKey === "ARCHIVE") return <Archive className={className} aria-hidden="true" />;
+  if (modeKey === "DELETED") return <Trash2 className={className} aria-hidden="true" />;
+  if (modeKey === "JUNK") return <ShieldAlert className={className} aria-hidden="true" />;
+  if (modeKey === "PINNED") return <Pin className={className} aria-hidden="true" />;
+  if (modeKey === "STARRED") return <Star className={className} aria-hidden="true" />;
+  if (modeKey === "FLAGGED") return <Flag className={className} aria-hidden="true" />;
+  if (modeKey === "SNOOZED") return <Clock3 className={className} aria-hidden="true" />;
+  return <Inbox className={className} aria-hidden="true" />;
 }
 
 function groupRecipients(recipients: InternalMailRecipient[] = []) {

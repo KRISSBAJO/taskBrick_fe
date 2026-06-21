@@ -43,6 +43,7 @@ export default function SiteAdminUserDetailPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
+  const [now] = useState(() => Date.now());
   const canMutate = currentUser.platformAdminLevel === "OWNER" || currentUser.platformAdminLevel === "ADMIN";
 
   const loadUser = useCallback(async () => {
@@ -59,14 +60,14 @@ export default function SiteAdminUserDetailPage() {
   }, [auth.accessToken, userId]);
 
   useEffect(() => {
-    void loadUser();
+    const timeout = window.setTimeout(() => void loadUser(), 0);
+    return () => window.clearTimeout(timeout);
   }, [loadUser]);
 
   const target = detail?.user;
   const activeSessions = useMemo(() => {
-    const now = Date.now();
     return (target?.authSessions ?? []).filter((session) => !session.revokedAt && new Date(session.expiresAt).getTime() > now).length;
-  }, [target?.authSessions]);
+  }, [now, target?.authSessions]);
   const activeMfa = useMemo(() => (target?.mfaFactors ?? []).filter((factor) => factor.status === "ACTIVE").length, [target?.mfaFactors]);
 
   async function changeStatus(nextStatus: string) {

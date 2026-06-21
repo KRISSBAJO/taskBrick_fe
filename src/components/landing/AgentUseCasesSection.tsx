@@ -21,6 +21,25 @@ import { motion, AnimatePresence, useInView, useSpring, useTransform, useMotionV
 import * as THREE from "three";
 
 type AgentVisual = "research" | "reporting" | "insights" | "meetings" | "process";
+type DisposableResource = { dispose: () => void };
+type MutableVector3 = {
+  x: number;
+  y: number;
+  z: number;
+  distanceTo: (other: MutableVector3) => number;
+  set: (x: number, y: number, z: number) => void;
+};
+type SceneNode = {
+  position: MutableVector3;
+  scale: { setScalar: (value: number) => void };
+};
+type EmissiveMaterial = DisposableResource & { emissiveIntensity: number };
+type OpacityMaterial = DisposableResource & { opacity: number };
+type DynamicBufferAttribute = {
+  array: Float32Array;
+  needsUpdate: boolean;
+  setUsage: (usage: unknown) => void;
+};
 
 type AgentCard = {
   title: string;
@@ -32,6 +51,10 @@ type AgentCard = {
   glow: string;
   capabilities: string[];
 };
+
+function disposeAll(resources: DisposableResource[]) {
+  resources.forEach((resource) => resource.dispose());
+}
 
 const agentCards: AgentCard[] = [
   {
@@ -796,7 +819,7 @@ function ThreeInsights() {
     return () => {
       cancelAnimationFrame(rafId);
       renderer.dispose();
-      [sGeo, sMat, cGeo, cMat, rGeo, rMat, dGeo, dMat].forEach((o: any) => o.dispose());
+      disposeAll([sGeo, sMat, cGeo, cMat, rGeo, rMat, dGeo, dMat]);
       container.innerHTML = "";
     };
   }, []);
@@ -848,7 +871,7 @@ function ThreeMeetings() {
     const orbColors = ["#10b981", "#34d399", "#6ee7b7", "#059669", "#a7f3d0"];
     const orbSpeeds = [0.65, 0.92, 0.48, 1.08, 0.74];
     const orbPhases = [0, 1.257, 2.513, 3.770, 5.027];
-    const orbGeos: any[] = [], orbMats: any[] = [], orbs: any[] = [];
+    const orbGeos: DisposableResource[] = [], orbMats: EmissiveMaterial[] = [], orbs: SceneNode[] = [];
     for (let i = 0; i < N_ORB; i++) {
       const g = new THREE.SphereGeometry(0.11, 10, 10);
       const m = new THREE.MeshPhongMaterial({ color: orbColors[i], emissive: orbColors[i], emissiveIntensity: 0.55 });
@@ -860,7 +883,7 @@ function ThreeMeetings() {
     // Connection beam pool
     const MAX_BEAMS = 8;
     const beamPts = Array.from({ length: MAX_BEAMS }, () => new Float32Array(6));
-    const beamAttrs: any[] = [], beamMats: any[] = [];
+    const beamAttrs: DynamicBufferAttribute[] = [], beamMats: OpacityMaterial[] = [];
     for (let i = 0; i < MAX_BEAMS; i++) {
       const attr = new THREE.BufferAttribute(beamPts[i]!, 3);
       attr.setUsage(THREE.DynamicDrawUsage);
@@ -967,9 +990,7 @@ function ThreeMeetings() {
     return () => {
       cancelAnimationFrame(rafId);
       renderer.dispose();
-      orbGeos.forEach((g: any) => g.dispose()); orbMats.forEach((m: any) => m.dispose());
-      hubGeo.dispose(); hubMat.dispose(); ringGeo.dispose(); ringMat.dispose();
-      scanGeo.dispose(); scanMat.dispose(); aGeo.dispose(); aMat.dispose();
+      disposeAll([...orbGeos, ...orbMats, hubGeo, hubMat, ringGeo, ringMat, scanGeo, scanMat, aGeo, aMat]);
       container.innerHTML = "";
     };
   }, []);
@@ -1001,7 +1022,7 @@ function ThreeProcess() {
     const opacs    = [0.28,   0.48, 1.0,   0.48,  0.28];
     const chanHex  = ["#7c2d12","#c2410c","#f97316","#c2410c","#7c2d12"];
 
-    const lineAttrs: any[] = [], lineGeos: any[] = [], lineMats: any[] = [];
+    const lineAttrs: DynamicBufferAttribute[] = [], lineGeos: DisposableResource[] = [], lineMats: OpacityMaterial[] = [];
     for (let ch = 0; ch < CHAN; ch++) {
       const pts = new Float32Array((SEGS + 1) * 3);
       const attr = new THREE.BufferAttribute(pts, 3);
@@ -1102,9 +1123,7 @@ function ThreeProcess() {
     return () => {
       cancelAnimationFrame(rafId);
       renderer.dispose();
-      lineGeos.forEach((g: any) => g.dispose()); lineMats.forEach((m: any) => m.dispose());
-      glowGeo.dispose(); glowMat.dispose(); dGeo.dispose(); dMat.dispose();
-      pGeo.dispose(); pMat.dispose();
+      disposeAll([...lineGeos, ...lineMats, glowGeo, glowMat, dGeo, dMat, pGeo, pMat]);
       container.innerHTML = "";
     };
   }, []);

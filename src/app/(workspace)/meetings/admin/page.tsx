@@ -130,7 +130,10 @@ export default function MeetingAdminPage() {
     }
   }, [auth.accessToken]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    const timeout = window.setTimeout(() => void load(), 0);
+    return () => window.clearTimeout(timeout);
+  }, [load]);
 
   const save = async () => {
     setSaving(true);

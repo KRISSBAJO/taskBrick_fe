@@ -69,7 +69,8 @@ export default function SiteAdminObservabilityPage() {
   }, [auth.accessToken]);
 
   useEffect(() => {
-    void load();
+    const timeout = window.setTimeout(() => void load(), 0);
+    return () => window.clearTimeout(timeout);
   }, [load]);
 
   const queueTotals = useMemo(() => {

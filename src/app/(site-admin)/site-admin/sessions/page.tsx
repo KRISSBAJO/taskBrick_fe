@@ -42,6 +42,7 @@ export default function SiteAdminSessionsPage() {
   const [busy, setBusy] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [now] = useState(() => Date.now());
   const canAct = user.platformAdminLevel === "OWNER" || user.platformAdminLevel === "ADMIN" || user.platformAdminLevel === "SUPPORT";
 
   const load = useCallback(async () => {
@@ -195,7 +196,7 @@ export default function SiteAdminSessionsPage() {
                   <td className="px-5 py-4"><StatusBadge value={session.authMethod} /></td>
                   <td className="px-5 py-4">
                     <div className="space-y-1">
-                      <StatusBadge value={session.revokedAt ? "REVOKED" : new Date(session.expiresAt).getTime() > Date.now() ? "ACTIVE" : "EXPIRED"} />
+                      <StatusBadge value={session.revokedAt ? "REVOKED" : new Date(session.expiresAt).getTime() > now ? "ACTIVE" : "EXPIRED"} />
                       <p className="text-[11px] font-semibold text-[#766f63]">{session.mfaVerifiedAt ? "MFA verified" : "No MFA marker"}</p>
                     </div>
                   </td>
