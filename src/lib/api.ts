@@ -4100,14 +4100,18 @@ export {
   removeTeamMember,
   updateTeamMemberRole,
 } from "./api/teamApi";
-
-export function healthReady() {
-  return apiRequest<ReadinessResponse>("/health/ready", { cache: "no-store" });
-}
-
-export function moduleStatus(path: string) {
-  return apiRequest<ModuleStatus>(path, { cache: "no-store" });
-}
+export {
+  assignRole,
+  createRole,
+  deleteRole,
+  listPermissions,
+  listRoles,
+  removeRoleFromUser,
+  updateRole,
+} from "./api/accessControlApi";
+export { globalSearch } from "./api/searchApi";
+export { healthReady, moduleStatus } from "./api/systemApi";
+export { getCurrentTenant, updateCurrentTenant } from "./api/tenantApi";
 
 function boundedLimit(value: number | undefined, fallback = 50) {
   return Math.min(Math.max(value ?? fallback, 1), 100);
@@ -4811,109 +4815,6 @@ export function syncMeetingOmoFlowRuntime(token: string, meetingId: string, payl
     token,
     pathParams: { meetingId },
     body: payload,
-  });
-}
-
-export function globalSearch(
-  token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    category?: SearchCategory;
-    contextType?: string;
-    contextId?: string;
-  } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 24)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.category) params.set("category", query.category);
-  if (query.contextType) params.set("contextType", query.contextType);
-  if (query.contextId) params.set("contextId", query.contextId);
-
-  return apiRequest<GlobalSearchResponse>(`/search?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listRoles(token: string) {
-  return apiRequest<Role[]>("/roles", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listPermissions(token: string) {
-  return apiRequest<Permission[]>("/permissions", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createRole(
-  token: string,
-  payload: { name: string; description?: string; permissionIds?: string[] },
-) {
-  return apiRequest<Role>("/roles", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function updateRole(
-  token: string,
-  roleId: string,
-  payload: { name?: string; description?: string; permissionIds?: string[] },
-) {
-  return apiRequest<Role>(`/roles/${roleId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function deleteRole(token: string, roleId: string) {
-  return apiRequest<{ success: boolean }>(`/roles/${roleId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function assignRole(token: string, payload: { userId: string; roleId: string }) {
-  return apiRequest<{ success: boolean }>("/roles/assignments", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function removeRoleFromUser(token: string, roleId: string, userId: string) {
-  return apiRequest<{ success: boolean }>(`/roles/${roleId}/users/${userId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function getCurrentTenant(token: string) {
-  return apiRequest<Tenant>("/tenants/current", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function updateCurrentTenant(
-  token: string,
-  payload: { name?: string; logoUrl?: string; website?: string },
-) {
-  return apiRequest<Tenant>("/tenants/current", {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
   });
 }
 
