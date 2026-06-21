@@ -10,8 +10,8 @@ import type {
 import { boundedLimit, openApiRequest, type OpenApiJsonBody, type OpenApiQuery } from "./request";
 
 type ListConversationsQuery = OpenApiQuery<"/api/v1/conversations", "get">;
-type CreateConversationPayload = { title?: string; isGroup?: boolean; memberIds: string[] };
-type UpdateConversationPayload = Partial<Pick<Conversation, "title" | "isGroup">>;
+type CreateConversationPayload = OpenApiJsonBody<"/api/v1/conversations", "post">;
+type UpdateConversationPayload = OpenApiJsonBody<"/api/v1/conversations/{conversationId}", "patch">;
 type ListMessagesQuery = OpenApiQuery<"/api/v1/conversations/{conversationId}/messages", "get">;
 type SendMessagePayload = {
   body?: string;
@@ -47,7 +47,7 @@ export function createConversation(token: string, payload: CreateConversationPay
   return openApiRequest<Conversation, "/api/v1/conversations", "post">("/api/v1/conversations", "post", {
     token,
     pathParams: {},
-    body: payload as unknown as OpenApiJsonBody<"/api/v1/conversations", "post">,
+    body: payload,
   });
 }
 
@@ -63,7 +63,7 @@ export function updateConversation(token: string, conversationId: string, payloa
   return openApiRequest<Conversation, "/api/v1/conversations/{conversationId}", "patch">("/api/v1/conversations/{conversationId}", "patch", {
     token,
     pathParams: { conversationId },
-    body: payload as unknown as OpenApiJsonBody<"/api/v1/conversations/{conversationId}", "patch">,
+    body: payload,
   });
 }
 

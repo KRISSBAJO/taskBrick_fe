@@ -10211,20 +10211,15 @@ export interface components {
         SetTaskCustomFieldValueDto: {
             value: Record<string, never>;
         };
-        CreateConversationDto: {
-            agentId: string;
+        CreateCollaborationConversationDto: {
             title?: string;
-            contextType?: string;
-            contextId?: string;
-            metadata?: Record<string, never>;
+            /** @default false */
+            isGroup?: boolean;
+            memberIds: string[];
         };
-        UpdateConversationDto: {
+        UpdateCollaborationConversationDto: {
             title?: string;
-            /** @enum {string} */
-            status?: "OPEN" | "ARCHIVED" | "LOCKED";
-            contextType?: string;
-            contextId?: string;
-            metadata?: Record<string, never>;
+            isGroup?: boolean;
         };
         ConversationMemberDto: {
             userId: string;
@@ -11470,6 +11465,21 @@ export interface components {
             guardrails?: Record<string, never>;
             knowledgeScope?: Record<string, never>;
             enabled?: boolean;
+        };
+        CreateAiConversationDto: {
+            agentId: string;
+            title?: string;
+            contextType?: string;
+            contextId?: string;
+            metadata?: Record<string, never>;
+        };
+        UpdateAiConversationDto: {
+            title?: string;
+            /** @enum {string} */
+            status?: "OPEN" | "ARCHIVED" | "LOCKED";
+            contextType?: string;
+            contextId?: string;
+            metadata?: Record<string, never>;
         };
         SendMessageDto: {
             content: string;
@@ -17978,7 +17988,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateConversationDto"];
+                "application/json": components["schemas"]["CreateCollaborationConversationDto"];
             };
         };
         responses: {
@@ -18040,7 +18050,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateConversationDto"];
+                "application/json": components["schemas"]["UpdateCollaborationConversationDto"];
             };
         };
         responses: {
@@ -25714,7 +25724,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateConversationDto"];
+                "application/json": components["schemas"]["CreateAiConversationDto"];
             };
         };
         responses: {
@@ -25756,7 +25766,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateConversationDto"];
+                "application/json": components["schemas"]["UpdateAiConversationDto"];
             };
         };
         responses: {
