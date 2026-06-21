@@ -20470,7 +20470,10 @@ export interface operations {
     Auth_register: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Set to "mobile" or "native" for non-browser clients that need refresh and trusted-device tokens in JSON responses. */
+                "X-TaskBricks-Client"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -20493,7 +20496,10 @@ export interface operations {
     Auth_verifyEmail: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Set to "mobile" or "native" for non-browser clients that need refresh and trusted-device tokens in JSON responses. */
+                "X-TaskBricks-Client"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -20540,7 +20546,10 @@ export interface operations {
     Auth_acceptInvite: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Set to "mobile" or "native" for non-browser clients that need refresh and trusted-device tokens in JSON responses. */
+                "X-TaskBricks-Client"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -20563,7 +20572,10 @@ export interface operations {
     Auth_login: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Set to "mobile" or "native" for non-browser clients that need refresh and trusted-device tokens in JSON responses. */
+                "X-TaskBricks-Client"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -20593,7 +20605,10 @@ export interface operations {
     Auth_verifyMfaLogin: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Set to "mobile" or "native" for non-browser clients that need refresh and trusted-device tokens in JSON responses. */
+                "X-TaskBricks-Client"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -20616,7 +20631,10 @@ export interface operations {
     Auth_ssoCallback: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Set to "mobile" or "native" for non-browser clients that need refresh and trusted-device tokens in JSON responses. */
+                "X-TaskBricks-Client"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -20639,11 +20657,14 @@ export interface operations {
     Auth_refresh: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Set to "mobile" or "native" for non-browser clients that need refresh and trusted-device tokens in JSON responses. */
+                "X-TaskBricks-Client"?: string;
+            };
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["RefreshTokenDto"];
             };
@@ -20669,11 +20690,18 @@ export interface operations {
     Auth_logout: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Set to "mobile" or "native" for non-browser clients that need refresh and trusted-device tokens in JSON responses. */
+                "X-TaskBricks-Client"?: string;
+            };
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RefreshTokenDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {

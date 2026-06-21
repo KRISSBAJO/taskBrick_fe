@@ -41,8 +41,12 @@ export type OpenApiPathParams<TPath extends OpenApiPath, TMethod extends OpenApi
   OpenApiOperation<TPath, TMethod> extends { parameters: { path: infer TParams } } ? TParams : Record<string, never>;
 export type OpenApiQuery<TPath extends OpenApiPath, TMethod extends OpenApiMethod<TPath>> =
   OpenApiOperation<TPath, TMethod> extends { parameters: { query?: infer TParams } } ? NonNullable<TParams> : never;
+type OpenApiRequestBody<TPath extends OpenApiPath, TMethod extends OpenApiMethod<TPath>> =
+  "requestBody" extends keyof OpenApiOperation<TPath, TMethod>
+    ? NonNullable<OpenApiOperation<TPath, TMethod>["requestBody"]>
+    : never;
 export type OpenApiJsonBody<TPath extends OpenApiPath, TMethod extends OpenApiMethod<TPath>> =
-  OpenApiOperation<TPath, TMethod> extends { requestBody: { content: { "application/json": infer TBody } } }
+  OpenApiRequestBody<TPath, TMethod> extends { content: { "application/json": infer TBody } }
     ? TBody
     : never;
 type OpenApiJsonResponseBody<TResponse> =
