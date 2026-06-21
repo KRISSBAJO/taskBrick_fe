@@ -15,6 +15,7 @@ import {
   Fingerprint,
   KeyRound,
   LayoutDashboard,
+  LockKeyhole,
   LogOut,
   MessageSquareWarning,
   MonitorSmartphone,
@@ -143,18 +144,71 @@ export function SiteAdminShell({ children }: { children: ReactNode }) {
       loadingTitle="Preparing site admin..."
       loadingSubtitle="Checking platform session boundary."
     >
-      {(value) => (
-        <ToastProvider>
-          <ConfirmProvider>
-            <RealtimeProvider token={value.auth.accessToken}>
-              <PlatformFrame sessionWarning={value.sessionWarning} onLogout={value.logout}>
-                {children}
-              </PlatformFrame>
-            </RealtimeProvider>
-          </ConfirmProvider>
-        </ToastProvider>
-      )}
+      {(value) => {
+        if (!value.user.isPlatformAdmin) {
+          return (
+            <ToastProvider>
+              <ConfirmProvider>
+                <SiteAdminAccessDenied onLogout={value.logout} />
+              </ConfirmProvider>
+            </ToastProvider>
+          );
+        }
+
+        return (
+          <ToastProvider>
+            <ConfirmProvider>
+              <RealtimeProvider token={value.auth.accessToken}>
+                <PlatformFrame sessionWarning={value.sessionWarning} onLogout={value.logout}>
+                  {children}
+                </PlatformFrame>
+              </RealtimeProvider>
+            </ConfirmProvider>
+          </ToastProvider>
+        );
+      }}
     </AuthenticatedSessionProvider>
+  );
+}
+
+function SiteAdminAccessDenied({ onLogout }: { onLogout: () => void }) {
+  return (
+    <div className="flex min-h-dvh items-center justify-center bg-[#f7f6f1] px-5 text-[#111111]">
+      <div
+        className="pointer-events-none fixed inset-0 opacity-100"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(17,17,17,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(17,17,17,0.035) 1px, transparent 1px)",
+          backgroundSize: "34px 34px",
+        }}
+      />
+      <section className="relative w-full max-w-md rounded-md border border-[#ded8c8] bg-white p-6 shadow-[0_24px_80px_rgba(17,17,17,0.12)]">
+        <div className="flex size-12 items-center justify-center rounded-2xl border border-red-100 bg-red-50 text-red-600">
+          <LockKeyhole className="size-5" aria-hidden="true" />
+        </div>
+        <h1 className="mt-5 text-2xl font-black text-[#111111]">Access denied</h1>
+        <p className="mt-2 text-sm font-semibold leading-6 text-[#766f63]">
+          This account is signed in, but it does not have an active platform administrator grant.
+        </p>
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+          <Link
+            href="/dashboard"
+            className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-[#dfc744] bg-[#ffd400] px-4 text-sm font-black text-[#111111] transition hover:bg-[#f2c200]"
+          >
+            <Building2 className="size-4" aria-hidden="true" />
+            Workspace
+          </Link>
+          <button
+            type="button"
+            onClick={onLogout}
+            className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-[#ded8c8] bg-white px-4 text-sm font-black text-[#777064] transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+          >
+            <LogOut className="size-4" aria-hidden="true" />
+            Sign out
+          </button>
+        </div>
+      </section>
+    </div>
   );
 }
 
