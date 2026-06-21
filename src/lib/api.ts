@@ -3745,6 +3745,21 @@ type OpenApiJsonBody<TPath extends OpenApiPath, TMethod extends OpenApiMethod<TP
 type ListProjectsQuery = OpenApiQuery<"/api/v1/projects", "get">;
 type CreateProjectPayload = OpenApiJsonBody<"/api/v1/projects", "post">;
 type UpdateProjectPayload = OpenApiJsonBody<"/api/v1/projects/{projectId}", "patch">;
+type AddProjectMemberPayload = OpenApiJsonBody<"/api/v1/projects/{projectId}/members", "post">;
+type CreateProjectMilestonePayload = OpenApiJsonBody<"/api/v1/projects/{projectId}/milestones", "post">;
+type UpdateProjectMilestonePayload = OpenApiJsonBody<"/api/v1/projects/{projectId}/milestones/{milestoneId}", "patch">;
+type CreateProjectRiskPayload = OpenApiJsonBody<"/api/v1/projects/{projectId}/risks", "post">;
+type UpdateProjectRiskPayload = OpenApiJsonBody<"/api/v1/projects/{projectId}/risks/{riskId}", "patch">;
+type CreateProjectBudgetPayload = OpenApiJsonBody<"/api/v1/projects/{projectId}/budgets", "post">;
+type UpdateProjectBudgetPayload = OpenApiJsonBody<"/api/v1/projects/{projectId}/budgets/{budgetId}", "patch">;
+type CreateProjectStakeholderPayload = OpenApiJsonBody<"/api/v1/projects/{projectId}/stakeholders", "post">;
+type UpdateProjectStakeholderPayload = OpenApiJsonBody<"/api/v1/projects/{projectId}/stakeholders/{stakeholderId}", "patch">;
+type CreateProjectDependencyPayload = OpenApiJsonBody<"/api/v1/projects/{projectId}/dependencies", "post">;
+type UpdateProjectDependencyPayload = OpenApiJsonBody<"/api/v1/projects/{projectId}/dependencies/{dependencyId}", "patch">;
+type CreateProjectDecisionPayload = OpenApiJsonBody<"/api/v1/projects/{projectId}/decisions", "post">;
+type UpdateProjectDecisionPayload = OpenApiJsonBody<"/api/v1/projects/{projectId}/decisions/{decisionId}", "patch">;
+type CreateProjectChangeRequestPayload = OpenApiJsonBody<"/api/v1/projects/{projectId}/change-requests", "post">;
+type UpdateProjectChangeRequestPayload = OpenApiJsonBody<"/api/v1/projects/{projectId}/change-requests/{changeRequestId}", "patch">;
 type ListTasksOpenApiQuery = OpenApiQuery<"/api/v1/tasks", "get">;
 type ListTasksQuery = Omit<ListTasksOpenApiQuery, "statuses" | "priorities" | "types"> & {
   statuses?: TaskStatus[];
@@ -5519,317 +5534,428 @@ export function deleteProject(token: string, projectId: string) {
 }
 
 export function listProjectMembers(token: string, projectId: string) {
-  return apiRequest<ProjectMember[]>(`/projects/${projectId}/members`, { token, cache: "no-store" });
+  return openApiRequest<ProjectMember[], "/api/v1/projects/{projectId}/members", "get">(
+    "/api/v1/projects/{projectId}/members",
+    "get",
+    {
+      pathParams: { projectId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
-export function upsertProjectMember(token: string, projectId: string, payload: { userId: string; role?: string }) {
-  return apiRequest<ProjectMember>(`/projects/${projectId}/members`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+export function upsertProjectMember(token: string, projectId: string, payload: AddProjectMemberPayload) {
+  return openApiRequest<ProjectMember, "/api/v1/projects/{projectId}/members", "post">(
+    "/api/v1/projects/{projectId}/members",
+    "post",
+    {
+      pathParams: { projectId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function removeProjectMember(token: string, projectId: string, userId: string) {
-  return apiRequest<{ success: boolean }>(`/projects/${projectId}/members/${userId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}/members/{userId}", "delete">(
+    "/api/v1/projects/{projectId}/members/{userId}",
+    "delete",
+    {
+      pathParams: { projectId, userId },
+      token,
+    },
+  );
 }
 
 export function listProjectMilestones(token: string, projectId: string) {
-  return apiRequest<ProjectMilestone[]>(`/projects/${projectId}/milestones`, { token, cache: "no-store" });
+  return openApiRequest<ProjectMilestone[], "/api/v1/projects/{projectId}/milestones", "get">(
+    "/api/v1/projects/{projectId}/milestones",
+    "get",
+    {
+      pathParams: { projectId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function createProjectMilestone(
   token: string,
   projectId: string,
-  payload: { title: string; description?: string; dueDate?: string },
+  payload: CreateProjectMilestonePayload,
 ) {
-  return apiRequest<ProjectMilestone>(`/projects/${projectId}/milestones`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<ProjectMilestone, "/api/v1/projects/{projectId}/milestones", "post">(
+    "/api/v1/projects/{projectId}/milestones",
+    "post",
+    {
+      pathParams: { projectId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function updateProjectMilestone(
   token: string,
   projectId: string,
   milestoneId: string,
-  payload: Partial<Pick<ProjectMilestone, "title" | "description">> & {
-    dueDate?: string | null;
-    completedAt?: string | null;
-  },
+  payload: UpdateProjectMilestonePayload,
 ) {
-  return apiRequest<ProjectMilestone>(`/projects/${projectId}/milestones/${milestoneId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<ProjectMilestone, "/api/v1/projects/{projectId}/milestones/{milestoneId}", "patch">(
+    "/api/v1/projects/{projectId}/milestones/{milestoneId}",
+    "patch",
+    {
+      pathParams: { projectId, milestoneId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function deleteProjectMilestone(token: string, projectId: string, milestoneId: string) {
-  return apiRequest<{ success: boolean }>(`/projects/${projectId}/milestones/${milestoneId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}/milestones/{milestoneId}", "delete">(
+    "/api/v1/projects/{projectId}/milestones/{milestoneId}",
+    "delete",
+    {
+      pathParams: { projectId, milestoneId },
+      token,
+    },
+  );
 }
 
 export function listProjectRisks(token: string, projectId: string) {
-  return apiRequest<ProjectRisk[]>(`/projects/${projectId}/risks`, { token, cache: "no-store" });
+  return openApiRequest<ProjectRisk[], "/api/v1/projects/{projectId}/risks", "get">(
+    "/api/v1/projects/{projectId}/risks",
+    "get",
+    {
+      pathParams: { projectId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function createProjectRisk(
   token: string,
   projectId: string,
-  payload: { title: string; description?: string; severity?: TaskPriority; mitigation?: string; isOpen?: boolean },
+  payload: CreateProjectRiskPayload,
 ) {
-  return apiRequest<ProjectRisk>(`/projects/${projectId}/risks`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<ProjectRisk, "/api/v1/projects/{projectId}/risks", "post">(
+    "/api/v1/projects/{projectId}/risks",
+    "post",
+    {
+      pathParams: { projectId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function updateProjectRisk(
   token: string,
   projectId: string,
   riskId: string,
-  payload: Partial<Pick<ProjectRisk, "title" | "description" | "severity" | "mitigation" | "isOpen">>,
+  payload: UpdateProjectRiskPayload,
 ) {
-  return apiRequest<ProjectRisk>(`/projects/${projectId}/risks/${riskId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<ProjectRisk, "/api/v1/projects/{projectId}/risks/{riskId}", "patch">(
+    "/api/v1/projects/{projectId}/risks/{riskId}",
+    "patch",
+    {
+      pathParams: { projectId, riskId },
+      token,
+      body: payload,
+    },
+  );
+}
+
+export function deleteProjectRisk(token: string, projectId: string, riskId: string) {
+  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}/risks/{riskId}", "delete">(
+    "/api/v1/projects/{projectId}/risks/{riskId}",
+    "delete",
+    {
+      pathParams: { projectId, riskId },
+      token,
+    },
+  );
 }
 
 export function listProjectBudgets(token: string, projectId: string) {
-  return apiRequest<ProjectBudget[]>(`/projects/${projectId}/budgets`, { token, cache: "no-store" });
+  return openApiRequest<ProjectBudget[], "/api/v1/projects/{projectId}/budgets", "get">(
+    "/api/v1/projects/{projectId}/budgets",
+    "get",
+    {
+      pathParams: { projectId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function createProjectBudget(
   token: string,
   projectId: string,
-  payload: { currency?: string; planned?: number; actual?: number; notes?: string },
+  payload: CreateProjectBudgetPayload,
 ) {
-  return apiRequest<ProjectBudget>(`/projects/${projectId}/budgets`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<ProjectBudget, "/api/v1/projects/{projectId}/budgets", "post">(
+    "/api/v1/projects/{projectId}/budgets",
+    "post",
+    {
+      pathParams: { projectId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function updateProjectBudget(
   token: string,
   projectId: string,
   budgetId: string,
-  payload: Partial<Pick<ProjectBudget, "currency" | "planned" | "actual" | "notes">>,
+  payload: UpdateProjectBudgetPayload,
 ) {
-  return apiRequest<ProjectBudget>(`/projects/${projectId}/budgets/${budgetId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<ProjectBudget, "/api/v1/projects/{projectId}/budgets/{budgetId}", "patch">(
+    "/api/v1/projects/{projectId}/budgets/{budgetId}",
+    "patch",
+    {
+      pathParams: { projectId, budgetId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function deleteProjectBudget(token: string, projectId: string, budgetId: string) {
-  return apiRequest<{ success: boolean }>(`/projects/${projectId}/budgets/${budgetId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}/budgets/{budgetId}", "delete">(
+    "/api/v1/projects/{projectId}/budgets/{budgetId}",
+    "delete",
+    {
+      pathParams: { projectId, budgetId },
+      token,
+    },
+  );
 }
 
 export function listProjectStakeholders(token: string, projectId: string) {
-  return apiRequest<ProjectStakeholder[]>(`/projects/${projectId}/stakeholders`, { token, cache: "no-store" });
+  return openApiRequest<ProjectStakeholder[], "/api/v1/projects/{projectId}/stakeholders", "get">(
+    "/api/v1/projects/{projectId}/stakeholders",
+    "get",
+    {
+      pathParams: { projectId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function createProjectStakeholder(
   token: string,
   projectId: string,
-  payload: Partial<Pick<ProjectStakeholder, "email" | "organization" | "role" | "influence" | "isExternal" | "notes">> & {
-    name: string;
-  },
+  payload: CreateProjectStakeholderPayload,
 ) {
-  return apiRequest<ProjectStakeholder>(`/projects/${projectId}/stakeholders`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<ProjectStakeholder, "/api/v1/projects/{projectId}/stakeholders", "post">(
+    "/api/v1/projects/{projectId}/stakeholders",
+    "post",
+    {
+      pathParams: { projectId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function updateProjectStakeholder(
   token: string,
   projectId: string,
   stakeholderId: string,
-  payload: Partial<Pick<ProjectStakeholder, "name" | "email" | "organization" | "role" | "influence" | "isExternal" | "notes">>,
+  payload: UpdateProjectStakeholderPayload,
 ) {
-  return apiRequest<ProjectStakeholder>(`/projects/${projectId}/stakeholders/${stakeholderId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<ProjectStakeholder, "/api/v1/projects/{projectId}/stakeholders/{stakeholderId}", "patch">(
+    "/api/v1/projects/{projectId}/stakeholders/{stakeholderId}",
+    "patch",
+    {
+      pathParams: { projectId, stakeholderId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function deleteProjectStakeholder(token: string, projectId: string, stakeholderId: string) {
-  return apiRequest<{ success: boolean }>(`/projects/${projectId}/stakeholders/${stakeholderId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}/stakeholders/{stakeholderId}", "delete">(
+    "/api/v1/projects/{projectId}/stakeholders/{stakeholderId}",
+    "delete",
+    {
+      pathParams: { projectId, stakeholderId },
+      token,
+    },
+  );
 }
 
 export function listProjectDependencies(token: string, projectId: string) {
-  return apiRequest<ProjectDependency[]>(`/projects/${projectId}/dependencies`, { token, cache: "no-store" });
+  return openApiRequest<ProjectDependency[], "/api/v1/projects/{projectId}/dependencies", "get">(
+    "/api/v1/projects/{projectId}/dependencies",
+    "get",
+    {
+      pathParams: { projectId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function createProjectDependency(
   token: string,
   projectId: string,
-  payload: Partial<
-    Pick<ProjectDependency, "description" | "dependencyType" | "status" | "ownerName" | "ownerEmail" | "dueDate" | "resolvedAt" | "externalUrl" | "notes">
-  > & { title: string },
+  payload: CreateProjectDependencyPayload,
 ) {
-  return apiRequest<ProjectDependency>(`/projects/${projectId}/dependencies`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<ProjectDependency, "/api/v1/projects/{projectId}/dependencies", "post">(
+    "/api/v1/projects/{projectId}/dependencies",
+    "post",
+    {
+      pathParams: { projectId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function updateProjectDependency(
   token: string,
   projectId: string,
   dependencyId: string,
-  payload: Partial<
-    Pick<ProjectDependency, "title" | "description" | "dependencyType" | "status" | "ownerName" | "ownerEmail" | "dueDate" | "resolvedAt" | "externalUrl" | "notes">
-  >,
+  payload: UpdateProjectDependencyPayload,
 ) {
-  return apiRequest<ProjectDependency>(`/projects/${projectId}/dependencies/${dependencyId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<ProjectDependency, "/api/v1/projects/{projectId}/dependencies/{dependencyId}", "patch">(
+    "/api/v1/projects/{projectId}/dependencies/{dependencyId}",
+    "patch",
+    {
+      pathParams: { projectId, dependencyId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function deleteProjectDependency(token: string, projectId: string, dependencyId: string) {
-  return apiRequest<{ success: boolean }>(`/projects/${projectId}/dependencies/${dependencyId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}/dependencies/{dependencyId}", "delete">(
+    "/api/v1/projects/{projectId}/dependencies/{dependencyId}",
+    "delete",
+    {
+      pathParams: { projectId, dependencyId },
+      token,
+    },
+  );
 }
 
 export function listProjectDecisions(token: string, projectId: string) {
-  return apiRequest<ProjectDecision[]>(`/projects/${projectId}/decisions`, { token, cache: "no-store" });
+  return openApiRequest<ProjectDecision[], "/api/v1/projects/{projectId}/decisions", "get">(
+    "/api/v1/projects/{projectId}/decisions",
+    "get",
+    {
+      pathParams: { projectId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function createProjectDecision(
   token: string,
   projectId: string,
-  payload: Partial<Pick<ProjectDecision, "description" | "status" | "ownerName" | "ownerEmail" | "decidedAt" | "effectiveAt" | "outcome" | "notes">> & {
-    title: string;
-  },
+  payload: CreateProjectDecisionPayload,
 ) {
-  return apiRequest<ProjectDecision>(`/projects/${projectId}/decisions`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<ProjectDecision, "/api/v1/projects/{projectId}/decisions", "post">(
+    "/api/v1/projects/{projectId}/decisions",
+    "post",
+    {
+      pathParams: { projectId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function updateProjectDecision(
   token: string,
   projectId: string,
   decisionId: string,
-  payload: Partial<Pick<ProjectDecision, "title" | "description" | "status" | "ownerName" | "ownerEmail" | "decidedAt" | "effectiveAt" | "outcome" | "notes">>,
+  payload: UpdateProjectDecisionPayload,
 ) {
-  return apiRequest<ProjectDecision>(`/projects/${projectId}/decisions/${decisionId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<ProjectDecision, "/api/v1/projects/{projectId}/decisions/{decisionId}", "patch">(
+    "/api/v1/projects/{projectId}/decisions/{decisionId}",
+    "patch",
+    {
+      pathParams: { projectId, decisionId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function deleteProjectDecision(token: string, projectId: string, decisionId: string) {
-  return apiRequest<{ success: boolean }>(`/projects/${projectId}/decisions/${decisionId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/projects/{projectId}/decisions/{decisionId}", "delete">(
+    "/api/v1/projects/{projectId}/decisions/{decisionId}",
+    "delete",
+    {
+      pathParams: { projectId, decisionId },
+      token,
+    },
+  );
 }
 
 export function listProjectChangeRequests(token: string, projectId: string) {
-  return apiRequest<ProjectChangeRequest[]>(`/projects/${projectId}/change-requests`, { token, cache: "no-store" });
+  return openApiRequest<ProjectChangeRequest[], "/api/v1/projects/{projectId}/change-requests", "get">(
+    "/api/v1/projects/{projectId}/change-requests",
+    "get",
+    {
+      pathParams: { projectId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function createProjectChangeRequest(
   token: string,
   projectId: string,
-  payload: Partial<
-    Pick<
-      ProjectChangeRequest,
-      | "description"
-      | "reason"
-      | "status"
-      | "requestedByName"
-      | "requestedByEmail"
-      | "approvedByName"
-      | "approvedByEmail"
-      | "budgetImpact"
-      | "scheduleImpactDays"
-      | "scopeImpact"
-      | "riskImpact"
-      | "dueDate"
-      | "submittedAt"
-      | "approvedAt"
-      | "implementedAt"
-      | "notes"
-    >
-  > & { title: string },
+  payload: CreateProjectChangeRequestPayload,
 ) {
-  return apiRequest<ProjectChangeRequest>(`/projects/${projectId}/change-requests`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<ProjectChangeRequest, "/api/v1/projects/{projectId}/change-requests", "post">(
+    "/api/v1/projects/{projectId}/change-requests",
+    "post",
+    {
+      pathParams: { projectId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function updateProjectChangeRequest(
   token: string,
   projectId: string,
   changeRequestId: string,
-  payload: Partial<
-    Pick<
-      ProjectChangeRequest,
-      | "title"
-      | "description"
-      | "reason"
-      | "status"
-      | "requestedByName"
-      | "requestedByEmail"
-      | "approvedByName"
-      | "approvedByEmail"
-      | "budgetImpact"
-      | "scheduleImpactDays"
-      | "scopeImpact"
-      | "riskImpact"
-      | "dueDate"
-      | "submittedAt"
-      | "approvedAt"
-      | "implementedAt"
-      | "notes"
-    >
-  >,
+  payload: UpdateProjectChangeRequestPayload,
 ) {
-  return apiRequest<ProjectChangeRequest>(`/projects/${projectId}/change-requests/${changeRequestId}`, {
-    method: "PATCH",
+  return openApiRequest<
+    ProjectChangeRequest,
+    "/api/v1/projects/{projectId}/change-requests/{changeRequestId}",
+    "patch"
+  >("/api/v1/projects/{projectId}/change-requests/{changeRequestId}", "patch", {
+    pathParams: { projectId, changeRequestId },
     token,
-    body: JSON.stringify(payload),
+    body: payload,
   });
 }
 
 export function deleteProjectChangeRequest(token: string, projectId: string, changeRequestId: string) {
-  return apiRequest<{ success: boolean }>(`/projects/${projectId}/change-requests/${changeRequestId}`, {
-    method: "DELETE",
+  return openApiRequest<
+    { success: boolean },
+    "/api/v1/projects/{projectId}/change-requests/{changeRequestId}",
+    "delete"
+  >("/api/v1/projects/{projectId}/change-requests/{changeRequestId}", "delete", {
+    pathParams: { projectId, changeRequestId },
     token,
   });
 }

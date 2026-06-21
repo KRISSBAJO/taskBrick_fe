@@ -9852,8 +9852,8 @@ export interface components {
             /** @example MVP Launch */
             title?: string;
             description?: string;
-            dueDate?: Record<string, never>;
-            completedAt?: Record<string, never>;
+            dueDate?: string | null;
+            completedAt?: string | null;
         };
         CreateProjectRiskDto: {
             /** @example Vendor delay */
