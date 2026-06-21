@@ -14892,9 +14892,9 @@ export interface operations {
     };
     AuthSso_discovery: {
         parameters: {
-            query: {
-                email: string;
-                tenantSlug: string;
+            query?: {
+                email?: string;
+                tenantSlug?: string;
             };
             header?: never;
             path?: never;
@@ -15753,6 +15753,7 @@ export interface operations {
                 page?: number;
                 limit?: number;
                 search?: string;
+                workspaceId?: string;
             };
             header?: never;
             path?: never;

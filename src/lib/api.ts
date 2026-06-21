@@ -4060,155 +4060,46 @@ function cleanupLegacyAuthTokens() {
   window.localStorage.removeItem(LEGACY_TRUSTED_DEVICE_KEY);
 }
 
-export function login(payload: { tenantSlug: string; email: string; password: string }) {
-  return apiRequest<AuthResponse | MfaChallengeResponse>("/auth/login", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function verifyMfaLogin(payload: { mfaToken: string; code: string; rememberDevice?: boolean; deviceName?: string }) {
-  return apiRequest<AuthResponse>("/auth/mfa/verify-login", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function register(payload: {
-  tenantName: string;
-  tenantSlug: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-}) {
-  return apiRequest<AuthResponse | AuthLifecycleResponse>("/auth/register", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function verifyEmail(payload: { token: string }) {
-  return apiRequest<AuthResponse>("/auth/verify-email", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function resendVerification(payload: { tenantSlug: string; email: string }) {
-  return apiRequest<AuthLifecycleResponse>("/auth/resend-verification", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function acceptInvite(payload: { token: string; password: string; firstName?: string; lastName?: string }) {
-  return apiRequest<AuthResponse>("/auth/accept-invite", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function forgotPassword(payload: { tenantSlug: string; email: string }) {
-  return apiRequest<AuthLifecycleResponse>("/auth/forgot-password", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function resetPassword(payload: { token: string; password: string }) {
-  return apiRequest<{ success: boolean; message: string }>("/auth/reset-password", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function changePassword(
-  token: string,
-  payload: { currentPassword: string; newPassword: string; revokeOtherSessions?: boolean },
-) {
-  return apiRequest<{ success: boolean; message: string }>("/auth/change-password", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function getIdentitySecurityOverview(token: string) {
-  return apiRequest<IdentitySecurityOverview>("/identity-security/overview", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function setupTotp(token: string, payload: { label?: string } = {}) {
-  return apiRequest<TotpSetupResponse>("/identity-security/mfa/totp/setup", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function enableTotp(token: string, payload: { factorId: string; code: string }) {
-  return apiRequest<{ success: boolean; backupCodes: string[] }>("/identity-security/mfa/totp/enable", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function disableMfa(token: string, payload: { code?: string; currentPassword?: string }) {
-  return apiRequest<{ success: boolean }>("/identity-security/mfa/disable", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function regenerateBackupCodes(token: string, payload: { code: string }) {
-  return apiRequest<{ backupCodes: string[] }>("/identity-security/mfa/backup-codes/regenerate", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function revokeTrustedDevice(token: string, deviceId: string) {
-  return apiRequest<{ success: boolean }>(`/identity-security/trusted-devices/${deviceId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function refreshSession() {
-  return apiRequest<AuthResponse>("/auth/refresh", {
-    method: "POST",
-    skipAuthRefresh: true,
-  });
-}
-
-export function logoutSession(token?: string) {
-  return apiRequest<{ success: boolean }>("/auth/logout", {
-    method: "POST",
-    token,
-    skipAuthRefresh: true,
-  });
-}
-
-export function getMe(token: string) {
-  return apiRequest<AuthUser>("/auth/me", { token, cache: "no-store" });
-}
-
-export function updateMyProfile(
-  token: string,
-  payload: { firstName?: string; lastName?: string; timezone?: string; locale?: string; avatarUrl?: string },
-) {
-  return apiRequest<TenantUser>("/users/me/profile", {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
+export {
+  acceptInvite,
+  changePassword,
+  completeSso,
+  discoverSso,
+  forgotPassword,
+  getMe,
+  login,
+  logoutSession,
+  refreshSession,
+  register,
+  resendVerification,
+  resetPassword,
+  startSso,
+  verifyEmail,
+  verifyMfaLogin,
+} from "./api/authApi";
+export {
+  disableMfa,
+  enableTotp,
+  getIdentitySecurityOverview,
+  listSsoProviders,
+  regenerateBackupCodes,
+  revokeTrustedDevice,
+  setupTotp,
+  updateTenantLoginPolicy,
+  upsertSsoProvider,
+} from "./api/identitySecurityApi";
+export { listSessions, revokeSession, revokeUserSessions } from "./api/sessionApi";
+export { bulkInviteTenantUsers, inviteTenantUser, listUsers, updateMyProfile } from "./api/userApi";
+export { listWorkspaces } from "./api/workspaceApi";
+export {
+  addTeamMember,
+  createTeam,
+  inviteTeamMember,
+  listTeamMembers,
+  listTeams,
+  removeTeamMember,
+  updateTeamMemberRole,
+} from "./api/teamApi";
 
 export function healthReady() {
   return apiRequest<ReadinessResponse>("/health/ready", { cache: "no-store" });
@@ -4229,33 +4120,6 @@ function siteParams(query: { page?: number; limit?: number; search?: string }, f
   });
   if (query.search) params.set("search", query.search);
   return params;
-}
-
-export function listWorkspaces(token: string, query: { page?: number; limit?: number; search?: string } = {}) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 100)),
-  });
-  if (query.search) params.set("search", query.search);
-
-  return apiRequest<PaginatedResponse<Workspace>>(`/workspaces?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listTeams(token: string, query: { page?: number; limit?: number; search?: string; workspaceId?: string } = {}) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.workspaceId) params.set("workspaceId", query.workspaceId);
-
-  return apiRequest<PaginatedResponse<Team>>(`/teams?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
 }
 
 export function listMeetingTypes(
@@ -4947,95 +4811,6 @@ export function syncMeetingOmoFlowRuntime(token: string, meetingId: string, payl
     token,
     pathParams: { meetingId },
     body: payload,
-  });
-}
-
-export function createTeam(
-  token: string,
-  payload: { name: string; description?: string; workspaceId?: string },
-) {
-  return apiRequest<Team>("/teams", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function listTeamMembers(token: string, teamId: string) {
-  return apiRequest<TeamMember[]>(`/teams/${teamId}/members`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function addTeamMember(
-  token: string,
-  teamId: string,
-  payload: { userId: string; role?: string },
-) {
-  return apiRequest<TeamMember>(`/teams/${teamId}/members`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function updateTeamMemberRole(token: string, teamId: string, userId: string, role?: string) {
-  return addTeamMember(token, teamId, { userId, role });
-}
-
-export function removeTeamMember(token: string, teamId: string, userId: string) {
-  return apiRequest<{ success: boolean }>(`/teams/${teamId}/members/${userId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function inviteTeamMember(
-  token: string,
-  teamId: string,
-  payload: { email: string; firstName: string; lastName: string; teamRole?: string; roleIds?: string[] },
-) {
-  return apiRequest<TeamMember>(`/teams/${teamId}/invite`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function inviteTenantUser(
-  token: string,
-  payload: { email: string; firstName: string; lastName: string; roleIds?: string[] },
-) {
-  return apiRequest<TenantUser>("/users/invite", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function bulkInviteTenantUsers(
-  token: string,
-  payload: { users: BulkInviteUserInput[]; defaultRoleIds?: string[]; sendInvites?: boolean },
-) {
-  return apiRequest<BulkInviteUsersResponse>("/users/bulk-invite", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function listUsers(token: string, query: { search?: string; page?: number; limit?: number } = {}) {
-  const limit = Math.min(Math.max(query.limit ?? 100, 1), 100);
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(limit),
-  });
-  if (query.search) params.set("search", query.search);
-
-  return apiRequest<PaginatedResponse<TenantUser>>(`/users?${params.toString()}`, {
-    token,
-    cache: "no-store",
   });
 }
 
@@ -8917,129 +8692,6 @@ export function updateSecurityPolicy(token: string, payload: Partial<Pick<
     method: "PATCH",
     token,
     body: JSON.stringify(payload),
-  });
-}
-
-export function listSsoProviders(token: string) {
-  return apiRequest<SsoProvider[]>("/identity-security/sso-providers", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function upsertSsoProvider(
-  token: string,
-  payload: {
-    type: SsoProvider["type"];
-    name: string;
-    status?: SsoProvider["status"];
-    issuerUrl?: string;
-    authorizationUrl?: string;
-    tokenUrl?: string;
-    userInfoUrl?: string;
-    redirectUri?: string;
-    clientId?: string;
-    clientSecret?: string;
-    scopes?: string[];
-    allowedDomains?: string[];
-    buttonLabel?: string;
-    jitProvisioningEnabled?: boolean;
-  },
-) {
-  return apiRequest<SsoProvider[]>("/identity-security/sso-providers", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function updateTenantLoginPolicy(
-  token: string,
-  payload: {
-    allowedLoginMethods?: string[];
-    ssoRequired?: boolean;
-    domainDiscoveryEnabled?: boolean;
-    mfaRequired?: boolean;
-    trustedDeviceTtlDays?: number;
-  },
-) {
-  return apiRequest<{
-    mfaRequired: boolean;
-    allowedLoginMethods: string[];
-    ssoRequired: boolean;
-    domainDiscoveryEnabled: boolean;
-    trustedDeviceTtlDays: number;
-  }>("/identity-security/login-policy", {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function discoverSso(query: { email?: string; tenantSlug?: string }) {
-  const params = new URLSearchParams();
-  if (query.email) params.set("email", query.email);
-  if (query.tenantSlug) params.set("tenantSlug", query.tenantSlug);
-  return apiRequest<{
-    tenant: Pick<Tenant, "id" | "name" | "slug"> | null;
-    loginMethods: string[];
-    ssoRequired?: boolean;
-    mfaRequired?: boolean;
-    providers: SsoProvider[];
-  }>(`/auth/sso/discovery?${params.toString()}`, { cache: "no-store" });
-}
-
-export function startSso(query: { tenantSlug: string; providerId: string; redirectUri?: string }) {
-  const params = new URLSearchParams({
-    tenantSlug: query.tenantSlug,
-    providerId: query.providerId,
-  });
-  if (query.redirectUri) params.set("redirectUri", query.redirectUri);
-  return apiRequest<{ authorizationUrl: string; stateExpiresAt: string }>(`/auth/sso/start?${params.toString()}`, {
-    cache: "no-store",
-  });
-}
-
-export function completeSso(payload: { state: string; code: string }) {
-  return apiRequest<AuthResponse>("/auth/sso/callback", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function listSessions(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; userId?: string; activeOnly?: boolean; revoked?: boolean; ipAddress?: string; from?: string; to?: string } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(Math.min(Math.max(query.limit ?? 50, 1), 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.userId) params.set("userId", query.userId);
-  if (query.activeOnly !== undefined) params.set("activeOnly", String(query.activeOnly));
-  if (query.revoked !== undefined) params.set("revoked", String(query.revoked));
-  if (query.ipAddress) params.set("ipAddress", query.ipAddress);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-
-  return apiRequest<PaginatedResponse<AuthSession>>(`/admin/sessions?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function revokeSession(token: string, sessionId: string) {
-  return apiRequest<AuthSession>(`/admin/sessions/${sessionId}/revoke`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function revokeUserSessions(token: string, userId: string) {
-  return apiRequest<{ success: boolean; revokedSessions: number }>(`/admin/users/${userId}/sessions/revoke`, {
-    method: "POST",
-    token,
   });
 }
 
