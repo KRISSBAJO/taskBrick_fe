@@ -4112,6 +4112,103 @@ export {
 export { globalSearch } from "./api/searchApi";
 export { healthReady, moduleStatus } from "./api/systemApi";
 export { getCurrentTenant, updateCurrentTenant } from "./api/tenantApi";
+export {
+  archiveDocument,
+  archiveDocumentFolder,
+  createDocument,
+  createDocumentFolder,
+  deleteDocumentFolder,
+  getDocument,
+  getDocumentFolderTree,
+  hardDeleteDocument,
+  listDocumentFolders,
+  listDocuments,
+  listDocumentVersions,
+  publishDocument,
+  restoreDocument,
+  restoreDocumentFolder,
+  restoreDocumentVersion,
+  updateDocument,
+  updateDocumentFolder,
+} from "./api/documentApi";
+export {
+  archiveFileAsset,
+  createFileAsset,
+  createUploadIntent,
+  deleteFileAsset,
+  listFileAssets,
+  restoreFileAsset,
+} from "./api/fileApi";
+export {
+  deleteNotification,
+  deleteReadNotifications,
+  getUnreadNotificationCount,
+  listNotificationPreferences,
+  listNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+  markNotificationUnread,
+  updateNotificationPreferences,
+} from "./api/notificationApi";
+export {
+  archiveInternalMailThread,
+  createInternalMailbox,
+  createInternalMailboxAlias,
+  createInternalMailThread,
+  deleteInternalMailThread,
+  getInternalMailFolders,
+  getInternalMailThread,
+  listInternalMailThreads,
+  markInternalMailRead,
+  markInternalMailUnread,
+  moveInternalMailThread,
+  removeInternalMailboxMember,
+  replyInternalMailThread,
+  restoreInternalMailThread,
+  searchInternalMailboxes,
+  setInternalMailFlag,
+  setInternalMailPin,
+  setInternalMailStar,
+  snoozeInternalMailThread,
+  updateInternalMailbox,
+  upsertInternalMailboxMember,
+} from "./api/internalMailApi";
+export {
+  archiveWorkflow,
+  cancelWorkflowRun,
+  createIntegration,
+  createWebhook,
+  createWorkflow,
+  deleteIntegration,
+  deleteWebhook,
+  deleteWorkflow,
+  disableIntegration,
+  disableWebhook,
+  enableIntegration,
+  enableWebhook,
+  listDeadLetterWorkflowRuns,
+  listIntegrationLogs,
+  listIntegrations,
+  listWebhookDeliveries,
+  listWebhooks,
+  listWorkflowRunLogs,
+  listWorkflowRuns,
+  listWorkflows,
+  processOmoFlowEvent,
+  replaceWorkflowNodes,
+  restoreWorkflow,
+  retryWebhookDelivery,
+  retryWorkflowRun,
+  requeueWorkflowRun,
+  rotateIntegrationSecret,
+  rotateWebhookSecret,
+  runWorkflow,
+  syncIntegration,
+  triggerWebhookEvent,
+  updateIntegration,
+  updateWebhook,
+  updateWorkflow,
+} from "./api/integrationWorkflowApi";
 
 function boundedLimit(value: number | undefined, fallback = 50) {
   return Math.min(Math.max(value ?? fallback, 1), 100);
@@ -4831,182 +4928,6 @@ export function listProjects(
     },
     token,
     cache: "no-store",
-  });
-}
-
-export function listDocumentFolders(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; parentId?: string; includeArchived?: boolean } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.parentId) params.set("parentId", query.parentId);
-  if (query.includeArchived !== undefined) params.set("includeArchived", String(query.includeArchived));
-
-  return apiRequest<PaginatedResponse<DocumentFolder>>(`/document-folders?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getDocumentFolderTree(token: string, query: { includeArchived?: boolean } = {}) {
-  const params = new URLSearchParams();
-  if (query.includeArchived !== undefined) params.set("includeArchived", String(query.includeArchived));
-  const suffix = params.toString() ? `?${params.toString()}` : "";
-
-  return apiRequest<DocumentFolder[]>(`/document-folders/tree${suffix}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createDocumentFolder(
-  token: string,
-  payload: { name: string; description?: string; parentId?: string },
-) {
-  return apiRequest<DocumentFolder>("/document-folders", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function updateDocumentFolder(
-  token: string,
-  folderId: string,
-  payload: { name?: string; description?: string; parentId?: string | null },
-) {
-  return apiRequest<DocumentFolder>(`/document-folders/${folderId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function archiveDocumentFolder(token: string, folderId: string) {
-  return apiRequest<DocumentFolder>(`/document-folders/${folderId}/archive`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function restoreDocumentFolder(token: string, folderId: string) {
-  return apiRequest<DocumentFolder>(`/document-folders/${folderId}/restore`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function deleteDocumentFolder(token: string, folderId: string) {
-  return apiRequest<{ success: boolean }>(`/document-folders/${folderId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function listDocuments(
-  token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    projectId?: string;
-    folderId?: string;
-    documentType?: string;
-    status?: DocumentStatus;
-    visibility?: Visibility;
-    includeArchived?: boolean;
-  } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.projectId) params.set("projectId", query.projectId);
-  if (query.folderId) params.set("folderId", query.folderId);
-  if (query.documentType) params.set("documentType", query.documentType);
-  if (query.status) params.set("status", query.status);
-  if (query.visibility) params.set("visibility", query.visibility);
-  if (query.includeArchived !== undefined) params.set("includeArchived", String(query.includeArchived));
-
-  return apiRequest<PaginatedResponse<WorkspaceDocument>>(`/documents?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createDocument(token: string, payload: DocumentPayload) {
-  return apiRequest<WorkspaceDocument>("/documents", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function getDocument(token: string, documentId: string) {
-  return apiRequest<WorkspaceDocument>(`/documents/${documentId}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function updateDocument(token: string, documentId: string, payload: Partial<DocumentPayload>) {
-  return apiRequest<WorkspaceDocument>(`/documents/${documentId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function publishDocument(token: string, documentId: string) {
-  return apiRequest<WorkspaceDocument>(`/documents/${documentId}/publish`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function archiveDocument(token: string, documentId: string) {
-  return apiRequest<WorkspaceDocument>(`/documents/${documentId}/archive`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function restoreDocument(token: string, documentId: string) {
-  return apiRequest<WorkspaceDocument>(`/documents/${documentId}/restore`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function hardDeleteDocument(token: string, documentId: string) {
-  return apiRequest<{ success: boolean }>(`/documents/${documentId}/hard-delete`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function listDocumentVersions(token: string, documentId: string) {
-  return apiRequest<DocumentVersion[]>(`/documents/${documentId}/versions`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function restoreDocumentVersion(
-  token: string,
-  documentId: string,
-  version: number,
-  payload: { changeNote?: string } = {},
-) {
-  return apiRequest<WorkspaceDocument>(`/documents/${documentId}/versions/${version}/restore`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
   });
 }
 
@@ -5730,102 +5651,6 @@ export function deleteTaskAttachment(token: string, taskId: string, attachmentId
   );
 }
 
-export function createUploadIntent(
-  token: string,
-  payload: {
-    fileName: string;
-    mimeType?: string;
-    sizeBytes?: number;
-    scope?: string;
-    entityType: string;
-    entityId?: string;
-    visibility?: Visibility;
-  },
-) {
-  return apiRequest<UploadIntent>("/files/upload-intents", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function listFileAssets(
-  token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    scope?: string;
-    entityType?: string;
-    entityId?: string;
-    provider?: string;
-    includeDeleted?: boolean;
-    includeArchived?: boolean;
-  } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 50)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.scope) params.set("scope", query.scope);
-  if (query.entityType) params.set("entityType", query.entityType);
-  if (query.entityId) params.set("entityId", query.entityId);
-  if (query.provider) params.set("provider", query.provider);
-  if (query.includeDeleted !== undefined) params.set("includeDeleted", String(query.includeDeleted));
-  if (query.includeArchived !== undefined) params.set("includeArchived", String(query.includeArchived));
-
-  return apiRequest<PaginatedResponse<FileAsset>>(`/files?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createFileAsset(
-  token: string,
-  payload: {
-    fileName: string;
-    fileUrl: string;
-    storageKey?: string;
-    provider?: string;
-    mimeType?: string;
-    sizeBytes?: number;
-    scope?: string;
-    entityType: string;
-    entityId?: string;
-    visibility?: Visibility;
-    expiresAt?: string;
-    metadata?: Record<string, unknown>;
-  },
-) {
-  return apiRequest<FileAsset>("/files", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function archiveFileAsset(token: string, fileId: string) {
-  return apiRequest<FileAsset>(`/files/${fileId}/archive`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function restoreFileAsset(token: string, fileId: string) {
-  return apiRequest<FileAsset>(`/files/${fileId}/restore`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function deleteFileAsset(token: string, fileId: string) {
-  return apiRequest<FileAsset>(`/files/${fileId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
 export function listTaskDependencies(token: string, taskId: string) {
   return openApiRequest<{ blocking: TaskDependency[]; blockedBy: TaskDependency[] }, "/api/v1/tasks/{taskId}/dependencies", "get">(
     "/api/v1/tasks/{taskId}/dependencies",
@@ -6390,805 +6215,6 @@ export function removeSprintTask(token: string, sprintId: string, taskId: string
       token,
     },
   );
-}
-
-export function listNotifications(
-  token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    unreadOnly?: boolean;
-    channel?: NotificationChannel;
-    userId?: string;
-  } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(query.limit ?? 50),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.unreadOnly !== undefined) params.set("unreadOnly", String(query.unreadOnly));
-  if (query.channel) params.set("channel", query.channel);
-  if (query.userId) params.set("userId", query.userId);
-
-  return apiRequest<PaginatedResponse<Notification>>(`/notifications?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getUnreadNotificationCount(token: string) {
-  return apiRequest<{ total: number }>("/notifications/unread-count", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function markNotificationRead(token: string, notificationId: string) {
-  return apiRequest<Notification>(`/notifications/${notificationId}/read`, {
-    method: "PATCH",
-    token,
-  });
-}
-
-export function markNotificationUnread(token: string, notificationId: string) {
-  return apiRequest<Notification>(`/notifications/${notificationId}/unread`, {
-    method: "PATCH",
-    token,
-  });
-}
-
-export function markAllNotificationsRead(token: string) {
-  return apiRequest<{ success: boolean; updated: number }>("/notifications/read-all", {
-    method: "PATCH",
-    token,
-  });
-}
-
-export function deleteNotification(token: string, notificationId: string) {
-  return apiRequest<{ success: boolean }>(`/notifications/${notificationId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function deleteReadNotifications(token: string) {
-  return apiRequest<{ success: boolean; deleted: number }>("/notifications/read", {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function getInternalMailFolders(token: string) {
-  return apiRequest<InternalMailFolderSummary>("/internal-mail/folders", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function searchInternalMailboxes(
-  token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    status?: InternalMailboxStatus;
-    type?: InternalMailboxType;
-  } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.status) params.set("status", query.status);
-  if (query.type) params.set("type", query.type);
-
-  return apiRequest<PaginatedResponse<InternalMailbox>>(`/internal-mail/mailboxes?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createInternalMailbox(
-  token: string,
-  payload: {
-    displayName: string;
-    localPart?: string;
-    address?: string;
-    type?: InternalMailboxType;
-    userId?: string;
-    teamId?: string;
-    memberIds?: string[];
-    description?: string;
-  },
-) {
-  return apiRequest<InternalMailbox>("/internal-mail/mailboxes", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function updateInternalMailbox(
-  token: string,
-  mailboxId: string,
-  payload: {
-    displayName?: string;
-    localPart?: string;
-    address?: string;
-    status?: InternalMailboxStatus;
-    userId?: string;
-    teamId?: string;
-    description?: string;
-  },
-) {
-  return apiRequest<InternalMailbox>(`/internal-mail/mailboxes/${mailboxId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function createInternalMailboxAlias(
-  token: string,
-  mailboxId: string,
-  payload: { localPart?: string; address?: string; isPrimary?: boolean },
-) {
-  return apiRequest<InternalMailboxAlias>(`/internal-mail/mailboxes/${mailboxId}/aliases`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function upsertInternalMailboxMember(
-  token: string,
-  mailboxId: string,
-  payload: { userId: string; role?: InternalMailboxMemberRole },
-) {
-  return apiRequest<InternalMailboxMember>(`/internal-mail/mailboxes/${mailboxId}/members`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function removeInternalMailboxMember(token: string, mailboxId: string, userId: string) {
-  return apiRequest<{ success: boolean }>(`/internal-mail/mailboxes/${mailboxId}/members/${userId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function listInternalMailThreads(
-  token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    folder?: InternalMailFolder;
-    unreadOnly?: boolean;
-    starredOnly?: boolean;
-    flaggedOnly?: boolean;
-    pinnedOnly?: boolean;
-  } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.folder) params.set("folder", query.folder);
-  if (query.unreadOnly !== undefined) params.set("unreadOnly", String(query.unreadOnly));
-  if (query.starredOnly !== undefined) params.set("starredOnly", String(query.starredOnly));
-  if (query.flaggedOnly !== undefined) params.set("flaggedOnly", String(query.flaggedOnly));
-  if (query.pinnedOnly !== undefined) params.set("pinnedOnly", String(query.pinnedOnly));
-
-  return apiRequest<PaginatedResponse<InternalMailThread>>(`/internal-mail/threads?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function getInternalMailThread(token: string, threadId: string, query: { markRead?: boolean } = {}) {
-  const params = new URLSearchParams();
-  if (query.markRead !== undefined) params.set("markRead", String(query.markRead));
-  const suffix = params.toString() ? `?${params.toString()}` : "";
-  return apiRequest<InternalMailThread>(`/internal-mail/threads/${threadId}${suffix}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createInternalMailThread(
-  token: string,
-  payload: {
-    subject: string;
-    bodyText: string;
-    bodyHtml?: string;
-    toIds?: string[];
-    toAddresses?: string[];
-    ccIds?: string[];
-    ccAddresses?: string[];
-    bccIds?: string[];
-    bccAddresses?: string[];
-    priority?: InternalMailPriority;
-    attachments?: Record<string, unknown>;
-    saveAsDraft?: boolean;
-  },
-) {
-  return apiRequest<InternalMailThread>("/internal-mail/threads", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function replyInternalMailThread(
-  token: string,
-  threadId: string,
-  payload: {
-    bodyText: string;
-    bodyHtml?: string;
-    toIds?: string[];
-    toAddresses?: string[];
-    ccIds?: string[];
-    ccAddresses?: string[];
-    bccIds?: string[];
-    bccAddresses?: string[];
-    priority?: InternalMailPriority;
-    attachments?: Record<string, unknown>;
-  },
-) {
-  return apiRequest<InternalMailThread>(`/internal-mail/threads/${threadId}/reply`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function markInternalMailRead(token: string, threadId: string) {
-  return apiRequest<InternalMailParticipant>(`/internal-mail/threads/${threadId}/read`, {
-    method: "PATCH",
-    token,
-  });
-}
-
-export function markInternalMailUnread(token: string, threadId: string) {
-  return apiRequest<InternalMailParticipant>(`/internal-mail/threads/${threadId}/unread`, {
-    method: "PATCH",
-    token,
-  });
-}
-
-export function setInternalMailStar(token: string, threadId: string, value: boolean) {
-  return apiRequest<InternalMailParticipant>(`/internal-mail/threads/${threadId}/star`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify({ value }),
-  });
-}
-
-export function setInternalMailFlag(token: string, threadId: string, value: boolean) {
-  return apiRequest<InternalMailParticipant>(`/internal-mail/threads/${threadId}/flag`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify({ value }),
-  });
-}
-
-export function setInternalMailPin(token: string, threadId: string, value: boolean) {
-  return apiRequest<InternalMailParticipant>(`/internal-mail/threads/${threadId}/pin`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify({ value }),
-  });
-}
-
-export function snoozeInternalMailThread(token: string, threadId: string, snoozedUntil?: string) {
-  return apiRequest<InternalMailParticipant>(`/internal-mail/threads/${threadId}/snooze`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify({ snoozedUntil }),
-  });
-}
-
-export function moveInternalMailThread(token: string, threadId: string, folder: InternalMailFolder) {
-  return apiRequest<InternalMailParticipant>(`/internal-mail/threads/${threadId}/move`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify({ folder }),
-  });
-}
-
-export function archiveInternalMailThread(token: string, threadId: string) {
-  return apiRequest<InternalMailParticipant>(`/internal-mail/threads/${threadId}/archive`, {
-    method: "PATCH",
-    token,
-  });
-}
-
-export function restoreInternalMailThread(token: string, threadId: string) {
-  return apiRequest<InternalMailParticipant>(`/internal-mail/threads/${threadId}/restore`, {
-    method: "PATCH",
-    token,
-  });
-}
-
-export function deleteInternalMailThread(token: string, threadId: string) {
-  return apiRequest<InternalMailParticipant>(`/internal-mail/threads/${threadId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function listNotificationPreferences(token: string) {
-  return apiRequest<NotificationPreference[]>("/notification-preferences", {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function updateNotificationPreferences(
-  token: string,
-  preferences: Array<{ channel: NotificationChannel; enabled: boolean }>,
-) {
-  return apiRequest<NotificationPreference[]>("/notification-preferences", {
-    method: "PATCH",
-    token,
-    body: JSON.stringify({ preferences }),
-  });
-}
-
-export function listIntegrations(
-  token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    provider?: IntegrationProvider;
-    status?: IntegrationStatus;
-    enabled?: boolean;
-  } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.provider) params.set("provider", query.provider);
-  if (query.status) params.set("status", query.status);
-  if (query.enabled !== undefined) params.set("enabled", String(query.enabled));
-
-  return apiRequest<PaginatedResponse<Integration>>(`/integrations?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createIntegration(
-  token: string,
-  payload: {
-    provider: IntegrationProvider;
-    name: string;
-    config?: unknown;
-    secrets?: Record<string, string>;
-    externalAccountId?: string;
-    scopes?: string[];
-    enabled?: boolean;
-  },
-) {
-  return apiRequest<Integration>("/integrations", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function updateIntegration(
-  token: string,
-  integrationId: string,
-  payload: Partial<Pick<Integration, "name" | "provider" | "externalAccountId" | "scopes" | "enabled" | "status">> & {
-    config?: unknown;
-    secrets?: Record<string, string>;
-  },
-) {
-  return apiRequest<Integration>(`/integrations/${integrationId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function deleteIntegration(token: string, integrationId: string) {
-  return apiRequest<{ success: boolean }>(`/integrations/${integrationId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function enableIntegration(token: string, integrationId: string) {
-  return apiRequest<Integration>(`/integrations/${integrationId}/enable`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function disableIntegration(token: string, integrationId: string) {
-  return apiRequest<Integration>(`/integrations/${integrationId}/disable`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function rotateIntegrationSecret(
-  token: string,
-  integrationId: string,
-  payload: { key: string; value: string },
-) {
-  return apiRequest<Integration>(`/integrations/${integrationId}/rotate-secret`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function syncIntegration(
-  token: string,
-  integrationId: string,
-  payload: { mode?: string; cursor?: string; payload?: unknown } = {},
-) {
-  return apiRequest<{ integration: Integration; queued: boolean; message?: string }>(
-    `/integrations/${integrationId}/sync`,
-    {
-      method: "POST",
-      token,
-      body: JSON.stringify(payload),
-    },
-  );
-}
-
-export function processOmoFlowEvent(token: string, payload: OmoFlowRuntimeEvent) {
-  return apiRequest<OmoFlowRuntimeResult>("/integrations/omoflow/events", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function listIntegrationLogs(
-  token: string,
-  integrationId: string,
-  query: { page?: number; limit?: number; search?: string; level?: string; eventType?: string; from?: string; to?: string } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 30)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.level) params.set("level", query.level);
-  if (query.eventType) params.set("eventType", query.eventType);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-
-  return apiRequest<PaginatedResponse<IntegrationLog>>(
-    `/integrations/${integrationId}/logs?${params.toString()}`,
-    { token, cache: "no-store" },
-  );
-}
-
-export function listWebhooks(
-  token: string,
-  query: { page?: number; limit?: number; search?: string; enabled?: boolean; eventType?: string } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.enabled !== undefined) params.set("enabled", String(query.enabled));
-  if (query.eventType) params.set("eventType", query.eventType);
-
-  return apiRequest<PaginatedResponse<Webhook>>(`/webhooks?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createWebhook(
-  token: string,
-  payload: {
-    name: string;
-    description?: string;
-    url: string;
-    events: string[];
-    secret?: string;
-    signingAlgorithm?: string;
-    enabled?: boolean;
-  },
-) {
-  return apiRequest<Webhook>("/webhooks", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function updateWebhook(
-  token: string,
-  webhookId: string,
-  payload: Partial<Pick<Webhook, "name" | "description" | "url" | "events" | "signingAlgorithm" | "enabled">>,
-) {
-  return apiRequest<Webhook>(`/webhooks/${webhookId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function deleteWebhook(token: string, webhookId: string) {
-  return apiRequest<{ success: boolean }>(`/webhooks/${webhookId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function enableWebhook(token: string, webhookId: string) {
-  return apiRequest<Webhook>(`/webhooks/${webhookId}/enable`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function disableWebhook(token: string, webhookId: string) {
-  return apiRequest<Webhook>(`/webhooks/${webhookId}/disable`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function rotateWebhookSecret(token: string, webhookId: string, payload: { secret?: string } = {}) {
-  return apiRequest<Webhook>(`/webhooks/${webhookId}/rotate-secret`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function triggerWebhookEvent(
-  token: string,
-  payload: { eventType: string; payload?: unknown; entityType?: string; entityId?: string },
-) {
-  return apiRequest<{ event: unknown; matched: number; deliveries: Array<{ delivery: WebhookDelivery; dispatched: boolean }> }>(
-    "/webhook-events",
-    {
-      method: "POST",
-      token,
-      body: JSON.stringify(payload),
-    },
-  );
-}
-
-export function listWebhookDeliveries(
-  token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    webhookId?: string;
-    eventType?: string;
-    status?: WebhookDeliveryStatus;
-    from?: string;
-    to?: string;
-  } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 30)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.webhookId) params.set("webhookId", query.webhookId);
-  if (query.eventType) params.set("eventType", query.eventType);
-  if (query.status) params.set("status", query.status);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-
-  return apiRequest<PaginatedResponse<WebhookDelivery>>(`/webhook-deliveries?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function retryWebhookDelivery(token: string, deliveryId: string) {
-  return apiRequest<WebhookDelivery>(`/webhook-deliveries/${deliveryId}/retry`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function listWorkflows(
-  token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    entityType?: string;
-    triggerType?: string;
-    eventType?: string;
-    isActive?: boolean;
-    includeArchived?: boolean;
-  } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.entityType) params.set("entityType", query.entityType);
-  if (query.triggerType) params.set("triggerType", query.triggerType);
-  if (query.eventType) params.set("eventType", query.eventType);
-  if (query.isActive !== undefined) params.set("isActive", String(query.isActive));
-  if (query.includeArchived !== undefined) params.set("includeArchived", String(query.includeArchived));
-
-  return apiRequest<PaginatedResponse<Workflow>>(`/workflows?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function createWorkflow(
-  token: string,
-  payload: {
-    name: string;
-    description?: string;
-    entityType: string;
-    triggerType?: string;
-    eventType?: string;
-    isActive?: boolean;
-    config?: unknown;
-    nodes?: WorkflowNode[];
-  },
-) {
-  return apiRequest<Workflow>("/workflows", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function updateWorkflow(
-  token: string,
-  workflowId: string,
-  payload: Partial<Pick<Workflow, "name" | "description" | "entityType" | "triggerType" | "eventType" | "isActive">> & {
-    config?: unknown;
-  },
-) {
-  return apiRequest<Workflow>(`/workflows/${workflowId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function archiveWorkflow(token: string, workflowId: string) {
-  return apiRequest<Workflow>(`/workflows/${workflowId}/archive`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function restoreWorkflow(token: string, workflowId: string) {
-  return apiRequest<Workflow>(`/workflows/${workflowId}/restore`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function deleteWorkflow(token: string, workflowId: string) {
-  return apiRequest<{ success: boolean }>(`/workflows/${workflowId}`, {
-    method: "DELETE",
-    token,
-  });
-}
-
-export function replaceWorkflowNodes(token: string, workflowId: string, nodes: WorkflowNode[]) {
-  return apiRequest<Workflow>(`/workflows/${workflowId}/nodes`, {
-    method: "PUT",
-    token,
-    body: JSON.stringify({ nodes }),
-  });
-}
-
-export function runWorkflow(
-  token: string,
-  workflowId: string,
-  payload: { entityType?: string; entityId?: string; eventType?: string; idempotencyKey?: string; context?: unknown } = {},
-) {
-  return apiRequest<WorkflowRun>(`/workflows/${workflowId}/run`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
-}
-
-export function listWorkflowRuns(
-  token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    workflowId?: string;
-    entityType?: string;
-    entityId?: string;
-    status?: WorkflowRunStatus;
-    from?: string;
-    to?: string;
-  } = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 50)),
-  });
-  if (query.workflowId) params.set("workflowId", query.workflowId);
-  if (query.entityType) params.set("entityType", query.entityType);
-  if (query.entityId) params.set("entityId", query.entityId);
-  if (query.status) params.set("status", query.status);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-
-  return apiRequest<PaginatedResponse<WorkflowRun>>(`/workflow-runs?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listDeadLetterWorkflowRuns(
-  token: string,
-  query: Parameters<typeof listWorkflowRuns>[1] = {},
-) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 50)),
-  });
-  if (query.workflowId) params.set("workflowId", query.workflowId);
-  if (query.entityType) params.set("entityType", query.entityType);
-  if (query.entityId) params.set("entityId", query.entityId);
-  if (query.from) params.set("from", query.from);
-  if (query.to) params.set("to", query.to);
-
-  return apiRequest<PaginatedResponse<WorkflowRun>>(`/workflow-runs/dead-letter?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function listWorkflowRunLogs(token: string, runId: string) {
-  return apiRequest<WorkflowRunLog[]>(`/workflow-runs/${runId}/logs`, {
-    token,
-    cache: "no-store",
-  });
-}
-
-export function retryWorkflowRun(token: string, runId: string) {
-  return apiRequest<WorkflowRun>(`/workflow-runs/${runId}/retry`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function requeueWorkflowRun(token: string, runId: string) {
-  return apiRequest<WorkflowRun>(`/workflow-runs/${runId}/requeue`, {
-    method: "POST",
-    token,
-  });
-}
-
-export function cancelWorkflowRun(token: string, runId: string) {
-  return apiRequest<WorkflowRun>(`/workflow-runs/${runId}/cancel`, {
-    method: "POST",
-    token,
-  });
 }
 
 export function getAiSettings(token: string) {
