@@ -9323,7 +9323,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        Object: Record<string, never>;
         UpdateSecurityPolicyDto: {
             enforceIpAllowlist?: boolean;
             ipAllowlist?: string[];
@@ -9809,9 +9808,9 @@ export interface components {
             status?: "PLANNING" | "ACTIVE" | "ON_HOLD" | "COMPLETED" | "ARCHIVED";
             /** @enum {string} */
             visibility?: "PRIVATE" | "TEAM" | "WORKSPACE" | "ORGANIZATION" | "PUBLIC";
-            startDate?: Record<string, never>;
-            dueDate?: Record<string, never>;
-            completedAt?: Record<string, never>;
+            startDate?: string | null;
+            dueDate?: string | null;
+            completedAt?: string | null;
             progress?: number;
             /** @example USD */
             currency?: string;
@@ -10150,9 +10149,9 @@ export interface components {
             status?: "BACKLOG" | "TODO" | "IN_PROGRESS" | "REVIEW" | "TESTING" | "DONE" | "CANCELLED";
             /** @enum {string} */
             priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT" | "CRITICAL";
-            startDate?: Record<string, never>;
-            dueDate?: Record<string, never>;
-            completedAt?: Record<string, never> | null;
+            startDate?: string | null;
+            dueDate?: string | null;
+            completedAt?: string | null;
             storyPoints?: number;
             estimateMins?: number;
             actualMins?: number;
@@ -11429,8 +11428,8 @@ export interface operations {
     Admin_listAuditLogs: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 action?: string;
                 actorId?: string;
@@ -11515,8 +11514,8 @@ export interface operations {
     Admin_listSessions: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 userId?: string;
                 activeOnly?: boolean;
@@ -11599,8 +11598,8 @@ export interface operations {
     Admin_listSecurityEvents: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 type?: string;
                 severity?: "INFO" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
@@ -11692,8 +11691,8 @@ export interface operations {
     Admin_listComplianceJobs: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 type?: "DATA_EXPORT" | "DATA_DELETION" | "RETENTION_PURGE";
                 status?: "REQUESTED" | "APPROVED" | "REJECTED" | "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED" | "CANCELLED" | "EXPIRED";
@@ -11844,8 +11843,8 @@ export interface operations {
     Admin_listApiKeys: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 status?: "ACTIVE" | "REVOKED" | "EXPIRED";
                 createdById?: string;
@@ -11998,8 +11997,8 @@ export interface operations {
     PlatformAdmin_listLoginHistory: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 userId?: string;
@@ -12025,8 +12024,8 @@ export interface operations {
     PlatformAdmin_listTrustedDevices: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 userId?: string;
@@ -12073,8 +12072,8 @@ export interface operations {
     PlatformAdmin_listSsoProviders: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 status?: "ACTIVE" | "DISABLED";
@@ -12096,8 +12095,8 @@ export interface operations {
     PlatformAdmin_listSecurityPolicies: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
             };
@@ -12137,8 +12136,8 @@ export interface operations {
     PlatformAdmin_listSessions: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 userId?: string;
@@ -12204,8 +12203,8 @@ export interface operations {
     PlatformAdmin_listBillingPlans: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
             };
@@ -12418,8 +12417,8 @@ export interface operations {
     PlatformAdmin_listBillingFeatures: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
             };
@@ -12523,8 +12522,8 @@ export interface operations {
     PlatformAdmin_listBillingSubscriptions: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 status?: "TRIALING" | "ACTIVE" | "PAST_DUE" | "CANCELLED" | "EXPIRED";
@@ -12661,8 +12660,8 @@ export interface operations {
     PlatformAdmin_listBillingInvoices: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
             };
@@ -12683,8 +12682,8 @@ export interface operations {
     PlatformAdmin_listBillingUsageRecords: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
             };
@@ -12705,8 +12704,8 @@ export interface operations {
     PlatformAdmin_listBillingEvents: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 status?: "RECEIVED" | "PROCESSED" | "FAILED" | "IGNORED";
@@ -12730,8 +12729,8 @@ export interface operations {
     PlatformAdmin_listBillingEntitlements: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
             };
@@ -12752,8 +12751,8 @@ export interface operations {
     PlatformAdmin_platformSearch: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 category?: "ALL" | "TENANTS" | "USERS" | "PROJECTS" | "TASKS" | "EVENTS" | "AUDIT";
                 tenantId?: string;
@@ -12792,8 +12791,8 @@ export interface operations {
     PlatformAdmin_listSiteWorkflows: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 entityType?: string;
@@ -12818,8 +12817,8 @@ export interface operations {
     PlatformAdmin_listSiteWorkflowRuns: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 workflowId?: string;
@@ -12883,8 +12882,8 @@ export interface operations {
     PlatformAdmin_listSiteApprovalDefinitions: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 entityType?: string;
@@ -12907,8 +12906,8 @@ export interface operations {
     PlatformAdmin_listSiteApprovals: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 entityType?: string;
@@ -12931,8 +12930,8 @@ export interface operations {
     PlatformAdmin_listSiteWorkflowRunLogs: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 workflowId?: string;
@@ -12975,8 +12974,8 @@ export interface operations {
     PlatformAdmin_listSiteAiSettings: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 provider?: string;
@@ -13000,8 +12999,8 @@ export interface operations {
     PlatformAdmin_listSiteAiAgents: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 provider?: string;
@@ -13026,8 +13025,8 @@ export interface operations {
     PlatformAdmin_listSiteAiConversations: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 agentId?: string;
@@ -13050,8 +13049,8 @@ export interface operations {
     PlatformAdmin_listSiteAiActions: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 agentId?: string;
@@ -13075,8 +13074,8 @@ export interface operations {
     PlatformAdmin_listSiteAiUsage: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 provider?: string;
@@ -13119,8 +13118,8 @@ export interface operations {
     PlatformAdmin_listSiteDashboards: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 type?: string;
@@ -13143,8 +13142,8 @@ export interface operations {
     PlatformAdmin_listSiteReports: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 type?: string;
@@ -13167,8 +13166,8 @@ export interface operations {
     PlatformAdmin_listSiteReportExecutions: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 reportId?: string;
@@ -13194,8 +13193,8 @@ export interface operations {
     PlatformAdmin_listSiteReportExports: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 reportId?: string;
@@ -13252,8 +13251,8 @@ export interface operations {
     PlatformAdmin_listSiteIntegrations: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 provider?: "GITHUB" | "GITLAB" | "BITBUCKET" | "SLACK" | "TEAMS" | "GOOGLE" | "MICROSOFT" | "ZOOM" | "WHATSAPP" | "EMAIL" | "SMS" | "STRIPE" | "PAYPAL" | "OPENAI" | "ANTHROPIC" | "ZAPIER" | "CUSTOM";
@@ -13301,8 +13300,8 @@ export interface operations {
     PlatformAdmin_listSiteWebhooks: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 /** @description true or false */
@@ -13325,8 +13324,8 @@ export interface operations {
     PlatformAdmin_listSiteWebhookDeliveries: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 webhookId?: string;
@@ -13428,8 +13427,8 @@ export interface operations {
     PlatformAdmin_listSiteConversations: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 conversationId?: string;
@@ -13454,8 +13453,8 @@ export interface operations {
     PlatformAdmin_listSiteMessageActivity: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 conversationId?: string;
@@ -13480,8 +13479,8 @@ export interface operations {
     PlatformAdmin_meetingOperationsOverview: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 status?: "SCHEDULED" | "LIVE" | "COMPLETED" | "CANCELLED" | "NO_SHOW" | "ARCHIVED";
@@ -13505,8 +13504,8 @@ export interface operations {
     PlatformAdmin_listSiteMeetingTenants: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 status?: "SCHEDULED" | "LIVE" | "COMPLETED" | "CANCELLED" | "NO_SHOW" | "ARCHIVED";
@@ -13530,8 +13529,8 @@ export interface operations {
     PlatformAdmin_listSiteMeetingReminderLogs: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 status?: "QUEUED" | "PROCESSING" | "SENT" | "FAILED" | "CANCELLED" | "DEAD_LETTER";
@@ -13572,8 +13571,8 @@ export interface operations {
     PlatformAdmin_listSiteComplianceJobs: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 type?: "DATA_EXPORT" | "DATA_DELETION" | "RETENTION_PURGE";
@@ -13688,8 +13687,8 @@ export interface operations {
     PlatformAdmin_listTenants: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 status?: "ACTIVE" | "SUSPENDED" | "TRIAL" | "CANCELLED";
             };
@@ -13710,8 +13709,8 @@ export interface operations {
     PlatformAdmin_listUsers: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 status?: "ACTIVE" | "INVITED" | "SUSPENDED" | "DEACTIVATED";
@@ -13859,8 +13858,8 @@ export interface operations {
     PlatformAdmin_listTenantUsers: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 status?: "ACTIVE" | "INVITED" | "SUSPENDED" | "DEACTIVATED";
             };
@@ -13883,8 +13882,8 @@ export interface operations {
     PlatformAdmin_listTenantProjects: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -13906,8 +13905,8 @@ export interface operations {
     PlatformAdmin_listTenantWorkspaces: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -13929,8 +13928,8 @@ export interface operations {
     PlatformAdmin_listTenantTeams: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -13952,8 +13951,8 @@ export interface operations {
     PlatformAdmin_listTenantSessions: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -13975,8 +13974,8 @@ export interface operations {
     PlatformAdmin_listTenantSecurity: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -13998,8 +13997,8 @@ export interface operations {
     PlatformAdmin_listTenantBilling: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -14021,8 +14020,8 @@ export interface operations {
     PlatformAdmin_listTenantIntegrations: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -14044,8 +14043,8 @@ export interface operations {
     PlatformAdmin_listTenantFiles: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -14067,8 +14066,8 @@ export interface operations {
     PlatformAdmin_listTenantAiUsage: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -14090,8 +14089,8 @@ export interface operations {
     PlatformAdmin_listTenantReports: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -14113,8 +14112,8 @@ export interface operations {
     PlatformAdmin_listTenantActivity: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -14136,8 +14135,8 @@ export interface operations {
     PlatformAdmin_listSecurityEvents: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 severity?: "INFO" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
@@ -14184,8 +14183,8 @@ export interface operations {
     PlatformAdmin_listPlatformAuditLogs: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 actorId?: string;
                 tenantId?: string;
@@ -14208,8 +14207,8 @@ export interface operations {
     PlatformAdmin_listPlatformAdmins: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 level?: "OWNER" | "ADMIN" | "SUPPORT" | "AUDITOR";
                 status?: "ACTIVE" | "REVOKED";
@@ -15059,8 +15058,8 @@ export interface operations {
     Users_listUsers: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -15186,8 +15185,8 @@ export interface operations {
     Workspaces_list: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -15312,8 +15311,8 @@ export interface operations {
     Teams_list: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -15528,8 +15527,8 @@ export interface operations {
     Projects_list: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 status?: "PLANNING" | "ACTIVE" | "ON_HOLD" | "COMPLETED" | "ARCHIVED";
                 visibility?: "PRIVATE" | "TEAM" | "WORKSPACE" | "ORGANIZATION" | "PUBLIC";
@@ -16437,8 +16436,8 @@ export interface operations {
     Tasks_listCustomFields: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 entityType?: string;
                 workspaceId?: string;
@@ -16563,8 +16562,8 @@ export interface operations {
     Tasks_listSavedViews: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 projectId?: string;
                 visibility?: "PRIVATE" | "TEAM" | "WORKSPACE" | "ORGANIZATION" | "PUBLIC";
@@ -16670,8 +16669,8 @@ export interface operations {
     Tasks_list: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 projectId?: string;
                 sprintId?: string;
@@ -17510,8 +17509,8 @@ export interface operations {
     Collaboration_listConversations: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 isGroup?: boolean;
             };
@@ -17678,8 +17677,8 @@ export interface operations {
     Collaboration_listMessages: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -17944,8 +17943,8 @@ export interface operations {
     Agile_listSprints: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 projectId?: string;
                 state?: "planned" | "active" | "completed";
@@ -18093,8 +18092,8 @@ export interface operations {
     Agile_listSprintTasks: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -18264,8 +18263,8 @@ export interface operations {
     Agile_getBacklog: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -18582,8 +18581,8 @@ export interface operations {
     InternalMail_listMailboxes: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 status?: "ACTIVE" | "SUSPENDED" | "ARCHIVED";
                 type?: "USER" | "SHARED" | "TEAM" | "SYSTEM";
@@ -18721,8 +18720,8 @@ export interface operations {
     InternalMail_listThreads: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 folder?: "INBOX" | "SENT" | "DRAFTS" | "ARCHIVE" | "DELETED" | "JUNK" | "SNOOZED";
                 unreadOnly?: boolean;
@@ -19024,8 +19023,8 @@ export interface operations {
     MeetingBooking_listPages: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 isActive?: boolean;
             };
@@ -19178,8 +19177,8 @@ export interface operations {
     MeetingBooking_listRequests: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 isActive?: boolean;
             };
@@ -19363,8 +19362,8 @@ export interface operations {
     MeetingIntegrations_listReminderJobs: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -19572,8 +19571,8 @@ export interface operations {
     MeetingAdmin_reminderLogs: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 from?: string;
                 to?: string;
@@ -19621,8 +19620,8 @@ export interface operations {
     MeetingAdmin_auditTrail: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 from?: string;
                 to?: string;
@@ -20336,8 +20335,8 @@ export interface operations {
     Meetings_listTypes: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 category?: "INTERNAL" | "CLIENT" | "SALES" | "SUPPORT" | "SPRINT" | "STANDUP" | "REVIEW" | "INTERVIEW" | "TRAINING" | "CUSTOM";
                 isActive?: boolean;
@@ -20542,8 +20541,8 @@ export interface operations {
     Meetings_list: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -20983,8 +20982,8 @@ export interface operations {
     Notifications_list: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 unreadOnly?: boolean;
                 channel?: "IN_APP" | "EMAIL" | "SMS" | "PUSH" | "WEBHOOK" | "SLACK" | "TEAMS";
@@ -21195,8 +21194,8 @@ export interface operations {
     Notifications_listTemplates: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -21279,8 +21278,8 @@ export interface operations {
     Notifications_listDeliveries: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 notificationId?: string;
                 userId?: string;
@@ -21382,8 +21381,8 @@ export interface operations {
     Documents_listFolders: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 parentId?: string;
                 includeArchived?: boolean;
@@ -21527,8 +21526,8 @@ export interface operations {
     Documents_listDocuments: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 projectId?: string;
                 folderId?: string;
@@ -21813,8 +21812,8 @@ export interface operations {
     Files_list: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 scope?: string;
                 entityType?: string;
@@ -21978,8 +21977,8 @@ export interface operations {
     TimeTracking_listTimeEntries: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 userId?: string;
                 projectId?: string;
@@ -22188,8 +22187,8 @@ export interface operations {
     TimeTracking_listTimesheets: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 userId?: string;
                 status?: "DRAFT" | "SUBMITTED" | "APPROVED" | "REJECTED" | "CANCELLED";
@@ -22418,8 +22417,8 @@ export interface operations {
     TimeTracking_listSkills: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 category?: string;
                 includeArchived?: boolean;
@@ -22561,8 +22560,8 @@ export interface operations {
     TimeTracking_listUserSkills: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 userId?: string;
                 skillId?: string;
@@ -22647,8 +22646,8 @@ export interface operations {
     TimeTracking_listAllocations: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 userId?: string;
                 projectId?: string;
@@ -22837,8 +22836,8 @@ export interface operations {
     Workflows_listWorkflows: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 entityType?: string;
                 triggerType?: string;
@@ -23119,8 +23118,8 @@ export interface operations {
     Workflows_listRuns: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 workflowId?: string;
                 entityType?: string;
@@ -23146,8 +23145,8 @@ export interface operations {
     Workflows_listDeadLetterRuns: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 workflowId?: string;
                 entityType?: string;
@@ -23268,8 +23267,8 @@ export interface operations {
     Workflows_listApprovalDefinitions: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 entityType?: string;
                 isActive?: boolean;
@@ -23393,8 +23392,8 @@ export interface operations {
     Workflows_listApprovals: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 entityType?: string;
                 entityId?: string;
@@ -23442,8 +23441,8 @@ export interface operations {
     Workflows_myPendingApprovals: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
             };
             header?: never;
@@ -23602,8 +23601,8 @@ export interface operations {
     Billing_listPlans: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 includeInactive?: boolean;
                 includeArchived?: boolean;
@@ -23839,8 +23838,8 @@ export interface operations {
     Billing_listFeatures: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 category?: string;
                 includeInactive?: boolean;
@@ -23944,8 +23943,8 @@ export interface operations {
     Billing_listSubscriptions: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 status?: "TRIALING" | "ACTIVE" | "PAST_DUE" | "CANCELLED" | "EXPIRED";
@@ -24128,8 +24127,8 @@ export interface operations {
     Billing_listInvoices: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 subscriptionId?: string;
@@ -24253,8 +24252,8 @@ export interface operations {
     Billing_listUsageRecords: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 featureKey?: string;
@@ -24299,8 +24298,8 @@ export interface operations {
     Billing_usageSummary: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 tenantId?: string;
                 featureKey?: string;
@@ -24425,8 +24424,8 @@ export interface operations {
     Billing_listBillingEvents: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 provider?: string;
                 type?: string;
@@ -24487,8 +24486,8 @@ export interface operations {
     Integrations_listIntegrations: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 provider?: "GITHUB" | "GITLAB" | "BITBUCKET" | "SLACK" | "TEAMS" | "GOOGLE" | "MICROSOFT" | "ZOOM" | "WHATSAPP" | "EMAIL" | "SMS" | "STRIPE" | "PAYPAL" | "OPENAI" | "ANTHROPIC" | "ZAPIER" | "CUSTOM";
                 status?: "ACTIVE" | "DISABLED" | "ERROR" | "REVOKED";
@@ -24679,8 +24678,8 @@ export interface operations {
     Integrations_listIntegrationLogs: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 level?: string;
                 eventType?: string;
@@ -24706,8 +24705,8 @@ export interface operations {
     Integrations_listWebhooks: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 enabled?: boolean;
                 eventType?: string;
@@ -24914,8 +24913,8 @@ export interface operations {
     Integrations_listWebhookDeliveries: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 webhookId?: string;
                 eventType?: string;
@@ -25056,8 +25055,8 @@ export interface operations {
     Ai_listAgents: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 provider?: string;
                 type?: string;
@@ -25203,8 +25202,8 @@ export interface operations {
     Ai_listConversations: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 agentId?: string;
                 status?: "OPEN" | "ARCHIVED" | "LOCKED";
@@ -25477,8 +25476,8 @@ export interface operations {
     Ai_listActions: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 status?: "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED";
                 type?: string;
@@ -25562,8 +25561,8 @@ export interface operations {
     Ai_listUsage: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 provider?: string;
                 model?: string;
@@ -25589,8 +25588,8 @@ export interface operations {
     Ai_usageSummary: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 provider?: string;
                 model?: string;
@@ -25633,8 +25632,8 @@ export interface operations {
     Reporting_listDashboards: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 visibility?: "PRIVATE" | "TEAM" | "TENANT" | "PUBLIC";
                 includeArchived?: boolean;
@@ -25863,8 +25862,8 @@ export interface operations {
     Reporting_listReports: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 type?: string;
                 status?: "DRAFT" | "ACTIVE" | "PAUSED" | "ARCHIVED";
@@ -26076,8 +26075,8 @@ export interface operations {
     Reporting_listExecutions: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 reportId?: string;
                 type?: string;
@@ -26121,8 +26120,8 @@ export interface operations {
     Reporting_listExports: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 reportId?: string;
                 format?: "JSON" | "CSV" | "XLSX" | "PDF";
@@ -26344,8 +26343,8 @@ export interface operations {
     Search_globalSearch: {
         parameters: {
             query?: {
-                page?: components["schemas"]["Object"];
-                limit?: components["schemas"]["Object"];
+                page?: number;
+                limit?: number;
                 search?: string;
                 /** @description Restrict search to one result family. */
                 category?: "all" | "projects" | "tasks" | "files" | "people" | "teams" | "workspaces" | "messages";

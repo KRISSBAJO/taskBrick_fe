@@ -3735,11 +3735,24 @@ type OpenApiMethod<TPath extends OpenApiPath> = Extract<keyof paths[TPath], Open
 type OpenApiOperation<TPath extends OpenApiPath, TMethod extends OpenApiMethod<TPath>> = paths[TPath][TMethod];
 type OpenApiPathParams<TPath extends OpenApiPath, TMethod extends OpenApiMethod<TPath>> =
   OpenApiOperation<TPath, TMethod> extends { parameters: { path: infer TParams } } ? TParams : Record<string, never>;
+type OpenApiQuery<TPath extends OpenApiPath, TMethod extends OpenApiMethod<TPath>> =
+  OpenApiOperation<TPath, TMethod> extends { parameters: { query?: infer TParams } } ? NonNullable<TParams> : never;
 type OpenApiJsonBody<TPath extends OpenApiPath, TMethod extends OpenApiMethod<TPath>> =
   OpenApiOperation<TPath, TMethod> extends { requestBody: { content: { "application/json": infer TBody } } }
     ? TBody
     : never;
 
+type ListProjectsQuery = OpenApiQuery<"/api/v1/projects", "get">;
+type CreateProjectPayload = OpenApiJsonBody<"/api/v1/projects", "post">;
+type UpdateProjectPayload = OpenApiJsonBody<"/api/v1/projects/{projectId}", "patch">;
+type ListTasksOpenApiQuery = OpenApiQuery<"/api/v1/tasks", "get">;
+type ListTasksQuery = Omit<ListTasksOpenApiQuery, "statuses" | "priorities" | "types"> & {
+  statuses?: TaskStatus[];
+  priorities?: TaskPriority[];
+  types?: TaskType[];
+};
+type CreateTaskPayload = OpenApiJsonBody<"/api/v1/tasks", "post">;
+type UpdateTaskPayload = OpenApiJsonBody<"/api/v1/tasks/{taskId}", "patch">;
 type CreateBoardColumnPayload = OpenApiJsonBody<"/api/v1/agile/boards/{boardId}/columns", "post">;
 type UpdateBoardColumnPayload = OpenApiJsonBody<"/api/v1/agile/boards/{boardId}/columns/{columnId}", "patch">;
 type ReorderBoardColumnsPayload = OpenApiJsonBody<"/api/v1/agile/boards/{boardId}/columns/reorder", "patch">;
@@ -3785,6 +3798,24 @@ function resolveOpenApiPath<TPath extends OpenApiPath, TMethod extends OpenApiMe
     });
 }
 
+function resolveOpenApiQueryString(query: Record<string, unknown> | undefined) {
+  if (!query) return "";
+
+  const params = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === "") return;
+    if (Array.isArray(value)) {
+      if (value.length) params.set(key, value.join(","));
+      return;
+    }
+
+    params.set(key, String(value));
+  });
+
+  const text = params.toString();
+  return text ? `?${text}` : "";
+}
+
 function openApiRequest<
   TResult,
   TPath extends OpenApiPath,
@@ -3795,11 +3826,13 @@ function openApiRequest<
   options: Omit<RequestOptions, "body" | "method"> & {
     body?: OpenApiJsonBody<TPath, TMethod>;
     pathParams: OpenApiPathParams<TPath, TMethod>;
+    query?: OpenApiQuery<TPath, TMethod>;
   },
 ) {
-  const { body, pathParams, ...requestOptions } = options;
+  const { body, pathParams, query, ...requestOptions } = options;
+  const requestPath = `${resolveOpenApiPath<TPath, TMethod>(path, pathParams)}${resolveOpenApiQueryString(query)}`;
 
-  return apiRequest<TResult>(resolveOpenApiPath<TPath, TMethod>(path, pathParams), {
+  return apiRequest<TResult>(requestPath, {
     ...requestOptions,
     method: method.toUpperCase(),
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -5253,18 +5286,15 @@ export function updateCurrentTenant(
 
 export function listProjects(
   token: string,
-  query: { page?: number; limit?: number; search?: string; workspaceId?: string; teamId?: string; status?: ProjectStatus } = {},
+  query: ListProjectsQuery = {},
 ) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 100)),
-  });
-  if (query.search) params.set("search", query.search);
-  if (query.workspaceId) params.set("workspaceId", query.workspaceId);
-  if (query.teamId) params.set("teamId", query.teamId);
-  if (query.status) params.set("status", query.status);
-
-  return apiRequest<PaginatedResponse<Project>>(`/projects?${params.toString()}`, {
+  return openApiRequest<PaginatedResponse<Project>, "/api/v1/projects", "get">("/api/v1/projects", "get", {
+    pathParams: {},
+    query: {
+      ...query,
+      page: query.page ?? 1,
+      limit: boundedLimit(query.limit, 100),
+    },
     token,
     cache: "no-store",
   });
@@ -5447,7 +5477,15 @@ export function restoreDocumentVersion(
 }
 
 export function getProject(token: string, projectId: string) {
-  return apiRequest<Project>(`/projects/${projectId}`, { token, cache: "no-store" });
+  return openApiRequest<Project, "/api/v1/projects/{projectId}", "get">(
+    "/api/v1/projects/{projectId}",
+    "get",
+    {
+      pathParams: { projectId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function getProjectPermissions(token: string, projectId: string) {
@@ -5460,43 +5498,17 @@ export function getProjectPermissions(token: string, projectId: string) {
 export function updateProject(
   token: string,
   projectId: string,
-  payload: Partial<
-    Pick<
-      Project,
-      | "name"
-      | "description"
-      | "status"
-      | "progress"
-      | "teamId"
-      | "workspaceId"
-      | "currency"
-      | "contractValue"
-      | "clientName"
-      | "clientEmail"
-      | "clientPhone"
-      | "locationName"
-      | "addressLine1"
-      | "addressLine2"
-      | "city"
-      | "state"
-      | "country"
-      | "postalCode"
-      | "timezone"
-      | "billingCode"
-      | "costCenter"
-    >
-  > & {
-    visibility?: Visibility;
-    startDate?: string | null;
-    dueDate?: string | null;
-    completedAt?: string | null;
-  },
+  payload: UpdateProjectPayload,
 ) {
-  return apiRequest<Project>(`/projects/${projectId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<Project, "/api/v1/projects/{projectId}", "patch">(
+    "/api/v1/projects/{projectId}",
+    "patch",
+    {
+      pathParams: { projectId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function deleteProject(token: string, projectId: string) {
@@ -5824,82 +5836,52 @@ export function deleteProjectChangeRequest(token: string, projectId: string, cha
 
 export function createProject(
   token: string,
-  payload: {
-    workspaceId: string;
-    teamId?: string;
-    key: string;
-    name: string;
-    description?: string;
-    status?: ProjectStatus;
-    visibility?: Visibility;
-    startDate?: string;
-    dueDate?: string;
-    progress?: number;
-    currency?: string;
-    contractValue?: number;
-    clientName?: string;
-    clientEmail?: string;
-    clientPhone?: string;
-    locationName?: string;
-    addressLine1?: string;
-    addressLine2?: string;
-    city?: string;
-    state?: string;
-    country?: string;
-    postalCode?: string;
-    timezone?: string;
-    billingCode?: string;
-    costCenter?: string;
-  },
+  payload: CreateProjectPayload,
 ) {
-  return apiRequest<Project>("/projects", {
-    method: "POST",
+  return openApiRequest<Project, "/api/v1/projects", "post">("/api/v1/projects", "post", {
+    pathParams: {},
     token,
-    body: JSON.stringify(payload),
+    body: payload,
   });
 }
 
 export function createTask(
   token: string,
-  payload: {
-    projectId: string;
-    sprintId?: string;
-    boardColumnId?: string;
-    title: string;
-    description?: string;
-    type?: TaskType;
-    status?: TaskStatus;
-    priority?: TaskPriority;
-    dueDate?: string;
-    storyPoints?: number;
-    estimateMins?: number;
-  },
+  payload: CreateTaskPayload,
 ) {
-  return apiRequest<Task>("/tasks", {
-    method: "POST",
+  return openApiRequest<Task, "/api/v1/tasks", "post">("/api/v1/tasks", "post", {
+    pathParams: {},
     token,
-    body: JSON.stringify(payload),
+    body: payload,
   });
 }
 
 export function getTask(token: string, taskId: string) {
-  return apiRequest<Task>(`/tasks/${taskId}`, { token, cache: "no-store" });
+  return openApiRequest<Task, "/api/v1/tasks/{taskId}", "get">(
+    "/api/v1/tasks/{taskId}",
+    "get",
+    {
+      pathParams: { taskId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function updateTask(
   token: string,
   taskId: string,
-  payload: Partial<Pick<Task, "projectId" | "sprintId" | "boardColumnId" | "key" | "title" | "description" | "status" | "priority" | "storyPoints" | "estimateMins" | "actualMins" | "sortOrder">> & {
-    startDate?: string | null;
-    dueDate?: string | null;
-    completedAt?: string | null;
-  },
+  payload: UpdateTaskPayload,
 ) {
-  return apiRequest<Task>(`/tasks/${taskId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<Task, "/api/v1/tasks/{taskId}", "patch">(
+    "/api/v1/tasks/{taskId}",
+    "patch",
+    {
+      pathParams: { taskId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function deleteTask(token: string, taskId: string) {
@@ -6384,121 +6366,21 @@ export function removeTaskWatcher(token: string, taskId: string, userId: string)
 
 export function listTasks(
   token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    projectId?: string;
-    sprintId?: string;
-    parentTaskId?: string;
-    boardColumnId?: string;
-    assigneeId?: string;
-    reporterId?: string;
-    watcherId?: string;
-    labelId?: string;
-    status?: TaskStatus;
-    priority?: TaskPriority;
-    type?: TaskType;
-    statuses?: TaskStatus[];
-    priorities?: TaskPriority[];
-    types?: TaskType[];
-    dueFrom?: string;
-    dueTo?: string;
-    startFrom?: string;
-    startTo?: string;
-    createdFrom?: string;
-    createdTo?: string;
-    updatedFrom?: string;
-    updatedTo?: string;
-    completedFrom?: string;
-    completedTo?: string;
-    storyPointsMin?: number;
-    storyPointsMax?: number;
-    estimateMinsMin?: number;
-    estimateMinsMax?: number;
-    actualMinsMin?: number;
-    actualMinsMax?: number;
-    hasAttachments?: boolean;
-    hasDependencies?: boolean;
-    hasSubtasks?: boolean;
-    unassigned?: boolean;
-    isOverdue?: boolean;
-    isBlocked?: boolean;
-    isBlocking?: boolean;
-    includeArchived?: boolean;
-    includeDeleted?: boolean;
-    sortBy?:
-      | "createdAt"
-      | "updatedAt"
-      | "dueDate"
-      | "startDate"
-      | "completedAt"
-      | "priority"
-      | "status"
-      | "type"
-      | "storyPoints"
-      | "estimateMins"
-      | "actualMins"
-      | "sortOrder"
-      | "key"
-      | "title"
-      | "sprintName";
-    sortDirection?: "asc" | "desc";
-  } = {},
+  query: ListTasksQuery = {},
 ) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 100)),
-  });
-  const entries: Array<[string, string | number | boolean | undefined]> = [
-    ["search", query.search],
-    ["projectId", query.projectId],
-    ["sprintId", query.sprintId],
-    ["parentTaskId", query.parentTaskId],
-    ["boardColumnId", query.boardColumnId],
-    ["assigneeId", query.assigneeId],
-    ["reporterId", query.reporterId],
-    ["watcherId", query.watcherId],
-    ["labelId", query.labelId],
-    ["status", query.status],
-    ["priority", query.priority],
-    ["type", query.type],
-    ["dueFrom", query.dueFrom],
-    ["dueTo", query.dueTo],
-    ["startFrom", query.startFrom],
-    ["startTo", query.startTo],
-    ["createdFrom", query.createdFrom],
-    ["createdTo", query.createdTo],
-    ["updatedFrom", query.updatedFrom],
-    ["updatedTo", query.updatedTo],
-    ["completedFrom", query.completedFrom],
-    ["completedTo", query.completedTo],
-    ["storyPointsMin", query.storyPointsMin],
-    ["storyPointsMax", query.storyPointsMax],
-    ["estimateMinsMin", query.estimateMinsMin],
-    ["estimateMinsMax", query.estimateMinsMax],
-    ["actualMinsMin", query.actualMinsMin],
-    ["actualMinsMax", query.actualMinsMax],
-    ["hasAttachments", query.hasAttachments],
-    ["hasDependencies", query.hasDependencies],
-    ["hasSubtasks", query.hasSubtasks],
-    ["unassigned", query.unassigned],
-    ["isOverdue", query.isOverdue],
-    ["isBlocked", query.isBlocked],
-    ["isBlocking", query.isBlocking],
-    ["includeArchived", query.includeArchived],
-    ["includeDeleted", query.includeDeleted],
-    ["sortBy", query.sortBy],
-    ["sortDirection", query.sortDirection],
-  ];
-  for (const [key, value] of entries) {
-    if (value !== undefined && value !== "") params.set(key, String(value));
-  }
-  if (query.statuses?.length) params.set("statuses", query.statuses.join(","));
-  if (query.priorities?.length) params.set("priorities", query.priorities.join(","));
-  if (query.types?.length) params.set("types", query.types.join(","));
+  const { statuses, priorities, types, ...rest } = query;
+  const apiQuery: ListTasksOpenApiQuery = {
+    ...rest,
+    page: query.page ?? 1,
+    limit: boundedLimit(query.limit, 100),
+    statuses: statuses?.join(","),
+    priorities: priorities?.join(","),
+    types: types?.join(","),
+  };
 
-  return apiRequest<PaginatedResponse<Task>>(`/tasks?${params.toString()}`, {
+  return openApiRequest<PaginatedResponse<Task>, "/api/v1/tasks", "get">("/api/v1/tasks", "get", {
+    pathParams: {},
+    query: apiQuery,
     token,
     cache: "no-store",
   });
