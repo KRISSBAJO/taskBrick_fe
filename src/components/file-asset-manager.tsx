@@ -14,7 +14,6 @@ import {
   Search,
   Trash2,
   Upload,
-  X,
 } from "lucide-react";
 import {
   archiveFileAsset,

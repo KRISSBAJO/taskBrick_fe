@@ -7,19 +7,15 @@ import { useParams } from "next/navigation";
 import {
   Activity,
   ArrowLeft,
-  Ban,
   Building2,
-  CheckCircle2,
   Clock3,
   Fingerprint,
   KeyRound,
-  Mail,
   MonitorSmartphone,
-  RefreshCw,
   ShieldAlert,
   ShieldCheck,
-  UserRound,
   Users,
+  type LucideIcon,
 } from "lucide-react";
 import { useConfirm } from "@/components/confirm-provider";
 import { useToast } from "@/components/toast-provider";
@@ -314,7 +310,7 @@ function Panel({ accent, children, eyebrow, title }: { accent: string; children:
   );
 }
 
-function Metric({ icon: Icon, label, tone, value }: { icon: typeof UserRound; label: string; tone: string; value: number | string }) {
+function Metric({ icon: Icon, label, tone, value }: { icon: LucideIcon; label: string; tone: string; value: number | string }) {
   return (
     <div className="rounded-2xl bg-[#fbfaf6] p-4" style={{ border: "1px solid #e7dfcf" }}>
       <div className="flex items-center justify-between gap-3">
@@ -339,7 +335,7 @@ function Info({ href, label, value }: { href?: string; label: string; value: str
   return <div className="rounded-2xl bg-[#fbfaf6] p-4" style={{ border: "1px solid #e7dfcf" }}>{content}</div>;
 }
 
-function Row({ icon: Icon, meta, status, title }: { icon: typeof Activity; meta: string; status: string; title: string }) {
+function Row({ icon: Icon, meta, status, title }: { icon: LucideIcon; meta: string; status: string; title: string }) {
   return (
     <div className="flex items-start gap-3 rounded-2xl bg-[#fbfaf6] px-3 py-3" style={{ border: "1px solid #e7dfcf" }}>
       <span className="flex size-9 shrink-0 items-center justify-center rounded-2xl bg-white text-[#111111]" style={{ border: "1px solid #ded8c8" }}>

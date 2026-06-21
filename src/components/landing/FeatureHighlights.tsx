@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { ShieldCheck, TrendingUp, Zap, Lock, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, TrendingUp, Zap, Lock, CheckCircle2 } from "lucide-react";
 import { motion, useInView, useSpring, useTransform, useMotionValue } from "framer-motion";
 
 type Feature = {

@@ -168,7 +168,6 @@ export default function SiteAdminTenantDetailPage() {
   const tenant = detail?.tenant;
   const indices = detail?.indices ?? emptyTenantIndices;
   const projectCount = indices.projects.total || tenant?._count?.projects || detail?.projects.length || 0;
-  const taskCount = indices.tasks.total;
   const openTaskCount = indices.tasks.open;
   const activeSessionCount = indices.security.activeSessions || detail?.sessions.active || 0;
   const openEventCount = indices.security.openSecurityEvents || detail?.securityEvents.open || 0;

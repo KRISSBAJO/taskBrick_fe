@@ -14,8 +14,6 @@ import {
   Settings2,
   ShieldCheck,
   Wand2,
-  Workflow,
-  Zap,
 } from "lucide-react";
 import { motion, AnimatePresence, useInView, useSpring, useTransform, useMotionValue } from "framer-motion";
 import * as THREE from "three";
@@ -431,23 +429,6 @@ function CanvasCard({ agent, index, inView }: { agent: AgentCard; index: number;
     </motion.div>
   );
 }
-
-function AgentMetric({ value, label, highlight }: { value: string; label: string; highlight?: boolean }) {
-  return (
-    <div
-      className={`rounded-xl border p-5 transition-all duration-500 ${
-        highlight
-          ? "border-[#ffd400]/15 bg-[#ffd400]/[0.02] shadow-[0_0_30px_rgba(255,212,0,0.02)]"
-          : "border-white/[0.04] bg-white/[0.01]"
-      }`}
-    >
-      <p className="text-3xl font-light tracking-tight text-white">{value}</p>
-      <p className="mt-1.5 text-[10px] font-medium tracking-widest uppercase text-neutral-500">{label}</p>
-    </div>
-  );
-}
-
-/* ─── Three.js agent visuals ────────────────────────────────────────────────── */
 
 function AgentVisualRenderer({ visual }: { visual: AgentVisual }) {
   if (visual === "research")  return <ThreeResearch />;
@@ -1148,7 +1129,8 @@ function CinematicOrb() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
 
     const width = 320;
     const height = 320;
@@ -1162,7 +1144,7 @@ function CinematicOrb() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
-    containerRef.current.appendChild(renderer.domElement);
+    container.appendChild(renderer.domElement);
 
     const canvasSize = 512;
     const textureCanvas = document.createElement("canvas");
@@ -1224,7 +1206,7 @@ function CinematicOrb() {
       geometry.dispose();
       material.dispose();
       orbTexture.dispose();
-      if (containerRef.current) containerRef.current.innerHTML = "";
+      container.innerHTML = "";
     };
   }, []);
 

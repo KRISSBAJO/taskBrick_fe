@@ -844,6 +844,7 @@ function TenantUsersPanel({
             filteredUsers.map((user) => (
               <article key={user.id} className="flex items-center gap-3 px-4 py-3 transition hover:bg-panel-muted/70">
                 {user.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={user.avatarUrl} alt="" className="size-10 rounded-xl object-cover" />
                 ) : (
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#111111] text-[11px] font-black text-white">
@@ -966,11 +967,13 @@ function BulkUserImportPanel({
 
   async function submitImport() {
     if (!preview.rows.length || preview.errors.length) return;
-    const response = await onImport({
-      users: preview.rows.map(({ rowNumber: _rowNumber, roleNames: _roleNames, ...row }) => row),
-      defaultRoleIds,
-      sendInvites,
-    });
+    const users = preview.rows.map((row) => ({
+      email: row.email,
+      firstName: row.firstName,
+      lastName: row.lastName,
+      roleIds: row.roleIds,
+    }));
+    const response = await onImport({ users, defaultRoleIds, sendInvites });
     setResult(response);
   }
 

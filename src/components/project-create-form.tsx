@@ -68,7 +68,7 @@ export function ProjectCreateForm({ disabledReason, onCreated }: { disabledReaso
     } finally {
       setLoadingOptions(false);
     }
-  }, []);
+  }, [setMessage]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => void loadOptions(), 0);

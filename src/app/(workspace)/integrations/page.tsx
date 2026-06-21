@@ -52,16 +52,13 @@ import { useConfirm } from "@/components/confirm-provider";
 import { useToast } from "@/components/toast-provider";
 import { useWorkspaceAuth } from "@/components/workspace-shell";
 import {
-  ActionBar,
   BrandedModal,
   EmptyState,
   FormField,
-  PageHeader,
   PermissionGate,
   SkeletonBlock,
   StatusBadge,
   SurfaceCard,
-  Tabs,
   type TabItem,
 } from "@/components/ui/foundation";
 import {
@@ -2439,31 +2436,6 @@ function HeroChip({
         <p className="text-lg font-black leading-tight" style={{ color }}>{loading ? "—" : value}</p>
       </div>
     </div>
-  );
-}
-
-function MetricCard({ icon: Icon, label, tone, value }: { icon: LucideIcon; label: string; tone: "brand" | "dark" | "green" | "blue" | "violet" | "red" | "muted"; value: number }) {
-  return (
-    <section className="rounded-2xl border border-line bg-panel p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">{label}</p>
-          <p className="mt-2 text-3xl font-black text-foreground">{value}</p>
-        </div>
-        <span className={cn(
-          "flex size-10 items-center justify-center rounded-2xl",
-          tone === "brand" && "bg-primary text-[#111111]",
-          tone === "dark" && "bg-[#111111] text-primary",
-          tone === "green" && "bg-emerald-50 text-emerald-700",
-          tone === "blue" && "bg-blue-50 text-blue-700",
-          tone === "violet" && "bg-violet-50 text-violet-700",
-          tone === "red" && "bg-red-50 text-red-700",
-          tone === "muted" && "bg-panel-muted text-ink-soft",
-        )}>
-          <Icon className="size-5" aria-hidden="true" />
-        </span>
-      </div>
-    </section>
   );
 }
 

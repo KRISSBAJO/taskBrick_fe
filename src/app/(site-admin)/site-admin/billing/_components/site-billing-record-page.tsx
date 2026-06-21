@@ -320,15 +320,6 @@ function RecordMeta({ label, value }: { label: string; value: ReactNode }) {
   );
 }
 
-function Metric({ accent, label, value }: { accent: string; label: string; value: ReactNode }) {
-  return (
-    <div className="rounded-3xl border border-line bg-panel-muted p-4">
-      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">{label}</p>
-      <p className="mt-2 text-3xl font-black" style={{ color: accent }}>{value}</p>
-    </div>
-  );
-}
-
 function StatusBadge({ value }: { value: string }) {
   const normalized = String(value).replace(/_/g, " ").toUpperCase();
   const good = /ACTIVE|PAID|PROCESSED|DELIVERED|API/.test(normalized);

@@ -3,11 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  Activity,
   AlertTriangle,
   ArrowRight,
   BarChart3,
-  CalendarClock,
   CheckCircle2,
   CircleDot,
   Clock3,
@@ -15,7 +13,6 @@ import {
   ListChecks,
   RefreshCw,
   Shield,
-  Target,
   TrendingDown,
   TrendingUp,
   Users,
@@ -32,7 +29,6 @@ import {
   type Project,
   type Task,
   type TaskPriority,
-  type TaskStatus,
   type TaskType,
   type Team,
   type Workspace,

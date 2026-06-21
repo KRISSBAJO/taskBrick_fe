@@ -226,8 +226,6 @@ const statusLeftBar: Record<TaskStatus, string> = {
 const lifecycleTaskStatuses: TaskStatus[] = [...taskStatusOrder, "CANCELLED"];
 const taskTypes: TaskType[] = ["TASK", "STORY", "BUG", "EPIC", "FEATURE", "INCIDENT", "APPROVAL", "CHANGE_REQUEST", "MILESTONE"];
 const customFieldTypes: CustomFieldType[] = ["TEXT", "NUMBER", "DATE", "BOOLEAN", "SINGLE_SELECT", "MULTI_SELECT", "USER", "URL", "JSON"];
-const filterControlClass =
-  "h-10 min-w-0 rounded-xl border border-line bg-panel px-3 text-sm font-semibold text-foreground outline-none transition focus:border-primary";
 
 type WorkViewMode = "list" | "table" | "backlog";
 
@@ -3701,6 +3699,7 @@ function FinanceTeamTab({
                   className="flex min-w-0 items-center gap-3 rounded-xl border border-line bg-background p-3"
                 >
                   {member.user.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={member.user.avatarUrl}
                       alt=""
@@ -4071,7 +4070,7 @@ function ProjectActivityTab({
     } finally {
       setLoading(false);
     }
-  }, [projectId, token]);
+  }, [projectId, setMessage, token]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => void loadActivity(), 0);
@@ -4613,7 +4612,7 @@ function TaskDetailPanel({
     } finally {
       setLoading(false);
     }
-  }, [taskId, token]);
+  }, [setMessage, taskId, token]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => void loadTask(), 0);

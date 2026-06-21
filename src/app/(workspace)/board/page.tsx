@@ -28,20 +28,16 @@ import {
   AlertTriangle,
   Bug,
   CalendarClock,
-  CheckCircle2,
   ChevronDown,
   ChevronsLeftRight,
   CircleDot,
-  Clock3,
   FileText,
   GitBranch,
   GripVertical,
   KanbanSquare,
   List,
   ListCollapse,
-  MessageSquareText,
   MoreVertical,
-  Paperclip,
   Plus,
   RefreshCw,
   Rocket,
@@ -143,14 +139,6 @@ const PRIORITY_COLOR: Record<TaskPriority, string> = {
   CRITICAL: "#ef4444",
 };
 
-const PRIORITY_BG: Record<TaskPriority, string> = {
-  LOW:      "bg-slate-100 text-slate-500",
-  MEDIUM:   "bg-blue-50 text-blue-600",
-  HIGH:     "bg-amber-50 text-amber-700",
-  URGENT:   "bg-orange-50 text-orange-700",
-  CRITICAL: "bg-red-50 text-red-600",
-};
-
 const colId  = (id: string) => `column:${id}`;
 const taskId = (id: string) => `task:${id}`;
 
@@ -214,7 +202,7 @@ export default function BoardPage() {
     } catch (err) {
       setMessage({ text: err instanceof Error ? err.message : "Unable to load board.", ok: false });
     } finally { setLoading(false); }
-  }, [auth.accessToken, selectedProjectId]);
+  }, [auth.accessToken, selectedProjectId, setMessage]);
 
   useEffect(() => {
     const t = window.setTimeout(() => void loadBoard(), 0);
@@ -442,23 +430,6 @@ export default function BoardPage() {
       setMessage({ text: "Column deleted.", ok: true });
     } catch (err) {
       setMessage({ text: err instanceof Error ? err.message : "Unable to delete.", ok: false });
-    } finally { setSaving(false); }
-  }
-
-  async function onTaskSprintChange(task: Task, sprintId: string) {
-    if (!board) return;
-    if (!canManageSprints || task.permissions?.canEdit === false) {
-      setMessage({ text: "Your role cannot assign tasks to sprints.", ok: false });
-      return;
-    }
-    const next = sprintId || null;
-    setBoard(updateTaskInBoard(board, task.id, { sprintId: next }));
-    setSaving(true); setMessage(null);
-    try {
-      await updateTaskBoardOrder(auth.accessToken, task.id, { sortOrder: task.sortOrder, sprintId: next });
-    } catch (err) {
-      setMessage({ text: err instanceof Error ? err.message : "Unable to update sprint.", ok: false });
-      void loadBoard();
     } finally { setSaving(false); }
   }
 
@@ -797,7 +768,6 @@ export default function BoardPage() {
                       sprints={sprints}
                       onDelete={onDeleteColumn}
                       onQuickAdd={onQuickAddTask}
-                      onSprintChange={onTaskSprintChange}
                       onUpdate={onUpdateColumn}
                       users={users}
                       expandedTaskIds={expandedTaskIds}
@@ -1184,7 +1154,7 @@ function TaskSummaryPreview({ task }: { task: Task }) {
 }
 
 function BoardColView({
-  canCreateTask, canManageColumns, canMoveTasks, column, density, expandedTaskIds, onDelete, onQuickAdd, onQuickAssign, onQuickUpdate, onSprintChange, onToggleExpanded, onUpdate, sprints, users,
+  canCreateTask, canManageColumns, canMoveTasks, column, density, expandedTaskIds, onDelete, onQuickAdd, onQuickAssign, onQuickUpdate, onToggleExpanded, onUpdate, sprints, users,
 }: {
   canCreateTask: boolean;
   canManageColumns: boolean;
@@ -1196,7 +1166,6 @@ function BoardColView({
   onQuickAssign: (task: Task, userId: string) => void;
   onQuickAdd: (columnId: string, title: string) => void;
   onQuickUpdate: (task: Task, patch: Partial<Pick<Task, "status" | "priority" | "dueDate">>) => void;
-  onSprintChange: (task: Task, sprintId: string) => void;
   onToggleExpanded: (taskIdValue: string) => void;
   onUpdate: (colId: string, payload: Partial<BoardColumn>) => void;
   sprints: Sprint[];
@@ -1411,7 +1380,6 @@ function BoardColView({
               expanded={expandedTaskIds.has(task.id)}
               onQuickAssign={onQuickAssign}
               onQuickUpdate={onQuickUpdate}
-              onSprintChange={onSprintChange}
               onToggleExpanded={onToggleExpanded}
               canMoveTasks={canMoveTasks}
               users={users}
@@ -1512,7 +1480,7 @@ function ColumnMetric({ color, label, value }: { color: string; label: string; v
 }
 
 function SortableCard({
-  canMoveTasks, columnId: cId, density, expanded, onQuickAssign, onQuickUpdate, onSprintChange, onToggleExpanded, sprints, task, users,
+  canMoveTasks, columnId: cId, density, expanded, onQuickAssign, onQuickUpdate, onToggleExpanded, sprints, task, users,
 }: {
   canMoveTasks: boolean;
   columnId: string;
@@ -1520,7 +1488,6 @@ function SortableCard({
   expanded: boolean;
   onQuickAssign: (task: Task, userId: string) => void;
   onQuickUpdate: (task: Task, patch: Partial<Pick<Task, "status" | "priority" | "dueDate">>) => void;
-  onSprintChange: (task: Task, sprintId: string) => void;
   onToggleExpanded: (taskIdValue: string) => void;
   sprints: Sprint[];
   task: Task;
@@ -1545,7 +1512,6 @@ function SortableCard({
         dragListeners={canMoveTasks && task.permissions?.canMove !== false ? listeners : undefined}
         onQuickAssign={task.permissions?.canAssign === false ? undefined : onQuickAssign}
         onQuickUpdate={task.permissions?.canEdit === false ? undefined : onQuickUpdate}
-        onSprintChange={task.permissions?.canEdit === false ? undefined : onSprintChange}
         onToggleExpanded={onToggleExpanded}
         users={users}
       />
@@ -1575,7 +1541,6 @@ function RichTaskCard({
   expanded = false,
   onQuickAssign,
   onQuickUpdate,
-  onSprintChange,
   onToggleExpanded,
   sprints = [],
   task,
@@ -1588,7 +1553,6 @@ function RichTaskCard({
   expanded?: boolean;
   onQuickAssign?: (task: Task, userId: string) => void;
   onQuickUpdate?: (task: Task, patch: Partial<Pick<Task, "status" | "priority" | "dueDate">>) => void;
-  onSprintChange?: (task: Task, sprintId: string) => void;
   onToggleExpanded?: (taskIdValue: string) => void;
   sprints?: Sprint[];
   task: Task;
@@ -1755,15 +1719,6 @@ function TaskSignalPill({ children, color }: { children: ReactNode; color: strin
   );
 }
 
-function IconCount({ icon, value }: { icon: ReactNode; value: number }) {
-  return (
-    <span className="inline-flex items-center gap-1 rounded-md border border-line bg-background px-1.5 py-0.5">
-      {icon}
-      {value}
-    </span>
-  );
-}
-
 function TaskTypeGlyph({ type }: { type: TaskType }) {
   if (type === "BUG") return <Bug className="size-3" />;
   if (type === "INCIDENT") return <AlertTriangle className="size-3" />;
@@ -1805,26 +1760,6 @@ function AvatarStack({ people }: { people: ReturnType<typeof getCardAssignees> }
           +{people.length - 4}
         </span>
       ) : null}
-    </div>
-  );
-}
-
-function AttachmentPreviewStrip({ previews }: { previews: NonNullable<Task["card"]>["attachments"]["previews"] }) {
-  return (
-    <div className="grid grid-cols-3 gap-1.5">
-      {previews.slice(0, 3).map((file) => (
-        <div key={file.id} className="min-w-0 rounded-xl border border-[#ded6bd] bg-white p-1.5">
-          <div className="flex h-10 items-center justify-center rounded-lg bg-[#f4f0e2] text-[10px] font-black text-foreground">
-            {file.kind === "IMAGE" ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={file.fileUrl} alt="" className="h-full w-full rounded-lg object-cover" />
-            ) : (
-              file.kind
-            )}
-          </div>
-          <p className="mt-1 truncate text-[9px] font-bold text-ink-soft">{file.fileName}</p>
-        </div>
-      ))}
     </div>
   );
 }
@@ -1874,188 +1809,10 @@ function getDueTone(state: ReturnType<typeof getTaskDue>["state"]) {
   return { className: "bg-[#f4f0e2] text-ink-soft" };
 }
 
-function getTaskEstimateLabel(task: Task) {
-  const estimateMins = task.card?.estimate.estimateMins ?? task.estimateMins;
-  const actualMins = task.card?.estimate.actualMins ?? task.actualMins;
-  if (typeof estimateMins !== "number" && typeof actualMins !== "number") return "";
-  if (typeof estimateMins === "number" && typeof actualMins === "number" && actualMins > 0) {
-    return `${formatMinutes(actualMins)}/${formatMinutes(estimateMins)}`;
-  }
-  return typeof estimateMins === "number" ? formatMinutes(estimateMins) : formatMinutes(actualMins ?? 0);
-}
-
-function formatMinutes(value: number) {
-  if (value < 60) return `${value}m`;
-  const hours = Math.floor(value / 60);
-  const minutes = value % 60;
-  return minutes ? `${hours}h ${minutes}m` : `${hours}h`;
-}
-
 function initialsFromParts(firstName?: string, lastName?: string, email?: string) {
   const initials = `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.trim();
   return (initials || email?.slice(0, 2) || "UN").toUpperCase();
 }
-
-function TaskCard({
-  density = "compact",
-  dragAttributes,
-  dragListeners,
-  dragging,
-  onSprintChange,
-  sprints = [],
-  task,
-}: {
-  density?: BoardDensity;
-  dragAttributes?: DragHandleAttributes;
-  dragListeners?: DragHandleListeners;
-  dragging?: boolean;
-  onSprintChange?: (task: Task, sprintId: string) => void;
-  sprints?: Sprint[];
-  task: Task;
-}) {
-  const [sprintMenuPos, setSprintMenuPos] = useState<{ top: number; right: number } | null>(null);
-  const assignee      = task.assignees?.[0]?.user;
-  const priColor      = PRIORITY_COLOR[task.priority];
-  const currentSprint = sprints.find((s) => s.id === task.sprintId);
-
-  return (
-    <article
-      className={cn(
-        "group relative overflow-hidden rounded-xl border border-line/60 bg-panel",
-        "transition-all duration-150 hover:border-[#ffd400]/40 hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]",
-        dragging && "w-[264px] rotate-[1deg] shadow-xl",
-      )}
-    >
-      {/* Priority left stripe */}
-      <div className="absolute inset-y-0 left-0 w-[3px]" style={{ background: priColor }} />
-
-      <div className="py-2.5 pl-3.5 pr-3">
-        {/* Row 1: key + title + assignee/drag stack */}
-        <div className="flex items-start gap-2">
-          <div className="min-w-0 flex-1">
-            <span className="text-[9px] font-black tracking-widest" style={{ color: "#b8870a" }}>
-              {task.key}
-            </span>
-            <Link
-              href={`/projects/${task.projectId}?task=${task.id}`}
-              className="mt-0.5 block line-clamp-2 text-[12px] font-semibold leading-snug text-foreground transition hover:text-primary"
-            >
-              {task.title}
-            </Link>
-          </div>
-
-          {/* Right column: assignee + drag handle */}
-          <div className="flex shrink-0 flex-col items-end gap-1.5 pt-0.5">
-            <span
-              className="flex size-[22px] items-center justify-center rounded-md text-[7px] font-black text-white"
-              style={{ background: "#1e1b2e" }}
-              title={assignee ? `${assignee.firstName} ${assignee.lastName}` : "Unassigned"}
-            >
-              {userInitials(assignee)}
-            </span>
-            <button
-              type="button"
-              className="flex size-4 items-center justify-center text-ink-soft/20 opacity-0 transition group-hover:opacity-100 hover:text-ink-soft"
-              {...dragAttributes}
-              {...dragListeners}
-              aria-label="Drag task"
-            >
-              <GripVertical className="size-3" />
-            </button>
-          </div>
-        </div>
-
-        {/* Row 2: priority · pts · comments · sprint icon · due */}
-        <div className="mt-2 flex items-center gap-1.5">
-          <span className="size-1.5 shrink-0 rounded-full" style={{ background: priColor }} />
-          <span className="text-[9px] font-semibold text-ink-soft">{priorityLabels[task.priority]}</span>
-          {task.storyPoints != null && (
-            <span className="text-[9px] text-ink-soft/60">· {task.storyPoints}pt</span>
-          )}
-          {(task._count?.comments ?? 0) > 0 && (
-            <span className="text-[9px] text-ink-soft/60">· {task._count!.comments}c</span>
-          )}
-
-          <div className="flex-1" />
-
-          {/* Sprint icon trigger */}
-          {onSprintChange && sprints.length > 0 && (
-            <>
-              <button
-                type="button"
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  setSprintMenuPos(
-                    sprintMenuPos
-                      ? null
-                      : { top: rect.bottom + 4, right: window.innerWidth - rect.right },
-                  );
-                }}
-                title={currentSprint?.name ?? "Backlog — click to assign sprint"}
-                className={cn(
-                  "flex items-center gap-1 rounded-md px-1 py-0.5 text-[9px] font-semibold transition hover:bg-panel-muted",
-                  currentSprint ? "text-blue-500" : "text-ink-soft/30 hover:text-ink-soft",
-                )}
-              >
-                <Rocket className="size-3 shrink-0" />
-                {currentSprint && (
-                  <span className="max-w-[52px] truncate">{currentSprint.name}</span>
-                )}
-              </button>
-
-              {sprintMenuPos && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setSprintMenuPos(null)} />
-                  <div
-                    className="fixed z-50 min-w-[148px] overflow-hidden rounded-xl border border-line bg-panel shadow-xl"
-                    style={{ top: sprintMenuPos.top, right: sprintMenuPos.right }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => { onSprintChange(task, ""); setSprintMenuPos(null); }}
-                      className={cn(
-                        "flex w-full items-center gap-2 px-3 py-2 text-[11px] font-semibold transition hover:bg-panel-muted",
-                        !task.sprintId ? "text-foreground" : "text-ink-soft",
-                      )}
-                    >
-                      <span className="size-1.5 shrink-0 rounded-full bg-ink-soft/30" />
-                      Backlog
-                    </button>
-                    {sprints.map((s) => (
-                      <button
-                        key={s.id}
-                        type="button"
-                        onClick={() => { onSprintChange(task, s.id); setSprintMenuPos(null); }}
-                        className={cn(
-                          "flex w-full items-center gap-2 px-3 py-2 text-[11px] font-semibold transition hover:bg-panel-muted",
-                          task.sprintId === s.id ? "text-blue-600" : "text-ink-soft",
-                        )}
-                      >
-                        <Rocket
-                          className="size-3 shrink-0"
-                          style={{ color: task.sprintId === s.id ? "#3b82f6" : undefined }}
-                        />
-                        <span className="truncate">{s.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </>
-          )}
-
-          {task.dueDate && (
-            <span className="text-[9px] font-medium text-ink-soft/70">
-              {formatShortDate(task.dueDate)}
-            </span>
-          )}
-        </div>
-      </div>
-    </article>
-  );
-}
-
-/* ─── Column editor ────────────────────────────────────────────────────────── */
 
 function ColumnEditor({ column, onCancel, onDelete, onSubmit }: {
   column: BoardColumn;

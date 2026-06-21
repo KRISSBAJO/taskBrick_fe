@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   BookOpenText,
   CalendarDays,
-  ChevronDown,
   CheckCircle2,
   Clock3,
   Copy,
@@ -22,7 +21,6 @@ import {
   ListChecks,
   Loader2,
   LockKeyhole,
-  MoreHorizontal,
   Paperclip,
   Pilcrow,
   Plus,
@@ -1601,7 +1599,7 @@ function DocumentWorkspace({
       setPromptCustomValue("");
     }, 0);
     return () => window.clearTimeout(timeout);
-  }, [activePromptKey]);
+  }, [activePrompt, activePromptKey]);
 
   useEffect(() => {
     if (editorPanel !== "write" || !assistantTargetKey || assistantTargetKey === lastAssistantTargetRef.current) return;
@@ -2214,9 +2212,6 @@ Notes:
 
 const inputClass =
   "h-11 w-full rounded-xl border border-line bg-white px-3 text-sm font-semibold text-foreground outline-none transition placeholder:text-ink-soft/70 focus:border-primary disabled:bg-panel-muted disabled:text-ink-soft";
-
-const metadataCardInputClass =
-  "mt-2 h-11 w-full rounded-xl border border-line bg-[#fbfaf7] px-3 text-sm font-semibold text-foreground outline-none transition placeholder:text-ink-soft/70 focus:border-[#111111] disabled:bg-panel-muted disabled:text-ink-soft";
 
 const sideActionClass =
   "inline-flex h-10 w-full items-center gap-2 rounded-xl border border-line bg-white px-3 text-sm font-black text-foreground transition hover:bg-panel-muted";
@@ -3176,103 +3171,6 @@ function formatDateForDocument(value: string) {
   return parsed.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function AuthoringCommandBar({
-  blockMenuOpen,
-  canManageDocs,
-  documentSnippets,
-  onAttachFile,
-  onCloseBlockMenu,
-  onInsertSnippet,
-  onOpenBlockMenu,
-  uploadingFile,
-}: {
-  blockMenuOpen: boolean;
-  canManageDocs: boolean;
-  documentSnippets: Array<{ body: string; label: string }>;
-  onAttachFile: () => void;
-  onCloseBlockMenu: () => void;
-  onInsertSnippet: (body: string) => void;
-  onOpenBlockMenu: () => void;
-  uploadingFile: boolean;
-}) {
-  return (
-    <div className="relative rounded-[28px] border border-line bg-white p-5 shadow-sm lg:col-span-2">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-primary-dark">Write mode</p>
-          <h2 className="text-lg font-black text-foreground">Build the page from clean blocks</h2>
-          <p className="mt-1 max-w-2xl text-sm font-semibold leading-6 text-ink-soft">
-            Use helpers for sections, tables, dates, statuses, prompts, and evidence. Preview hides unused instructions.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={onOpenBlockMenu}
-            disabled={!canManageDocs}
-            className="inline-flex h-11 items-center gap-2 rounded-2xl bg-[#111111] px-4 text-sm font-black text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Plus className="size-4" aria-hidden="true" />
-            Add block
-            <ChevronDown className="size-4" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            onClick={onAttachFile}
-            disabled={!canManageDocs || uploadingFile}
-            className="inline-flex h-11 items-center gap-2 rounded-2xl border border-line bg-[#fbfaf7] px-4 text-sm font-black text-foreground transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {uploadingFile ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <Paperclip className="size-4" aria-hidden="true" />}
-            {uploadingFile ? "Uploading" : "Upload"}
-          </button>
-        </div>
-      </div>
-
-      {blockMenuOpen ? (
-        <div className="absolute left-3 top-[calc(100%+8px)] z-20 w-[min(600px,calc(100vw-3rem))] overflow-hidden rounded-2xl border border-line bg-white shadow-[0_24px_60px_rgba(17,17,17,0.18)]">
-          <div className="flex items-center justify-between border-b border-line px-4 py-3">
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-primary-dark">Block library</p>
-              <p className="text-sm font-black text-foreground">Insert reusable document structure</p>
-            </div>
-            <button
-              type="button"
-              onClick={onCloseBlockMenu}
-              className="inline-flex size-8 items-center justify-center rounded-xl border border-line bg-white text-ink-soft transition hover:border-[#111111] hover:text-foreground"
-              aria-label="Close block menu"
-            >
-              <X className="size-4" aria-hidden="true" />
-            </button>
-          </div>
-          <div className="grid gap-1 p-2 sm:grid-cols-2">
-            {documentSnippets.map((snippet) => (
-              <button
-                key={snippet.label}
-                type="button"
-                onClick={() => {
-                  onInsertSnippet(snippet.body);
-                  onCloseBlockMenu();
-                }}
-                className="group flex items-start gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-[#fbfaf7]"
-              >
-                <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-[#111111]">
-                  <Plus className="size-4" aria-hidden="true" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-sm font-black text-foreground">{snippet.label}</span>
-                  <span className="mt-1 block line-clamp-2 text-xs font-semibold leading-4 text-ink-soft">
-                    {snippet.body.split("\n").find((line) => line.trim() && !line.startsWith("##"))?.replace(/\[|\]/g, "") || "Structured content block"}
-                  </span>
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 function PromptReplacementPanel({
   activePrompt,
   canManageDocs,
@@ -3765,251 +3663,6 @@ function AuthoringAssistant({
   );
 }
 
-function SnippetButton({ disabled, label, onClick }: { disabled: boolean; label: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="inline-flex h-9 items-center gap-2 rounded-xl border border-line bg-white px-3 text-xs font-black text-foreground shadow-sm transition hover:border-[#111111] hover:bg-[#fbfaf7] disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      <Plus className="size-3.5 text-primary-dark" aria-hidden="true" />
-      {label}
-    </button>
-  );
-}
-
-function PlaceholderPromptHelper({
-  customValue,
-  disabled,
-  onApply,
-  onClose,
-  onCustomValueChange,
-  onValueChange,
-  prompt,
-  value,
-}: {
-  customValue: string;
-  disabled: boolean;
-  onApply: () => void;
-  onClose: () => void;
-  onCustomValueChange: (value: string) => void;
-  onValueChange: (value: string) => void;
-  prompt: PlaceholderPrompt | null;
-  value: string;
-}) {
-  if (!prompt) {
-    return null;
-  }
-
-  const promptTitle =
-    prompt.kind === "date"
-      ? "Date prompt"
-      : prompt.kind === "options"
-        ? "Option prompt"
-        : "Text prompt";
-  const showCustomInput = prompt.kind === "text" || value === "__custom";
-
-  return (
-    <div className="fixed inset-x-3 bottom-4 z-50 mx-auto max-w-4xl rounded-[20px] border border-primary/60 bg-[#fffdf1] p-3 pr-12 shadow-[0_24px_70px_rgba(17,17,17,0.22)] sm:bottom-6">
-      <button
-        type="button"
-        onClick={onClose}
-        className="absolute right-3 top-3 inline-flex size-8 items-center justify-center rounded-xl border border-line bg-white text-ink-soft transition hover:border-[#111111] hover:text-foreground"
-        aria-label="Close prompt helper"
-      >
-        <X className="size-4" aria-hidden="true" />
-      </button>
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="min-w-[180px] flex-1">
-          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-primary-dark">Fill selected prompt</p>
-          <p className="mt-1 text-sm font-black text-foreground">{promptTitle}: {prompt.placeholder}</p>
-        </div>
-
-        {prompt.kind === "date" ? (
-          <label className="min-w-[180px] text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">
-            Pick date
-            <input
-              type="date"
-              value={value}
-              onChange={(event) => onValueChange(event.target.value)}
-              disabled={disabled}
-              className="mt-1 h-10 w-full rounded-xl border border-line bg-white px-3 text-sm font-semibold normal-case tracking-normal text-foreground outline-none disabled:bg-panel-muted"
-            />
-          </label>
-        ) : null}
-
-        {prompt.kind === "options" ? (
-          <label className="min-w-[220px] text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">
-            Choose value
-            <select
-              value={value}
-              onChange={(event) => onValueChange(event.target.value)}
-              disabled={disabled}
-              className="mt-1 h-10 w-full rounded-xl border border-line bg-white px-3 text-sm font-semibold normal-case tracking-normal text-foreground outline-none disabled:bg-panel-muted"
-            >
-              {prompt.options.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-              <option value="__custom">Other value...</option>
-            </select>
-          </label>
-        ) : null}
-
-        {showCustomInput ? (
-          <label className="min-w-[220px] flex-1 text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">
-            {prompt.kind === "text" ? "Replacement" : "Custom value"}
-            <input
-              value={customValue}
-              onChange={(event) => onCustomValueChange(event.target.value)}
-              disabled={disabled}
-              placeholder={prompt.kind === "text" ? "Type the final text" : "Type another option"}
-              className="mt-1 h-10 w-full rounded-xl border border-line bg-white px-3 text-sm font-semibold normal-case tracking-normal text-foreground outline-none disabled:bg-panel-muted"
-            />
-          </label>
-        ) : null}
-
-        <button
-          type="button"
-          onClick={onApply}
-          disabled={disabled}
-          className="h-10 rounded-xl bg-[#111111] px-4 text-sm font-black text-white shadow-sm transition hover:bg-black disabled:opacity-50"
-        >
-          Replace prompt
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function SectionControl({
-  disabled,
-  onClose,
-  onRemove,
-  reviewing,
-  section,
-}: {
-  disabled: boolean;
-  onClose: () => void;
-  onRemove: () => void;
-  reviewing: boolean;
-  section: DocumentSection | null;
-}) {
-  if (!section) return null;
-
-  return (
-    <div
-      className={cn(
-        "mt-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border px-4 py-3 shadow-sm transition",
-        reviewing
-          ? "border-red-300 bg-red-50 shadow-[0_0_0_3px_rgba(239,68,68,0.10)]"
-          : "border-line bg-white",
-      )}
-    >
-      <div className="min-w-0">
-        <p className={cn("text-[10px] font-black uppercase tracking-[0.16em]", reviewing ? "text-red-700" : "text-ink-soft")}>
-          {reviewing ? "Section selected for removal" : "Current section"}
-        </p>
-        <p className="truncate text-sm font-black text-foreground">{section.title}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onRemove}
-          disabled={disabled}
-          className={cn(
-            "inline-flex h-9 items-center gap-2 rounded-xl border px-3 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-50",
-            reviewing ? "border-red-300 bg-red-600 text-white hover:bg-red-700" : "border-red-200 bg-red-50 text-red-700 hover:bg-red-100",
-          )}
-        >
-          <Trash2 className="size-3.5" aria-hidden="true" />
-          {reviewing ? "Confirming..." : "Remove section"}
-        </button>
-        <button
-          type="button"
-          onClick={onClose}
-          className="inline-flex size-9 items-center justify-center rounded-xl border border-line bg-white text-ink-soft transition hover:border-[#111111] hover:text-foreground"
-          aria-label="Close section helper"
-        >
-          <X className="size-4" aria-hidden="true" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function StructuredFieldHelper({
-  disabled,
-  dueDate,
-  onDueDateChange,
-  onInsert,
-  onOwnerChange,
-  onStatusChange,
-  owner,
-  status,
-}: {
-  disabled: boolean;
-  dueDate: string;
-  onDueDateChange: (value: string) => void;
-  onInsert: () => void;
-  onOwnerChange: (value: string) => void;
-  onStatusChange: (value: string) => void;
-  owner: string;
-  status: string;
-}) {
-  return (
-    <div className="mt-4 rounded-2xl border border-line bg-white p-3 shadow-sm">
-      <div className="flex flex-wrap items-end gap-3">
-        <label className="min-w-[180px] flex-1 text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">
-          Owner
-          <input
-            value={owner}
-            onChange={(event) => onOwnerChange(event.target.value)}
-            disabled={disabled}
-            placeholder="Owner name"
-            className="mt-1 h-10 w-full rounded-xl border border-line bg-white px-3 text-sm font-semibold normal-case tracking-normal text-foreground outline-none disabled:bg-panel-muted"
-          />
-        </label>
-        <label className="min-w-[150px] text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">
-          Date
-          <input
-            type="date"
-            value={dueDate}
-            onChange={(event) => onDueDateChange(event.target.value)}
-            disabled={disabled}
-            className="mt-1 h-10 w-full rounded-xl border border-line bg-white px-3 text-sm font-semibold normal-case tracking-normal text-foreground outline-none disabled:bg-panel-muted"
-          />
-        </label>
-        <label className="min-w-[170px] text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">
-          Status
-          <select
-            value={status}
-            onChange={(event) => onStatusChange(event.target.value)}
-            disabled={disabled}
-            className="mt-1 h-10 w-full rounded-xl border border-line bg-white px-3 text-sm font-semibold normal-case tracking-normal text-foreground outline-none disabled:bg-panel-muted"
-          >
-            {statusHelperOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button
-          type="button"
-          onClick={onInsert}
-          disabled={disabled}
-          className="h-10 rounded-xl bg-primary px-4 text-sm font-black text-[#111111] shadow-sm transition hover:bg-primary-dark disabled:opacity-50"
-        >
-          Insert update
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function WritingGuideCard({ guide }: { guide: string[] }) {
   return (
     <section className="rounded-[24px] border border-line bg-white p-4 shadow-sm">
@@ -4230,15 +3883,6 @@ function GovernanceRow({ icon: Icon, label, value }: { icon: LucideIcon; label: 
         {label}
       </span>
       <span className="text-xs font-black text-ink-soft">{value}</span>
-    </div>
-  );
-}
-
-function MetadataCard({ children, label }: { children: ReactNode; label: string }) {
-  return (
-    <div className="min-w-0 rounded-[20px] border border-line bg-white p-4">
-      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-ink-soft">{label}</p>
-      <div className="min-w-0">{children}</div>
     </div>
   );
 }
@@ -4512,6 +4156,7 @@ function PreviewTable({ rows }: { rows: string[][] }) {
 function PreviewImage({ alt, src }: { alt: string; src: string }) {
   return (
     <figure className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt={alt || "Document image"} className="max-h-[520px] w-full object-contain bg-[#fbfaf7]" />
       {alt ? <figcaption className="border-t border-line px-4 py-2 text-xs font-semibold text-ink-soft">{alt}</figcaption> : null}
     </figure>

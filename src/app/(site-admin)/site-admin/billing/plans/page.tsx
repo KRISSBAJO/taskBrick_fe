@@ -14,7 +14,6 @@ import {
   Save,
   ShieldCheck,
   Trash2,
-  Users,
   Zap,
 } from "lucide-react";
 import { useConfirm } from "@/components/confirm-provider";
@@ -133,10 +132,8 @@ export default function SiteAdminBillingPlansPage() {
     setEditPlanState({ draft: planToDraft(selectedPlan), planId: selectedPlan.id });
   }
 
-  const activePlans = plans.filter((p) => p.isActive && !p.archivedAt).length;
-  const archivedPlans = plans.filter((p) => p.archivedAt).length;
-  const assignedFeatureCount = plans.reduce((sum, p) => sum + (p.features?.length ?? 0), 0);
-  const totalSubscriptions = plans.reduce((sum, p) => sum + (p._count?.subscriptions ?? 0), 0);
+  const activePlans = plans.filter((plan) => plan.isActive && !plan.archivedAt).length;
+  const totalSubscriptions = plans.reduce((sum, plan) => sum + (plan._count?.subscriptions ?? 0), 0);
   const availableFeatures = selectedPlan ? unassignedFeatures(features, selectedPlan) : features;
   const assignmentFeatureId = assignmentDraft.featureId || availableFeatures[0]?.id || "";
 

@@ -42,7 +42,6 @@ import {
   Trash2,
   Underline,
   Undo2,
-  UserRound,
   type LucideIcon,
 } from "lucide-react";
 import { useRealtime } from "@/components/realtime-provider";
@@ -1847,6 +1846,7 @@ function EmptyState({ body, compact = false, icon: Icon, title }: { body: string
 
 function Avatar({ user }: { user?: UserSummary | null }) {
   if (user?.avatarUrl) {
+    // eslint-disable-next-line @next/next/no-img-element
     return <img src={user.avatarUrl} alt="" className="size-8 shrink-0 rounded-full object-cover ring-1 ring-line" />;
   }
 
