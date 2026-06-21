@@ -3768,6 +3768,28 @@ type ListTasksQuery = Omit<ListTasksOpenApiQuery, "statuses" | "priorities" | "t
 };
 type CreateTaskPayload = OpenApiJsonBody<"/api/v1/tasks", "post">;
 type UpdateTaskPayload = OpenApiJsonBody<"/api/v1/tasks/{taskId}", "patch">;
+type TaskUserPayload = OpenApiJsonBody<"/api/v1/tasks/{taskId}/assignees", "post">;
+type CreateTaskCommentPayload = OpenApiJsonBody<"/api/v1/tasks/{taskId}/comments", "post">;
+type CreateTaskAttachmentPayload = OpenApiJsonBody<"/api/v1/tasks/{taskId}/attachments", "post">;
+type CreateTaskChecklistPayload = OpenApiJsonBody<"/api/v1/tasks/{taskId}/checklists", "post">;
+type CreateTaskChecklistItemPayload = OpenApiJsonBody<"/api/v1/tasks/{taskId}/checklists/{checklistId}/items", "post">;
+type UpdateTaskChecklistItemPayload = OpenApiJsonBody<"/api/v1/tasks/{taskId}/checklists/{checklistId}/items/{itemId}", "patch">;
+type AssignTaskLabelPayload = OpenApiJsonBody<"/api/v1/tasks/{taskId}/labels", "post">;
+type CreateTaskDependencyPayload = OpenApiJsonBody<"/api/v1/tasks/{taskId}/dependencies", "post">;
+type ListCustomFieldsQuery = OpenApiQuery<"/api/v1/tasks/custom-fields", "get">;
+type CreateCustomFieldPayload = OpenApiJsonBody<"/api/v1/tasks/custom-fields", "post">;
+type UpdateCustomFieldPayload = OpenApiJsonBody<"/api/v1/tasks/custom-fields/{customFieldId}", "patch">;
+type ListTaskSavedViewsQuery = OpenApiQuery<"/api/v1/tasks/saved-views", "get">;
+type CreateTaskSavedViewPayload = OpenApiJsonBody<"/api/v1/tasks/saved-views", "post">;
+type UpdateTaskSavedViewPayload = OpenApiJsonBody<"/api/v1/tasks/saved-views/{viewId}", "patch">;
+type BulkTaskOperationPayload = OpenApiJsonBody<"/api/v1/tasks/bulk", "post">;
+type CreateLabelPayload = OpenApiJsonBody<"/api/v1/tasks/labels", "post">;
+type UpdateLabelPayload = OpenApiJsonBody<"/api/v1/tasks/labels/{labelId}", "patch">;
+type ListSprintsQuery = OpenApiQuery<"/api/v1/agile/sprints", "get">;
+type CreateSprintPayload = OpenApiJsonBody<"/api/v1/agile/sprints", "post">;
+type UpdateSprintPayload = OpenApiJsonBody<"/api/v1/agile/sprints/{sprintId}", "patch">;
+type CompleteSprintPayload = OpenApiJsonBody<"/api/v1/agile/sprints/{sprintId}/complete", "post">;
+type SprintTaskBulkPayload = OpenApiJsonBody<"/api/v1/agile/sprints/{sprintId}/tasks", "post">;
 type CreateBoardColumnPayload = OpenApiJsonBody<"/api/v1/agile/boards/{boardId}/columns", "post">;
 type UpdateBoardColumnPayload = OpenApiJsonBody<"/api/v1/agile/boards/{boardId}/columns/{columnId}", "patch">;
 type ReorderBoardColumnsPayload = OpenApiJsonBody<"/api/v1/agile/boards/{boardId}/columns/reorder", "patch">;
@@ -6011,75 +6033,119 @@ export function updateTask(
 }
 
 export function deleteTask(token: string, taskId: string) {
-  return apiRequest<Task>(`/tasks/${taskId}`, {
-    method: "DELETE",
+  return openApiRequest<Task, "/api/v1/tasks/{taskId}", "delete">("/api/v1/tasks/{taskId}", "delete", {
+    pathParams: { taskId },
     token,
   });
 }
 
 export function archiveTask(token: string, taskId: string) {
-  return apiRequest<Task>(`/tasks/${taskId}/archive`, {
-    method: "POST",
-    token,
-  });
+  return openApiRequest<Task, "/api/v1/tasks/{taskId}/archive", "post">(
+    "/api/v1/tasks/{taskId}/archive",
+    "post",
+    {
+      pathParams: { taskId },
+      token,
+    },
+  );
 }
 
 export function restoreTask(token: string, taskId: string) {
-  return apiRequest<Task>(`/tasks/${taskId}/restore`, {
-    method: "POST",
-    token,
-  });
+  return openApiRequest<Task, "/api/v1/tasks/{taskId}/restore", "post">(
+    "/api/v1/tasks/{taskId}/restore",
+    "post",
+    {
+      pathParams: { taskId },
+      token,
+    },
+  );
 }
 
 export function listTaskComments(token: string, taskId: string) {
-  return apiRequest<TaskComment[]>(`/tasks/${taskId}/comments`, { token, cache: "no-store" });
+  return openApiRequest<TaskComment[], "/api/v1/tasks/{taskId}/comments", "get">(
+    "/api/v1/tasks/{taskId}/comments",
+    "get",
+    {
+      pathParams: { taskId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
-export function createTaskComment(token: string, taskId: string, payload: { body: string; parentId?: string }) {
-  return apiRequest<TaskComment>(`/tasks/${taskId}/comments`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+export function createTaskComment(token: string, taskId: string, payload: CreateTaskCommentPayload) {
+  return openApiRequest<TaskComment, "/api/v1/tasks/{taskId}/comments", "post">(
+    "/api/v1/tasks/{taskId}/comments",
+    "post",
+    {
+      pathParams: { taskId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function deleteTaskComment(token: string, taskId: string, commentId: string) {
-  return apiRequest<{ success: boolean }>(`/tasks/${taskId}/comments/${commentId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/tasks/{taskId}/comments/{commentId}", "delete">(
+    "/api/v1/tasks/{taskId}/comments/{commentId}",
+    "delete",
+    {
+      pathParams: { taskId, commentId },
+      token,
+    },
+  );
 }
 
 export function listTaskChecklists(token: string, taskId: string) {
-  return apiRequest<TaskChecklist[]>(`/tasks/${taskId}/checklists`, { token, cache: "no-store" });
+  return openApiRequest<TaskChecklist[], "/api/v1/tasks/{taskId}/checklists", "get">(
+    "/api/v1/tasks/{taskId}/checklists",
+    "get",
+    {
+      pathParams: { taskId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
-export function createTaskChecklist(token: string, taskId: string, payload: { title: string }) {
-  return apiRequest<TaskChecklist>(`/tasks/${taskId}/checklists`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+export function createTaskChecklist(token: string, taskId: string, payload: CreateTaskChecklistPayload) {
+  return openApiRequest<TaskChecklist, "/api/v1/tasks/{taskId}/checklists", "post">(
+    "/api/v1/tasks/{taskId}/checklists",
+    "post",
+    {
+      pathParams: { taskId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function deleteTaskChecklist(token: string, taskId: string, checklistId: string) {
-  return apiRequest<{ success: boolean }>(`/tasks/${taskId}/checklists/${checklistId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/tasks/{taskId}/checklists/{checklistId}", "delete">(
+    "/api/v1/tasks/{taskId}/checklists/{checklistId}",
+    "delete",
+    {
+      pathParams: { taskId, checklistId },
+      token,
+    },
+  );
 }
 
 export function createTaskChecklistItem(
   token: string,
   taskId: string,
   checklistId: string,
-  payload: { text: string; sortOrder?: number },
+  payload: CreateTaskChecklistItemPayload,
 ) {
-  return apiRequest<TaskChecklistItem>(`/tasks/${taskId}/checklists/${checklistId}/items`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<TaskChecklistItem, "/api/v1/tasks/{taskId}/checklists/{checklistId}/items", "post">(
+    "/api/v1/tasks/{taskId}/checklists/{checklistId}/items",
+    "post",
+    {
+      pathParams: { taskId, checklistId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function updateTaskChecklistItem(
@@ -6087,12 +6153,16 @@ export function updateTaskChecklistItem(
   taskId: string,
   checklistId: string,
   itemId: string,
-  payload: Partial<Pick<TaskChecklistItem, "text" | "isDone" | "sortOrder">>,
+  payload: UpdateTaskChecklistItemPayload,
 ) {
-  return apiRequest<TaskChecklistItem>(`/tasks/${taskId}/checklists/${checklistId}/items/${itemId}`, {
-    method: "PATCH",
+  return openApiRequest<
+    TaskChecklistItem,
+    "/api/v1/tasks/{taskId}/checklists/{checklistId}/items/{itemId}",
+    "patch"
+  >("/api/v1/tasks/{taskId}/checklists/{checklistId}/items/{itemId}", "patch", {
+    pathParams: { taskId, checklistId, itemId },
     token,
-    body: JSON.stringify(payload),
+    body: payload,
   });
 }
 
@@ -6102,40 +6172,65 @@ export function deleteTaskChecklistItem(
   checklistId: string,
   itemId: string,
 ) {
-  return apiRequest<{ success: boolean }>(`/tasks/${taskId}/checklists/${checklistId}/items/${itemId}`, {
-    method: "DELETE",
+  return openApiRequest<
+    { success: boolean },
+    "/api/v1/tasks/{taskId}/checklists/{checklistId}/items/{itemId}",
+    "delete"
+  >("/api/v1/tasks/{taskId}/checklists/{checklistId}/items/{itemId}", "delete", {
+    pathParams: { taskId, checklistId, itemId },
     token,
   });
 }
 
 export function listTaskActivities(token: string, taskId: string) {
-  return apiRequest<TaskActivity[]>(`/tasks/${taskId}/activities`, { token, cache: "no-store" });
+  return openApiRequest<TaskActivity[], "/api/v1/tasks/{taskId}/activities", "get">(
+    "/api/v1/tasks/{taskId}/activities",
+    "get",
+    {
+      pathParams: { taskId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function listTaskAttachments(token: string, taskId: string) {
-  return apiRequest<TaskAttachment[]>(`/tasks/${taskId}/attachments`, {
-    token,
-    cache: "no-store",
-  });
+  return openApiRequest<TaskAttachment[], "/api/v1/tasks/{taskId}/attachments", "get">(
+    "/api/v1/tasks/{taskId}/attachments",
+    "get",
+    {
+      pathParams: { taskId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function createTaskAttachment(
   token: string,
   taskId: string,
-  payload: { fileName: string; fileUrl: string; mimeType?: string; sizeBytes?: number },
+  payload: CreateTaskAttachmentPayload,
 ) {
-  return apiRequest<TaskAttachment>(`/tasks/${taskId}/attachments`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<TaskAttachment, "/api/v1/tasks/{taskId}/attachments", "post">(
+    "/api/v1/tasks/{taskId}/attachments",
+    "post",
+    {
+      pathParams: { taskId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function deleteTaskAttachment(token: string, taskId: string, attachmentId: string) {
-  return apiRequest<{ success: boolean }>(`/tasks/${taskId}/attachments/${attachmentId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/tasks/{taskId}/attachments/{attachmentId}", "delete">(
+    "/api/v1/tasks/{taskId}/attachments/{attachmentId}",
+    "delete",
+    {
+      pathParams: { taskId, attachmentId },
+      token,
+    },
+  );
 }
 
 export function createUploadIntent(
@@ -6235,33 +6330,47 @@ export function deleteFileAsset(token: string, fileId: string) {
 }
 
 export function listTaskDependencies(token: string, taskId: string) {
-  return apiRequest<{ blocking: TaskDependency[]; blockedBy: TaskDependency[] }>(`/tasks/${taskId}/dependencies`, {
-    token,
-    cache: "no-store",
-  });
+  return openApiRequest<{ blocking: TaskDependency[]; blockedBy: TaskDependency[] }, "/api/v1/tasks/{taskId}/dependencies", "get">(
+    "/api/v1/tasks/{taskId}/dependencies",
+    "get",
+    {
+      pathParams: { taskId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function createTaskDependency(
   token: string,
   taskId: string,
-  payload: { toTaskId: string; type?: string },
+  payload: CreateTaskDependencyPayload,
 ) {
-  return apiRequest<TaskDependency>(`/tasks/${taskId}/dependencies`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<TaskDependency, "/api/v1/tasks/{taskId}/dependencies", "post">(
+    "/api/v1/tasks/{taskId}/dependencies",
+    "post",
+    {
+      pathParams: { taskId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function deleteTaskDependency(token: string, taskId: string, dependencyId: string) {
-  return apiRequest<{ success: boolean }>(`/tasks/${taskId}/dependencies/${dependencyId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/tasks/{taskId}/dependencies/{dependencyId}", "delete">(
+    "/api/v1/tasks/{taskId}/dependencies/{dependencyId}",
+    "delete",
+    {
+      pathParams: { taskId, dependencyId },
+      token,
+    },
+  );
 }
 
 export function getTaskTaxonomy(token: string) {
-  return apiRequest<TaskTaxonomy>("/tasks/taxonomy", {
+  return openApiRequest<TaskTaxonomy, "/api/v1/tasks/taxonomy", "get">("/api/v1/tasks/taxonomy", "get", {
+    pathParams: {},
     token,
     cache: "no-store",
   });
@@ -6269,225 +6378,296 @@ export function getTaskTaxonomy(token: string) {
 
 export function listCustomFields(
   token: string,
-  query: {
-    page?: number;
-    limit?: number;
-    entityType?: string;
-    workspaceId?: string;
-    projectId?: string;
-    includeArchived?: boolean;
-  } = {},
+  query: ListCustomFieldsQuery = {},
 ) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 100)),
-  });
-  if (query.entityType) params.set("entityType", query.entityType);
-  if (query.workspaceId) params.set("workspaceId", query.workspaceId);
-  if (query.projectId) params.set("projectId", query.projectId);
-  if (query.includeArchived !== undefined) params.set("includeArchived", String(query.includeArchived));
-
-  return apiRequest<PaginatedResponse<CustomField>>(`/tasks/custom-fields?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
+  return openApiRequest<PaginatedResponse<CustomField>, "/api/v1/tasks/custom-fields", "get">(
+    "/api/v1/tasks/custom-fields",
+    "get",
+    {
+      pathParams: {},
+      query: {
+        ...query,
+        page: query.page ?? 1,
+        limit: boundedLimit(query.limit, 100),
+      },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
-export function createCustomField(
-  token: string,
-  payload: {
-    entityType?: string;
-    name: string;
-    type: CustomFieldType;
-    workspaceId?: string;
-    projectId?: string;
-    required?: boolean;
-    config?: Record<string, unknown>;
-    sortOrder?: number;
-    options?: Array<{ label: string; value: string; sortOrder?: number }>;
-  },
-) {
-  return apiRequest<CustomField>("/tasks/custom-fields", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+export function createCustomField(token: string, payload: CreateCustomFieldPayload) {
+  return openApiRequest<CustomField, "/api/v1/tasks/custom-fields", "post">(
+    "/api/v1/tasks/custom-fields",
+    "post",
+    {
+      pathParams: {},
+      token,
+      body: payload,
+    },
+  );
 }
 
-export function updateCustomField(token: string, customFieldId: string, payload: Partial<CustomField>) {
-  return apiRequest<CustomField>(`/tasks/custom-fields/${customFieldId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
+export function updateCustomField(token: string, customFieldId: string, payload: UpdateCustomFieldPayload) {
+  return openApiRequest<CustomField, "/api/v1/tasks/custom-fields/{customFieldId}", "patch">(
+    "/api/v1/tasks/custom-fields/{customFieldId}",
+    "patch",
+    {
+      pathParams: { customFieldId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function archiveCustomField(token: string, customFieldId: string) {
-  return apiRequest<CustomField>(`/tasks/custom-fields/${customFieldId}/archive`, {
-    method: "POST",
-    token,
-  });
+  return openApiRequest<CustomField, "/api/v1/tasks/custom-fields/{customFieldId}/archive", "post">(
+    "/api/v1/tasks/custom-fields/{customFieldId}/archive",
+    "post",
+    {
+      pathParams: { customFieldId },
+      token,
+    },
+  );
 }
 
 export function restoreCustomField(token: string, customFieldId: string) {
-  return apiRequest<CustomField>(`/tasks/custom-fields/${customFieldId}/restore`, {
-    method: "POST",
-    token,
-  });
+  return openApiRequest<CustomField, "/api/v1/tasks/custom-fields/{customFieldId}/restore", "post">(
+    "/api/v1/tasks/custom-fields/{customFieldId}/restore",
+    "post",
+    {
+      pathParams: { customFieldId },
+      token,
+    },
+  );
+}
+
+export function deleteCustomField(token: string, customFieldId: string) {
+  return openApiRequest<{ success: boolean } | CustomField, "/api/v1/tasks/custom-fields/{customFieldId}", "delete">(
+    "/api/v1/tasks/custom-fields/{customFieldId}",
+    "delete",
+    {
+      pathParams: { customFieldId },
+      token,
+    },
+  );
 }
 
 export function listTaskSavedViews(
   token: string,
-  query: { page?: number; limit?: number; projectId?: string; visibility?: Visibility } = {},
+  query: ListTaskSavedViewsQuery = {},
 ) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(boundedLimit(query.limit, 100)),
-  });
-  if (query.projectId) params.set("projectId", query.projectId);
-  if (query.visibility) params.set("visibility", query.visibility);
-
-  return apiRequest<PaginatedResponse<TaskSavedView>>(`/tasks/saved-views?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
+  return openApiRequest<PaginatedResponse<TaskSavedView>, "/api/v1/tasks/saved-views", "get">(
+    "/api/v1/tasks/saved-views",
+    "get",
+    {
+      pathParams: {},
+      query: {
+        ...query,
+        page: query.page ?? 1,
+        limit: boundedLimit(query.limit, 100),
+      },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
-export function createTaskSavedView(
-  token: string,
-  payload: {
-    name: string;
-    description?: string;
-    projectId?: string;
-    visibility?: Visibility;
-    filters: Record<string, unknown>;
-    columns?: Record<string, unknown>;
-    sortBy?: string;
-    sortDirection?: "asc" | "desc";
-    isDefault?: boolean;
-  },
-) {
-  return apiRequest<TaskSavedView>("/tasks/saved-views", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+export function createTaskSavedView(token: string, payload: CreateTaskSavedViewPayload) {
+  return openApiRequest<TaskSavedView, "/api/v1/tasks/saved-views", "post">(
+    "/api/v1/tasks/saved-views",
+    "post",
+    {
+      pathParams: {},
+      token,
+      body: payload,
+    },
+  );
 }
 
-export function updateTaskSavedView(token: string, viewId: string, payload: Partial<TaskSavedView>) {
-  return apiRequest<TaskSavedView>(`/tasks/saved-views/${viewId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
+export function updateTaskSavedView(token: string, viewId: string, payload: UpdateTaskSavedViewPayload) {
+  return openApiRequest<TaskSavedView, "/api/v1/tasks/saved-views/{viewId}", "patch">(
+    "/api/v1/tasks/saved-views/{viewId}",
+    "patch",
+    {
+      pathParams: { viewId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function deleteTaskSavedView(token: string, viewId: string) {
-  return apiRequest<{ success: boolean }>(`/tasks/saved-views/${viewId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/tasks/saved-views/{viewId}", "delete">(
+    "/api/v1/tasks/saved-views/{viewId}",
+    "delete",
+    {
+      pathParams: { viewId },
+      token,
+    },
+  );
 }
 
 export function bulkTaskOperation(
   token: string,
-  payload: {
-    operation: "UPDATE" | "ARCHIVE" | "RESTORE" | "DELETE";
-    taskIds: string[];
-    status?: TaskStatus;
-    priority?: TaskPriority;
-    type?: TaskType;
-    sprintId?: string | null;
-    boardColumnId?: string | null;
-    dueDate?: string | null;
-    storyPoints?: number | null;
-    assigneeIds?: string[];
-    labelIds?: string[];
-  },
+  payload: BulkTaskOperationPayload,
 ) {
-  return apiRequest<{ success: boolean; operation: string; count: number }>("/tasks/bulk", {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<{ success: boolean; operation: string; count: number }, "/api/v1/tasks/bulk", "post">(
+    "/api/v1/tasks/bulk",
+    "post",
+    {
+      pathParams: {},
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function listLabels(token: string) {
-  return apiRequest<TaskLabel[]>("/tasks/labels", { token, cache: "no-store" });
+  return openApiRequest<TaskLabel[], "/api/v1/tasks/labels", "get">("/api/v1/tasks/labels", "get", {
+    pathParams: {},
+    token,
+    cache: "no-store",
+  });
 }
 
-export function createLabel(token: string, payload: { name: string; color?: string }) {
-  return apiRequest<TaskLabel>("/tasks/labels", {
-    method: "POST",
+export function createLabel(token: string, payload: CreateLabelPayload) {
+  return openApiRequest<TaskLabel, "/api/v1/tasks/labels", "post">("/api/v1/tasks/labels", "post", {
+    pathParams: {},
     token,
-    body: JSON.stringify(payload),
+    body: payload,
   });
+}
+
+export function updateLabel(token: string, labelId: string, payload: UpdateLabelPayload) {
+  return openApiRequest<TaskLabel, "/api/v1/tasks/labels/{labelId}", "patch">(
+    "/api/v1/tasks/labels/{labelId}",
+    "patch",
+    {
+      pathParams: { labelId },
+      token,
+      body: payload,
+    },
+  );
+}
+
+export function deleteLabel(token: string, labelId: string) {
+  return openApiRequest<{ success: boolean }, "/api/v1/tasks/labels/{labelId}", "delete">(
+    "/api/v1/tasks/labels/{labelId}",
+    "delete",
+    {
+      pathParams: { labelId },
+      token,
+    },
+  );
 }
 
 export function listTaskLabels(token: string, taskId: string) {
-  return apiRequest<TaskLabelAssignment[]>(`/tasks/${taskId}/labels`, {
-    token,
-    cache: "no-store",
-  });
+  return openApiRequest<TaskLabelAssignment[], "/api/v1/tasks/{taskId}/labels", "get">(
+    "/api/v1/tasks/{taskId}/labels",
+    "get",
+    {
+      pathParams: { taskId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function assignTaskLabel(token: string, taskId: string, labelId: string) {
-  return apiRequest<TaskLabelAssignment>(`/tasks/${taskId}/labels`, {
-    method: "POST",
-    token,
-    body: JSON.stringify({ labelId }),
-  });
+  const payload: AssignTaskLabelPayload = { labelId };
+  return openApiRequest<TaskLabelAssignment, "/api/v1/tasks/{taskId}/labels", "post">(
+    "/api/v1/tasks/{taskId}/labels",
+    "post",
+    {
+      pathParams: { taskId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function removeTaskLabel(token: string, taskId: string, labelId: string) {
-  return apiRequest<{ success: boolean }>(`/tasks/${taskId}/labels/${labelId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/tasks/{taskId}/labels/{labelId}", "delete">(
+    "/api/v1/tasks/{taskId}/labels/{labelId}",
+    "delete",
+    {
+      pathParams: { taskId, labelId },
+      token,
+    },
+  );
 }
 
 export function listTaskAssignees(token: string, taskId: string) {
-  return apiRequest<TaskAssignee[]>(`/tasks/${taskId}/assignees`, {
-    token,
-    cache: "no-store",
-  });
+  return openApiRequest<TaskAssignee[], "/api/v1/tasks/{taskId}/assignees", "get">(
+    "/api/v1/tasks/{taskId}/assignees",
+    "get",
+    {
+      pathParams: { taskId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function addTaskAssignee(token: string, taskId: string, userId: string) {
-  return apiRequest<TaskAssignee>(`/tasks/${taskId}/assignees`, {
-    method: "POST",
-    token,
-    body: JSON.stringify({ userId }),
-  });
+  const payload: TaskUserPayload = { userId };
+  return openApiRequest<TaskAssignee, "/api/v1/tasks/{taskId}/assignees", "post">(
+    "/api/v1/tasks/{taskId}/assignees",
+    "post",
+    {
+      pathParams: { taskId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function removeTaskAssignee(token: string, taskId: string, userId: string) {
-  return apiRequest<{ success: boolean }>(`/tasks/${taskId}/assignees/${userId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/tasks/{taskId}/assignees/{userId}", "delete">(
+    "/api/v1/tasks/{taskId}/assignees/{userId}",
+    "delete",
+    {
+      pathParams: { taskId, userId },
+      token,
+    },
+  );
 }
 
 export function listTaskWatchers(token: string, taskId: string) {
-  return apiRequest<TaskWatcher[]>(`/tasks/${taskId}/watchers`, {
-    token,
-    cache: "no-store",
-  });
+  return openApiRequest<TaskWatcher[], "/api/v1/tasks/{taskId}/watchers", "get">(
+    "/api/v1/tasks/{taskId}/watchers",
+    "get",
+    {
+      pathParams: { taskId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function addTaskWatcher(token: string, taskId: string, userId: string) {
-  return apiRequest<TaskWatcher>(`/tasks/${taskId}/watchers`, {
-    method: "POST",
-    token,
-    body: JSON.stringify({ userId }),
-  });
+  const payload: TaskUserPayload = { userId };
+  return openApiRequest<TaskWatcher, "/api/v1/tasks/{taskId}/watchers", "post">(
+    "/api/v1/tasks/{taskId}/watchers",
+    "post",
+    {
+      pathParams: { taskId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function removeTaskWatcher(token: string, taskId: string, userId: string) {
-  return apiRequest<{ success: boolean }>(`/tasks/${taskId}/watchers/${userId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/tasks/{taskId}/watchers/{userId}", "delete">(
+    "/api/v1/tasks/{taskId}/watchers/{userId}",
+    "delete",
+    {
+      pathParams: { taskId, userId },
+      token,
+    },
+  );
 }
 
 export function listTasks(
@@ -6606,90 +6786,113 @@ export function updateTaskStatus(token: string, taskId: string, payload: UpdateT
 
 export function listSprints(
   token: string,
-  query: { projectId?: string; state?: "planned" | "active" | "completed"; page?: number; limit?: number } = {},
+  query: ListSprintsQuery = {},
 ) {
-  const params = new URLSearchParams({
-    page: String(query.page ?? 1),
-    limit: String(query.limit ?? 100),
-  });
-
-  if (query.projectId) params.set("projectId", query.projectId);
-  if (query.state) params.set("state", query.state);
-
-  return apiRequest<PaginatedResponse<Sprint>>(`/agile/sprints?${params.toString()}`, {
-    token,
-    cache: "no-store",
-  });
+  return openApiRequest<PaginatedResponse<Sprint>, "/api/v1/agile/sprints", "get">(
+    "/api/v1/agile/sprints",
+    "get",
+    {
+      pathParams: {},
+      query: {
+        ...query,
+        page: query.page ?? 1,
+        limit: boundedLimit(query.limit, 100),
+      },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
 export function createSprint(
   token: string,
-  payload: { projectId: string; name: string; goal?: string; startDate?: string; endDate?: string },
+  payload: CreateSprintPayload,
 ) {
-  return apiRequest<Sprint>("/agile/sprints", {
-    method: "POST",
+  return openApiRequest<Sprint, "/api/v1/agile/sprints", "post">("/api/v1/agile/sprints", "post", {
+    pathParams: {},
     token,
-    body: JSON.stringify(payload),
+    body: payload,
   });
 }
 
 export function updateSprint(
   token: string,
   sprintId: string,
-  payload: Partial<Pick<Sprint, "name" | "goal">> & {
-    startDate?: string;
-    endDate?: string;
-    completedAt?: string;
-  },
+  payload: UpdateSprintPayload,
 ) {
-  return apiRequest<Sprint>(`/agile/sprints/${sprintId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<Sprint, "/api/v1/agile/sprints/{sprintId}", "patch">(
+    "/api/v1/agile/sprints/{sprintId}",
+    "patch",
+    {
+      pathParams: { sprintId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function startSprint(token: string, sprintId: string) {
-  return apiRequest<Sprint>(`/agile/sprints/${sprintId}/start`, {
-    method: "POST",
-    token,
-  });
+  return openApiRequest<Sprint, "/api/v1/agile/sprints/{sprintId}/start", "post">(
+    "/api/v1/agile/sprints/{sprintId}/start",
+    "post",
+    {
+      pathParams: { sprintId },
+      token,
+    },
+  );
 }
 
 export function completeSprint(
   token: string,
   sprintId: string,
-  payload: { moveIncompleteToSprintId?: string; moveIncompleteToBacklog?: boolean } = {
+  payload: CompleteSprintPayload = {
     moveIncompleteToBacklog: true,
   },
 ) {
-  return apiRequest<Sprint>(`/agile/sprints/${sprintId}/complete`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<Sprint, "/api/v1/agile/sprints/{sprintId}/complete", "post">(
+    "/api/v1/agile/sprints/{sprintId}/complete",
+    "post",
+    {
+      pathParams: { sprintId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function deleteSprint(token: string, sprintId: string) {
-  return apiRequest<{ success: boolean }>(`/agile/sprints/${sprintId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/agile/sprints/{sprintId}", "delete">(
+    "/api/v1/agile/sprints/{sprintId}",
+    "delete",
+    {
+      pathParams: { sprintId },
+      token,
+    },
+  );
 }
 
 export function addSprintTasks(token: string, sprintId: string, taskIds: string[]) {
-  return apiRequest<{ success: boolean; count: number }>(`/agile/sprints/${sprintId}/tasks`, {
-    method: "POST",
-    token,
-    body: JSON.stringify({ taskIds }),
-  });
+  const payload: SprintTaskBulkPayload = { taskIds };
+  return openApiRequest<{ success: boolean; count: number }, "/api/v1/agile/sprints/{sprintId}/tasks", "post">(
+    "/api/v1/agile/sprints/{sprintId}/tasks",
+    "post",
+    {
+      pathParams: { sprintId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function removeSprintTask(token: string, sprintId: string, taskId: string) {
-  return apiRequest<{ success: boolean }>(`/agile/sprints/${sprintId}/tasks/${taskId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/agile/sprints/{sprintId}/tasks/{taskId}", "delete">(
+    "/api/v1/agile/sprints/{sprintId}/tasks/{taskId}",
+    "delete",
+    {
+      pathParams: { sprintId, taskId },
+      token,
+    },
+  );
 }
 
 export function listNotifications(

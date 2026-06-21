@@ -10048,7 +10048,9 @@ export interface components {
             projectId?: string;
             /** @default false */
             required?: boolean;
-            config?: Record<string, never>;
+            config?: {
+                [key: string]: unknown;
+            };
             sortOrder?: number;
             options?: components["schemas"]["CustomFieldOptionInputDto"][];
         };
@@ -10056,10 +10058,12 @@ export interface components {
             name?: string;
             /** @enum {string} */
             type?: "TEXT" | "LONG_TEXT" | "NUMBER" | "CURRENCY" | "DATE" | "DATETIME" | "BOOLEAN" | "SINGLE_SELECT" | "MULTI_SELECT" | "USER" | "PROJECT" | "TASK" | "URL" | "EMAIL" | "PHONE" | "JSON" | "FORMULA";
-            workspaceId?: Record<string, never>;
-            projectId?: Record<string, never>;
+            workspaceId?: string | null;
+            projectId?: string | null;
             required?: boolean;
-            config?: Record<string, never>;
+            config?: {
+                [key: string]: unknown;
+            };
             sortOrder?: number;
             /** @description When supplied, replaces all options. */
             options?: components["schemas"]["CustomFieldOptionInputDto"][];
@@ -10073,8 +10077,12 @@ export interface components {
              * @enum {string}
              */
             visibility?: "PRIVATE" | "TEAM" | "WORKSPACE" | "ORGANIZATION" | "PUBLIC";
-            filters: Record<string, never>;
-            columns?: Record<string, never>;
+            filters: {
+                [key: string]: unknown;
+            };
+            columns?: {
+                [key: string]: unknown;
+            };
             sortBy?: string;
             /** @enum {string} */
             sortDirection?: "asc" | "desc";
@@ -10083,14 +10091,18 @@ export interface components {
         };
         UpdateTaskSavedViewDto: {
             name?: string;
-            description?: Record<string, never>;
+            description?: string | null;
             /** @enum {string} */
             visibility?: "PRIVATE" | "TEAM" | "WORKSPACE" | "ORGANIZATION" | "PUBLIC";
-            filters?: Record<string, never>;
-            columns?: Record<string, never>;
-            sortBy?: Record<string, never>;
-            /** @enum {string} */
-            sortDirection?: "asc" | "desc";
+            filters?: {
+                [key: string]: unknown;
+            };
+            columns?: {
+                [key: string]: unknown;
+            };
+            sortBy?: string | null;
+            /** @enum {string|null} */
+            sortDirection?: "asc" | "desc" | null;
             isDefault?: boolean;
         };
         BulkTaskOperationDto: {
@@ -10103,10 +10115,10 @@ export interface components {
             priority?: "LOW" | "MEDIUM" | "HIGH" | "URGENT" | "CRITICAL";
             /** @enum {string} */
             type?: "TASK" | "BUG" | "STORY" | "EPIC" | "FEATURE" | "INCIDENT" | "APPROVAL" | "CHANGE_REQUEST" | "MILESTONE";
-            sprintId?: Record<string, never>;
-            boardColumnId?: Record<string, never>;
-            dueDate?: Record<string, never>;
-            storyPoints?: Record<string, never>;
+            sprintId?: string | null;
+            boardColumnId?: string | null;
+            dueDate?: string | null;
+            storyPoints?: number | null;
             assigneeIds?: string[];
             labelIds?: string[];
         };
