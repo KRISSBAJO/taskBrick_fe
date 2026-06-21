@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, KeyRound, Loader2, Mail, ShieldCheck } from "lucide-react";
 import {
   discoverSso,
-  getTrustedDeviceToken,
   login,
   setStoredAuth,
   startSso,
@@ -40,7 +39,6 @@ export function LoginForm() {
         tenantSlug: String(formData.get("tenantSlug") ?? ""),
         email: String(formData.get("email") ?? ""),
         password: String(formData.get("password") ?? ""),
-        trustedDeviceToken: getTrustedDeviceToken(),
       });
       if ("requiresMfa" in result && result.requiresMfa) {
         setChallenge(result);

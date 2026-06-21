@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LayoutDashboard, LogOut, ChevronDown } from "lucide-react";
 import { landingNavLinks } from "./landing-data";
-import { getStoredAuth, clearStoredAuth, type AuthUser } from "@/lib/api";
+import { getStoredAuth, clearStoredAuth, logoutSession, type AuthUser } from "@/lib/api";
 
 export function LandingNav() {
   const router = useRouter();
@@ -26,10 +26,13 @@ export function LandingNav() {
   }, [open]);
 
   function handleLogout() {
-    clearStoredAuth();
-    setUser(null);
-    setOpen(false);
-    router.push("/");
+    const token = getStoredAuth()?.accessToken;
+    void logoutSession(token).finally(() => {
+      clearStoredAuth();
+      setUser(null);
+      setOpen(false);
+      router.push("/");
+    });
   }
 
   const initials = user

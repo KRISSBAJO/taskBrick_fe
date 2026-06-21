@@ -8,6 +8,7 @@ import {
   clearStoredAuth,
   getMe,
   getStoredAuth,
+  logoutSession,
   refreshSession,
   setStoredAuth,
   type AuthUser,
@@ -86,6 +87,13 @@ export function AuthenticatedSessionProvider({
   const [sessionWarning, setSessionWarning] = useState("");
 
   useEffect(() => {
+    async function refreshBrowserSession() {
+      const refreshed = await refreshSession();
+      setStoredAuth(refreshed);
+      setAuth(refreshed);
+      setSessionWarning("");
+    }
+
     async function validateSession(current: StoredAuth) {
       try {
         const user = await getMe(current.accessToken);
@@ -94,10 +102,7 @@ export function AuthenticatedSessionProvider({
       } catch (caught) {
         if (caught instanceof ApiError && caught.status === 401) {
           try {
-            const refreshed = await refreshSession(current.refreshToken);
-            setStoredAuth(refreshed);
-            setAuth(refreshed);
-            setSessionWarning("");
+            await refreshBrowserSession();
             return;
           } catch {
             clearStoredAuth();
@@ -106,7 +111,8 @@ export function AuthenticatedSessionProvider({
           }
         }
 
-        setSessionWarning("Backend session validation is unavailable. Showing locally stored workspace session.");
+        clearStoredAuth();
+        router.replace(`/login?next=${encodeURIComponent(pathname || "/dashboard")}`);
       }
     }
 
@@ -114,14 +120,20 @@ export function AuthenticatedSessionProvider({
       const stored = getStoredAuth();
 
       if (!stored) {
-        router.replace(`/login?next=${encodeURIComponent(pathname || "/dashboard")}`);
-        setInitializing(false);
+        void refreshBrowserSession()
+          .catch(() => {
+            clearStoredAuth();
+            router.replace(`/login?next=${encodeURIComponent(pathname || "/dashboard")}`);
+          })
+          .finally(() => {
+            setInitializing(false);
+          });
         return;
       }
 
-      setAuth(stored);
-      setInitializing(false);
-      void validateSession(stored);
+      void validateSession(stored).finally(() => {
+        setInitializing(false);
+      });
     }, 0);
 
     return () => window.clearTimeout(timeout);
@@ -163,8 +175,11 @@ export function AuthenticatedSessionProvider({
         setAuth(next);
       },
       logout: () => {
-        clearStoredAuth();
-        router.replace("/login");
+        const token = auth.accessToken;
+        void logoutSession(token).finally(() => {
+          clearStoredAuth();
+          router.replace("/login");
+        });
       },
     };
   }, [auth, router, sessionWarning]);

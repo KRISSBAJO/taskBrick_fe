@@ -20,9 +20,9 @@ export const API_ORIGIN = API_BASE_URL.replace(/\/api\/v\d+$/i, "");
 export const WS_BASE_URL = (process.env.NEXT_PUBLIC_WS_URL ?? API_ORIGIN).replace(/\/$/, "");
 
 const ACCESS_TOKEN_KEY = "taskbricks.accessToken";
-const REFRESH_TOKEN_KEY = "taskbricks.refreshToken";
+const LEGACY_REFRESH_TOKEN_KEY = "taskbricks.refreshToken";
 const USER_KEY = "taskbricks.user";
-const TRUSTED_DEVICE_KEY = "taskbricks.trustedDeviceToken";
+const LEGACY_TRUSTED_DEVICE_KEY = "taskbricks.trustedDeviceToken";
 export const AUTH_UPDATED_EVENT = "taskbricks.auth.updated";
 
 export type AuthUser = {
@@ -44,7 +44,7 @@ export type AuthUser = {
 
 export type AuthResponse = {
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
   user: AuthUser;
   trustedDeviceToken?: string;
 };
@@ -68,7 +68,6 @@ export type AuthLifecycleResponse = {
 
 export type StoredAuth = {
   accessToken: string;
-  refreshToken: string;
   user: AuthUser;
 };
 
@@ -3810,26 +3809,21 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   if (!response.ok) {
     if (response.status === 401 && token && !skipAuthRefresh && typeof window !== "undefined") {
-      const stored = getStoredAuth();
+      try {
+        const refreshed = await apiRequest<AuthResponse>("/auth/refresh", {
+          method: "POST",
+          skipAuthRefresh: true,
+        });
 
-      if (stored?.refreshToken) {
-        try {
-          const refreshed = await apiRequest<AuthResponse>("/auth/refresh", {
-            method: "POST",
-            body: JSON.stringify({ refreshToken: stored.refreshToken }),
-            skipAuthRefresh: true,
-          });
+        setStoredAuth(refreshed);
 
-          setStoredAuth(refreshed);
-
-          return apiRequest<T>(path, {
-            ...options,
-            token: refreshed.accessToken,
-            skipAuthRefresh: true,
-          });
-        } catch {
-          clearStoredAuth();
-        }
+        return apiRequest<T>(path, {
+          ...options,
+          token: refreshed.accessToken,
+          skipAuthRefresh: true,
+        });
+      } catch {
+        clearStoredAuth();
       }
     }
 
@@ -3846,16 +3840,16 @@ export function unwrapPage<T>(payload: T[] | PaginatedResponse<T>) {
 export function getStoredAuth(): StoredAuth | null {
   if (typeof window === "undefined") return null;
 
-  const accessToken = window.localStorage.getItem(ACCESS_TOKEN_KEY);
-  const refreshToken = window.localStorage.getItem(REFRESH_TOKEN_KEY);
+  const accessToken = window.sessionStorage.getItem(ACCESS_TOKEN_KEY);
   const userText = window.localStorage.getItem(USER_KEY);
 
-  if (!accessToken || !refreshToken || !userText) return null;
+  cleanupLegacyAuthTokens();
+
+  if (!accessToken || !userText) return null;
 
   try {
     return {
       accessToken,
-      refreshToken,
       user: JSON.parse(userText) as AuthUser,
     };
   } catch {
@@ -3864,38 +3858,32 @@ export function getStoredAuth(): StoredAuth | null {
   }
 }
 
-export function setStoredAuth(auth: AuthResponse) {
+export function setStoredAuth(auth: Pick<AuthResponse, "accessToken" | "user">) {
   if (typeof window === "undefined") return;
 
-  window.localStorage.setItem(ACCESS_TOKEN_KEY, auth.accessToken);
-  window.localStorage.setItem(REFRESH_TOKEN_KEY, auth.refreshToken);
+  window.sessionStorage.setItem(ACCESS_TOKEN_KEY, auth.accessToken);
   window.localStorage.setItem(USER_KEY, JSON.stringify(auth.user));
-  if (auth.trustedDeviceToken) {
-    window.localStorage.setItem(TRUSTED_DEVICE_KEY, auth.trustedDeviceToken);
-  }
-  window.dispatchEvent(new CustomEvent(AUTH_UPDATED_EVENT, { detail: auth }));
+  cleanupLegacyAuthTokens();
+  window.dispatchEvent(new CustomEvent(AUTH_UPDATED_EVENT, { detail: { accessToken: auth.accessToken, user: auth.user } }));
 }
 
 export function clearStoredAuth() {
   if (typeof window === "undefined") return;
 
+  window.sessionStorage.removeItem(ACCESS_TOKEN_KEY);
   window.localStorage.removeItem(ACCESS_TOKEN_KEY);
-  window.localStorage.removeItem(REFRESH_TOKEN_KEY);
   window.localStorage.removeItem(USER_KEY);
+  cleanupLegacyAuthTokens();
   window.dispatchEvent(new CustomEvent(AUTH_UPDATED_EVENT, { detail: null }));
 }
 
-export function getTrustedDeviceToken() {
-  if (typeof window === "undefined") return undefined;
-  return window.localStorage.getItem(TRUSTED_DEVICE_KEY) ?? undefined;
+function cleanupLegacyAuthTokens() {
+  window.localStorage.removeItem(ACCESS_TOKEN_KEY);
+  window.localStorage.removeItem(LEGACY_REFRESH_TOKEN_KEY);
+  window.localStorage.removeItem(LEGACY_TRUSTED_DEVICE_KEY);
 }
 
-export function clearTrustedDeviceToken() {
-  if (typeof window === "undefined") return;
-  window.localStorage.removeItem(TRUSTED_DEVICE_KEY);
-}
-
-export function login(payload: { tenantSlug: string; email: string; password: string; trustedDeviceToken?: string }) {
+export function login(payload: { tenantSlug: string; email: string; password: string }) {
   return apiRequest<AuthResponse | MfaChallengeResponse>("/auth/login", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -4015,10 +4003,18 @@ export function revokeTrustedDevice(token: string, deviceId: string) {
   });
 }
 
-export function refreshSession(refreshToken: string) {
+export function refreshSession() {
   return apiRequest<AuthResponse>("/auth/refresh", {
     method: "POST",
-    body: JSON.stringify({ refreshToken }),
+    skipAuthRefresh: true,
+  });
+}
+
+export function logoutSession(token?: string) {
+  return apiRequest<{ success: boolean }>("/auth/logout", {
+    method: "POST",
+    token,
+    skipAuthRefresh: true,
   });
 }
 
