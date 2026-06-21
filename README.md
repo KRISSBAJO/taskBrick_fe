@@ -49,6 +49,12 @@ npm run lint
 npm run build
 ```
 
+Regenerate committed OpenAPI types after backend route or DTO changes:
+
+```bash
+npm run api:generate
+```
+
 The backend contract verifier lives in `taskbricks-be` and checks the frontend API helper coverage against exported OpenAPI routes:
 
 ```bash

@@ -1,3 +1,5 @@
+import type { paths } from "@/lib/generated/openapi";
+
 const configuredApiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4070/api/v1";
 
 function normalizeApiBaseUrl(value: string) {
@@ -3727,6 +3729,23 @@ type RequestOptions = RequestInit & {
   skipAuthRefresh?: boolean;
 };
 
+type OpenApiHttpMethod = "get" | "post" | "patch" | "put" | "delete";
+type OpenApiPath = keyof paths & `/api/v1/${string}`;
+type OpenApiMethod<TPath extends OpenApiPath> = Extract<keyof paths[TPath], OpenApiHttpMethod>;
+type OpenApiOperation<TPath extends OpenApiPath, TMethod extends OpenApiMethod<TPath>> = paths[TPath][TMethod];
+type OpenApiPathParams<TPath extends OpenApiPath, TMethod extends OpenApiMethod<TPath>> =
+  OpenApiOperation<TPath, TMethod> extends { parameters: { path: infer TParams } } ? TParams : Record<string, never>;
+type OpenApiJsonBody<TPath extends OpenApiPath, TMethod extends OpenApiMethod<TPath>> =
+  OpenApiOperation<TPath, TMethod> extends { requestBody: { content: { "application/json": infer TBody } } }
+    ? TBody
+    : never;
+
+type CreateBoardColumnPayload = OpenApiJsonBody<"/api/v1/agile/boards/{boardId}/columns", "post">;
+type UpdateBoardColumnPayload = OpenApiJsonBody<"/api/v1/agile/boards/{boardId}/columns/{columnId}", "patch">;
+type ReorderBoardColumnsPayload = OpenApiJsonBody<"/api/v1/agile/boards/{boardId}/columns/reorder", "patch">;
+type UpdateTaskOrderPayload = OpenApiJsonBody<"/api/v1/agile/tasks/{taskId}/order", "patch">;
+type UpdateTaskStatusPayload = OpenApiJsonBody<"/api/v1/agile/tasks/{taskId}/status", "patch">;
+
 export class ApiError extends Error {
   status: number;
   details: unknown;
@@ -3747,6 +3766,44 @@ function resolveUrl(path: string) {
 
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   return `${API_BASE_URL}${normalizedPath}`;
+}
+
+function resolveOpenApiPath<TPath extends OpenApiPath, TMethod extends OpenApiMethod<TPath>>(
+  path: TPath,
+  pathParams: OpenApiPathParams<TPath, TMethod>,
+) {
+  const params = pathParams as Record<string, string | number | boolean | null | undefined>;
+  return path
+    .replace(/^\/api\/v1/, "")
+    .replace(/\{([^}]+)\}/g, (_, key: string) => {
+      const value = params[key];
+      if (value === undefined || value === null) {
+        throw new Error(`Missing OpenAPI path parameter: ${key}`);
+      }
+
+      return encodeURIComponent(String(value));
+    });
+}
+
+function openApiRequest<
+  TResult,
+  TPath extends OpenApiPath,
+  TMethod extends OpenApiMethod<TPath>,
+>(
+  path: TPath,
+  method: TMethod,
+  options: Omit<RequestOptions, "body" | "method"> & {
+    body?: OpenApiJsonBody<TPath, TMethod>;
+    pathParams: OpenApiPathParams<TPath, TMethod>;
+  },
+) {
+  const { body, pathParams, ...requestOptions } = options;
+
+  return apiRequest<TResult>(resolveOpenApiPath<TPath, TMethod>(path, pathParams), {
+    ...requestOptions,
+    method: method.toUpperCase(),
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
 }
 
 function readErrorMessage(payload: unknown) {
@@ -6448,66 +6505,95 @@ export function listTasks(
 }
 
 export function getProjectBoard(token: string, projectId: string) {
-  return apiRequest<ProjectBoard>(`/agile/projects/${projectId}/board`, {
-    token,
-    cache: "no-store",
-  });
+  return openApiRequest<ProjectBoard, "/api/v1/agile/projects/{projectId}/board", "get">(
+    "/api/v1/agile/projects/{projectId}/board",
+    "get",
+    {
+      pathParams: { projectId },
+      token,
+      cache: "no-store",
+    },
+  );
 }
 
-export function createBoardColumn(
-  token: string,
-  boardId: string,
-  payload: { name: string; status?: TaskStatus; wipLimit?: number; isCollapsed?: boolean; sortOrder?: number },
-) {
-  return apiRequest<BoardColumn>(`/agile/boards/${boardId}/columns`, {
-    method: "POST",
-    token,
-    body: JSON.stringify(payload),
-  });
+export function createBoardColumn(token: string, boardId: string, payload: CreateBoardColumnPayload) {
+  return openApiRequest<BoardColumn, "/api/v1/agile/boards/{boardId}/columns", "post">(
+    "/api/v1/agile/boards/{boardId}/columns",
+    "post",
+    {
+      pathParams: { boardId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function updateBoardColumn(
   token: string,
   boardId: string,
   columnId: string,
-  payload: Partial<Pick<BoardColumn, "name" | "status" | "wipLimit" | "isCollapsed" | "sortOrder">>,
+  payload: UpdateBoardColumnPayload,
 ) {
-  return apiRequest<BoardColumn>(`/agile/boards/${boardId}/columns/${columnId}`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
+  return openApiRequest<BoardColumn, "/api/v1/agile/boards/{boardId}/columns/{columnId}", "patch">(
+    "/api/v1/agile/boards/{boardId}/columns/{columnId}",
+    "patch",
+    {
+      pathParams: { boardId, columnId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function deleteBoardColumn(token: string, boardId: string, columnId: string) {
-  return apiRequest<{ success: boolean }>(`/agile/boards/${boardId}/columns/${columnId}`, {
-    method: "DELETE",
-    token,
-  });
+  return openApiRequest<{ success: boolean }, "/api/v1/agile/boards/{boardId}/columns/{columnId}", "delete">(
+    "/api/v1/agile/boards/{boardId}/columns/{columnId}",
+    "delete",
+    {
+      pathParams: { boardId, columnId },
+      token,
+    },
+  );
 }
 
 export function reorderBoardColumns(
   token: string,
   boardId: string,
-  columns: Array<{ columnId: string; sortOrder: number }>,
+  columns: ReorderBoardColumnsPayload["columns"],
 ) {
-  return apiRequest<ProjectBoard>(`/agile/boards/${boardId}/columns/reorder`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify({ columns }),
-  });
+  return openApiRequest<ProjectBoard, "/api/v1/agile/boards/{boardId}/columns/reorder", "patch">(
+    "/api/v1/agile/boards/{boardId}/columns/reorder",
+    "patch",
+    {
+      pathParams: { boardId },
+      token,
+      body: { columns },
+    },
+  );
 }
 
-export function updateTaskBoardOrder(
-  token: string,
-  taskId: string,
-  payload: { sortOrder: number; status?: TaskStatus; sprintId?: string | null; boardColumnId?: string | null },
-) {
-  return apiRequest<Task>(`/agile/tasks/${taskId}/order`, {
-    method: "PATCH",
-    token,
-    body: JSON.stringify(payload),
-  });
+export function updateTaskBoardOrder(token: string, taskId: string, payload: UpdateTaskOrderPayload) {
+  return openApiRequest<Task, "/api/v1/agile/tasks/{taskId}/order", "patch">(
+    "/api/v1/agile/tasks/{taskId}/order",
+    "patch",
+    {
+      pathParams: { taskId },
+      token,
+      body: payload,
+    },
+  );
+}
+
+export function updateTaskStatus(token: string, taskId: string, payload: UpdateTaskStatusPayload) {
+  return openApiRequest<Task, "/api/v1/agile/tasks/{taskId}/status", "patch">(
+    "/api/v1/agile/tasks/{taskId}/status",
+    "patch",
+    {
+      pathParams: { taskId },
+      token,
+      body: payload,
+    },
+  );
 }
 
 export function listSprints(
