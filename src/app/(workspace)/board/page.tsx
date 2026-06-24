@@ -56,10 +56,13 @@ import { useWorkspaceAuth } from "@/components/workspace-shell";
 import { useConfirm } from "@/components/confirm-provider";
 import { useToast } from "@/components/toast-provider";
 import {
+  applyBoardActions,
   createBoardColumn,
   createTaskSavedView,
   createTask,
   deleteBoardColumn,
+  generateBoardActionPlan,
+  generateBoardSummary,
   getProjectBoard,
   addTaskAssignee,
   listProjects,
@@ -68,9 +71,14 @@ import {
   listUsers,
   removeTaskAssignee,
   reorderBoardColumns,
+  scanBoardRisks,
   updateBoardColumn,
   updateTask,
   updateTaskBoardOrder,
+  type BoardAiActionPlanResponse,
+  type BoardAiApplyResponse,
+  type BoardAiRiskScanResponse,
+  type BoardAiSummaryResponse,
   type BoardColumn,
   type Project,
   type ProjectBoard,
@@ -96,6 +104,12 @@ type BoardDensity = "comfortable" | "compact";
 type ViewMode     = "board" | "list";
 type SwimlaneMode = "NONE" | "SPRINT" | "ASSIGNEE" | "EPIC" | "PRIORITY";
 type DueFilter = "" | "OVERDUE" | "TODAY" | "UPCOMING" | "NONE";
+type BoardAiMode = "summary" | "risk" | "actions" | "apply";
+type BoardAiResult =
+  | { mode: "summary"; result: BoardAiSummaryResponse }
+  | { mode: "risk"; result: BoardAiRiskScanResponse }
+  | { mode: "actions"; result: BoardAiActionPlanResponse }
+  | null;
 type BoardFilters = {
   search: string;
   priority: "" | TaskPriority;
@@ -175,6 +189,11 @@ export default function BoardPage() {
   const [activeTask,         setActiveTask]         = useState<Task | null>(null);
   const [activeColumn,       setActiveColumn]       = useState<BoardColumn | null>(null);
   const [viewMode,           setViewMode]           = useState<ViewMode>("board");
+  const [boardAiLoading,     setBoardAiLoading]     = useState<BoardAiMode | null>(null);
+  const [boardAiResult,      setBoardAiResult]      = useState<BoardAiResult>(null);
+  const [boardAiError,       setBoardAiError]       = useState("");
+  const [selectedAiActionIds, setSelectedAiActionIds] = useState<Set<string>>(() => new Set());
+  const [boardAiApplyResult, setBoardAiApplyResult] = useState<BoardAiApplyResponse | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -480,6 +499,83 @@ export default function BoardPage() {
     setSwimlane("NONE");
   }
 
+  async function runBoardAi(mode: BoardAiMode) {
+    if (!selectedProjectId || !board) return;
+    setBoardAiLoading(mode);
+    setBoardAiError("");
+    setBoardAiApplyResult(null);
+    try {
+      const payload = { boardId: board.id, projectId: selectedProjectId };
+      if (mode === "summary") {
+        const result = await generateBoardSummary(auth.accessToken, payload);
+        setBoardAiResult({ mode, result });
+      } else if (mode === "risk") {
+        const result = await scanBoardRisks(auth.accessToken, payload);
+        setBoardAiResult({ mode, result });
+      } else if (mode === "actions") {
+        const result = await generateBoardActionPlan(auth.accessToken, payload);
+        setSelectedAiActionIds(new Set());
+        setBoardAiResult({ mode, result });
+      }
+      toast({
+        title: "Board AI ready",
+        description: mode === "summary"
+          ? "Board summary generated."
+          : mode === "risk"
+            ? "Risk scan completed."
+            : "Action plan generated for review.",
+        variant: "success",
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unable to run board AI.";
+      setBoardAiError(message);
+      toast({ title: "Board AI failed", description: message, variant: "error" });
+    } finally {
+      setBoardAiLoading(null);
+    }
+  }
+
+  function toggleAiAction(actionId: string) {
+    setSelectedAiActionIds((current) => {
+      const next = new Set(current);
+      if (next.has(actionId)) next.delete(actionId);
+      else next.add(actionId);
+      return next;
+    });
+  }
+
+  async function applySelectedBoardAiActions() {
+    if (!selectedProjectId || !board || boardAiResult?.mode !== "actions") return;
+    const actionIds = [...selectedAiActionIds];
+    if (!actionIds.length) {
+      toast({ title: "No actions selected", description: "Select at least one AI proposal to apply.", variant: "error" });
+      return;
+    }
+    setBoardAiLoading("apply");
+    setBoardAiError("");
+    try {
+      const result = await applyBoardActions(auth.accessToken, {
+        actionIds,
+        boardId: board.id,
+        projectId: selectedProjectId,
+      });
+      setBoardAiApplyResult(result);
+      setSelectedAiActionIds(new Set());
+      toast({
+        title: result.failed ? "Board AI applied with issues" : "Board AI actions applied",
+        description: `${result.applied} applied, ${result.failed} failed.`,
+        variant: result.failed ? "error" : "success",
+      });
+      await loadBoard(selectedProjectId);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unable to apply Board AI actions.";
+      setBoardAiError(message);
+      toast({ title: "Board AI apply failed", description: message, variant: "error" });
+    } finally {
+      setBoardAiLoading(null);
+    }
+  }
+
   function applySavedView(viewId: string) {
     if (!viewId) return;
     const view = savedViews.find((item) => item.id === viewId);
@@ -621,6 +717,13 @@ export default function BoardPage() {
               Saving
             </span>
           )}
+          <GhostBtn
+            disabled={!board || Boolean(boardAiLoading)}
+            onClick={() => void runBoardAi("summary")}
+            icon={<Sparkles className={cn("size-3.5", boardAiLoading === "summary" && "animate-pulse")} />}
+          >
+            Board AI
+          </GhostBtn>
           <GhostBtn onClick={() => void loadBoard()} icon={<RefreshCw className={cn("size-3.5", loading && "animate-spin")} />}>
             Refresh
           </GhostBtn>
@@ -716,6 +819,18 @@ export default function BoardPage() {
       />
 
       {filteredBoard ? <BoardInsights board={filteredBoard} visibleTasks={visibleTasks} /> : null}
+      {filteredBoard ? (
+        <BoardAiPanel
+          applyResult={boardAiApplyResult}
+          error={boardAiError}
+          loading={boardAiLoading}
+          onApply={() => void applySelectedBoardAiActions()}
+          onRun={(mode) => void runBoardAi(mode)}
+          onToggleAction={toggleAiAction}
+          result={boardAiResult}
+          selectedActionIds={selectedAiActionIds}
+        />
+      ) : null}
 
 
       {/* ── Composer panels ────────────────────────────────────── */}
@@ -961,6 +1076,237 @@ function InsightTile({ helper, label, tone, value }: { helper: string; label: st
       <div className="mt-1 flex items-end justify-between gap-2">
         <span className={cn("rounded-lg px-2 py-0.5 text-[22px] font-black leading-none", toneClass)}>{value}</span>
         <span className="text-right text-[10px] font-bold text-ink-soft">{helper}</span>
+      </div>
+    </div>
+  );
+}
+
+function BoardAiPanel({
+  applyResult,
+  error,
+  loading,
+  onApply,
+  onRun,
+  onToggleAction,
+  result,
+  selectedActionIds,
+}: {
+  applyResult: BoardAiApplyResponse | null;
+  error: string;
+  loading: BoardAiMode | null;
+  onApply: () => void;
+  onRun: (mode: BoardAiMode) => void;
+  onToggleAction: (actionId: string) => void;
+  result: BoardAiResult;
+  selectedActionIds: Set<string>;
+}) {
+  const summary = result?.mode === "summary" ? result.result : null;
+  const risk = result?.mode === "risk" ? result.result : null;
+  const actionPlan = result?.mode === "actions" ? result.result : null;
+  return (
+    <section className="rounded-xl border border-line bg-white p-3 shadow-sm">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="inline-flex size-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+          <Sparkles className="size-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-sm font-black text-foreground">Board AI</h2>
+          <p className="text-[12px] font-semibold text-ink-soft">Recommendation-only board summary and risk scan. No tasks are changed automatically.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            disabled={Boolean(loading)}
+            onClick={() => onRun("summary")}
+            className="inline-flex h-9 items-center gap-2 rounded-lg border border-line bg-background px-3 text-[12px] font-black text-foreground transition hover:bg-panel-muted disabled:opacity-50"
+          >
+            <Sparkles className={cn("size-3.5 text-blue-600", loading === "summary" && "animate-pulse")} />
+            Summary
+          </button>
+          <button
+            type="button"
+            disabled={Boolean(loading)}
+            onClick={() => onRun("risk")}
+            className="inline-flex h-9 items-center gap-2 rounded-lg border border-line bg-background px-3 text-[12px] font-black text-foreground transition hover:bg-panel-muted disabled:opacity-50"
+          >
+            <AlertTriangle className={cn("size-3.5 text-red-600", loading === "risk" && "animate-pulse")} />
+            Risk scan
+          </button>
+          <button
+            type="button"
+            disabled={Boolean(loading)}
+            onClick={() => onRun("actions")}
+            className="inline-flex h-9 items-center gap-2 rounded-lg border border-line bg-foreground px-3 text-[12px] font-black text-white transition hover:bg-foreground/90 disabled:opacity-50"
+          >
+            <ShieldCheck className={cn("size-3.5 text-primary", loading === "actions" && "animate-pulse")} />
+            Action plan
+          </button>
+        </div>
+      </div>
+
+      {error ? (
+        <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[12px] font-bold text-red-700">
+          {error}
+        </div>
+      ) : null}
+
+      {!result && !error ? (
+        <div className="mt-3 rounded-lg border border-dashed border-line bg-background px-3 py-4 text-[12px] font-bold text-ink-soft">
+          Run a summary or risk scan to review board flow, ownership gaps, stale work, WIP pressure, and recommended next actions.
+        </div>
+      ) : null}
+
+      {summary ? (
+        <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1.3fr)_minmax(280px,0.7fr)]">
+          <AiTextBlock title="Narrative">{summary.content}</AiTextBlock>
+          <div className="grid gap-3">
+            <AiList title="Highlights" items={summary.highlights} />
+            <AiList title="Risks" items={summary.risks} tone="risk" />
+            <AiList title="Recommended actions" items={summary.recommendedActions} />
+          </div>
+        </div>
+      ) : null}
+
+      {risk ? (
+        <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          <AiTextBlock title="Risk narrative">{risk.narrative}</AiTextBlock>
+          <div className="rounded-lg border border-line bg-background p-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">Findings</p>
+            <div className="mt-3 grid gap-2">
+              {risk.findings.length ? risk.findings.map((finding, index) => (
+                <div key={`${finding.type}-${finding.taskId ?? finding.columnId ?? index}`} className="rounded-lg border border-line bg-white p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.14em] text-red-600">{finding.severity}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.14em] text-ink-soft">{finding.type.replaceAll("_", " ")}</span>
+                  </div>
+                  <p className="mt-1 text-[13px] font-black text-foreground">{finding.title}</p>
+                  <p className="mt-1 text-[12px] font-semibold leading-5 text-ink-soft">{finding.evidence}</p>
+                </div>
+              )) : (
+                <p className="text-[12px] font-bold text-ink-soft">No board risk findings were detected.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {actionPlan ? (
+        <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+          <AiTextBlock title="Plan guidance">{actionPlan.summary}</AiTextBlock>
+          <div className="rounded-lg border border-line bg-background p-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">Review before apply</p>
+                <p className="mt-1 text-[12px] font-bold text-ink-soft">
+                  {selectedActionIds.size} of {actionPlan.proposals.length} selected. Selected actions run with your current project permissions.
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={loading === "apply" || selectedActionIds.size === 0}
+                onClick={onApply}
+                className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#ffd400] px-3 text-[12px] font-black text-foreground transition hover:bg-[#f5ca00] disabled:cursor-not-allowed disabled:opacity-45"
+              >
+                <ShieldCheck className={cn("size-3.5", loading === "apply" && "animate-pulse")} />
+                {loading === "apply" ? "Applying..." : "Apply selected"}
+              </button>
+            </div>
+
+            {applyResult ? (
+              <div className="mt-3 rounded-lg border border-line bg-white p-3">
+                <p className="text-[12px] font-black text-foreground">{applyResult.applied} applied, {applyResult.failed} failed</p>
+                <div className="mt-2 grid gap-1.5">
+                  {applyResult.results.map((item) => (
+                    <p key={item.actionId} className={cn(
+                      "text-[11px] font-bold",
+                      item.status === "COMPLETED" ? "text-emerald-700" : "text-red-700",
+                    )}>
+                      {item.status}: {item.message ?? item.error ?? item.title ?? item.type}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            <div className="mt-3 grid gap-2">
+              {actionPlan.proposals.map((proposal) => {
+                const selected = selectedActionIds.has(proposal.actionId);
+                return (
+                  <button
+                    key={proposal.actionId}
+                    type="button"
+                    onClick={() => onToggleAction(proposal.actionId)}
+                    className={cn(
+                      "group rounded-lg border bg-white p-3 text-left transition",
+                      selected ? "border-primary shadow-sm ring-2 ring-primary/20" : "border-line hover:border-primary/60",
+                    )}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className={cn(
+                        "mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-md border text-[11px] font-black",
+                        selected ? "border-primary bg-primary text-foreground" : "border-line bg-background text-ink-soft",
+                      )}>
+                        {selected ? "✓" : ""}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-center gap-2">
+                          <span className="text-[13px] font-black text-foreground">{proposal.title}</span>
+                          <span className="rounded-full bg-panel-muted px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-ink-soft">
+                            {proposal.type.replace("BOARD_", "").replaceAll("_", " ")}
+                          </span>
+                          <span className={cn(
+                            "rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em]",
+                            proposal.riskLevel === "HIGH"
+                              ? "bg-red-50 text-red-700"
+                              : proposal.riskLevel === "MEDIUM"
+                                ? "bg-amber-50 text-amber-700"
+                                : "bg-emerald-50 text-emerald-700",
+                          )}>
+                            {proposal.riskLevel} review
+                          </span>
+                        </span>
+                        <span className="mt-1 block text-[12px] font-semibold leading-5 text-ink-soft">{proposal.rationale}</span>
+                        <span className="mt-1 block text-[12px] font-bold leading-5 text-foreground">{proposal.impact}</span>
+                        {proposal.taskKey ? (
+                          <span className="mt-2 inline-flex rounded-md bg-blue-50 px-2 py-1 text-[10px] font-black text-blue-700">
+                            {proposal.taskKey} {proposal.columnName ? `-> ${proposal.columnName}` : ""}
+                          </span>
+                        ) : null}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function AiTextBlock({ children, title }: { children: ReactNode; title: string }) {
+  return (
+    <div className="rounded-lg border border-line bg-background p-3">
+      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">{title}</p>
+      <p className="mt-2 whitespace-pre-wrap text-[13px] font-semibold leading-6 text-foreground">{children}</p>
+    </div>
+  );
+}
+
+function AiList({ items, title, tone }: { items: string[]; title: string; tone?: "risk" }) {
+  return (
+    <div className="rounded-lg border border-line bg-background p-3">
+      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">{title}</p>
+      <div className="mt-2 grid gap-2">
+        {items.length ? items.map((item, index) => (
+          <div key={`${title}-${index}`} className="flex items-start gap-2">
+            <span className={cn("mt-1.5 size-1.5 shrink-0 rounded-full", tone === "risk" ? "bg-red-500" : "bg-blue-500")} />
+            <span className="text-[12px] font-bold leading-5 text-foreground">{item}</span>
+          </div>
+        )) : (
+          <p className="text-[12px] font-bold text-ink-soft">No items returned.</p>
+        )}
       </div>
     </div>
   );
@@ -1436,19 +1782,19 @@ function BoardColView({
           <button
             type="button"
             onClick={() => setShowQuickAdd(true)}
-            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-line bg-background py-1.5 text-[11px] font-black text-ink-soft transition hover:border-primary/60 hover:bg-primary/10 hover:text-foreground"
+            className="inline-flex w-auto items-center justify-center gap-1.5 rounded-lg border border-dashed border-line bg-background px-2.5 py-1.5 text-[11px] font-black text-ink-soft transition hover:border-primary/60 hover:bg-primary/10 hover:text-foreground"
           >
             <Plus className="size-3" />
-            Add task
+            Add
           </button>
         ) : (
           <button
             type="button"
             disabled
-            className="flex w-full cursor-not-allowed items-center justify-center gap-1.5 rounded-xl border border-dashed border-line bg-background py-1.5 text-[11px] font-black text-ink-soft opacity-55"
+            className="inline-flex w-auto cursor-not-allowed items-center justify-center gap-1.5 rounded-lg border border-dashed border-line bg-background px-2.5 py-1.5 text-[11px] font-black text-ink-soft opacity-55"
           >
             <Plus className="size-3" />
-            Add task
+            Add
           </button>
         )}
       </div>

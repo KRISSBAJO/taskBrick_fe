@@ -1,5 +1,27 @@
 import { boundedLimit,openApiRequest,type OpenApiJsonBody,type OpenApiQuery } from "./request";
 
+export type TenantBillingEvent = {
+  id: string;
+  tenantId?: string | null;
+  provider: string;
+  eventId: string;
+  type: string;
+  status: "RECEIVED" | "PROCESSED" | "FAILED" | "IGNORED" | string;
+  payload?: unknown;
+  processedAt?: string | null;
+  error?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+};
+
+export type TenantBillingEventPage = {
+  data: TenantBillingEvent[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
 function pagedQuery<TQuery extends { page?: number; limit?: number; search?: string }>(query: TQuery, fallback = 30) {
   return {
     ...query,
@@ -58,6 +80,21 @@ export function createBillingCheckout(
     token,
     pathParams: {},
     body: payload as unknown as OpenApiJsonBody<"/api/v1/billing/checkout", "post">,
+  });
+}
+
+export function confirmBillingCheckout(
+  token: string,
+  payload: {
+    provider?: "stripe" | "paystack";
+    sessionId?: string;
+    reference?: string;
+  },
+) {
+  return openApiRequest("/api/v1/billing/checkout/confirm", "post", {
+    token,
+    pathParams: {},
+    body: payload as unknown as OpenApiJsonBody<"/api/v1/billing/checkout/confirm", "post">,
   });
 }
 
@@ -137,4 +174,33 @@ export function getTenantUsageSummary(
     pathParams: {},
     query: query as OpenApiQuery<"/api/v1/usage-records/summary", "get">,
   });
+}
+
+export async function listTenantBillingEvents(
+  token: string,
+  query: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    provider?: string;
+    type?: string;
+    status?: "RECEIVED" | "PROCESSED" | "FAILED" | "IGNORED";
+    from?: string;
+    to?: string;
+  } = {},
+) {
+  const result = await openApiRequest("/api/v1/billing/events", "get", {
+    token,
+    cache: "no-store",
+    pathParams: {},
+    query: pagedQuery(query, 20) as OpenApiQuery<"/api/v1/billing/events", "get">,
+  }) as unknown as TenantBillingEventPage | null;
+
+  return result ?? {
+    data: [],
+    page: query.page ?? 1,
+    limit: boundedLimit(query.limit, 20),
+    total: 0,
+    totalPages: 0,
+  };
 }

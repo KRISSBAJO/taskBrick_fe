@@ -9,6 +9,7 @@ import {
   Blocks,
   BriefcaseBusiness,
   Calendar,
+  ClipboardCheck,
   CreditCard,
   Ellipsis,
   FileText,
@@ -17,6 +18,7 @@ import {
   LayoutDashboard,
   ListChecks,
   LogOut,
+  MessageCircle,
   MessageSquare,
   Settings,
   Shield,
@@ -39,11 +41,13 @@ const PRIMARY_NAV: NavItem[] = [
   { label: "Board", href: "/board", icon: ListChecks },
   { label: "Sprints", href: "/sprints", icon: Calendar },
   { label: "Meetings", href: "/meetings", icon: MessageSquare },
+  { label: "Messages", href: "/messages", icon: MessageCircle },
   { label: "Team", href: "/team", icon: Users },
 ];
 
 const TOOLS_NAV: NavItem[] = [
   { label: "Activity", href: "/activity", icon: Activity },
+  { label: "Approvals", href: "/approvals", icon: ClipboardCheck },
   { label: "Reports", href: "/reports", icon: BarChart3 },
   { label: "Billing", href: "/settings/billing", icon: CreditCard },
   { label: "Calendar", href: "/calendar", icon: Calendar },

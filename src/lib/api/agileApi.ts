@@ -1,4 +1,5 @@
 import {
+apiRequest,
 boundedLimit,
 openApiRequest,
 type OpenApiJsonBody,
@@ -15,6 +16,36 @@ type UpdateBoardColumnPayload = OpenApiJsonBody<"/api/v1/agile/boards/{boardId}/
 type ReorderBoardColumnsPayload = OpenApiJsonBody<"/api/v1/agile/boards/{boardId}/columns/reorder", "patch">;
 type UpdateTaskOrderPayload = OpenApiJsonBody<"/api/v1/agile/tasks/{taskId}/order", "patch">;
 type UpdateTaskStatusPayload = OpenApiJsonBody<"/api/v1/agile/tasks/{taskId}/status", "patch">;
+
+export type SprintRetrospectiveActionItem = {
+  id?: string;
+  title?: string;
+  owner?: string;
+  dueDate?: string;
+  done?: boolean;
+  [key: string]: unknown;
+};
+
+export type SprintRetrospective = {
+  id: string;
+  sprintId: string;
+  authorId: string;
+  wentWell: string | null;
+  improve: string | null;
+  actionItems: SprintRetrospectiveActionItem[] | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SprintRetrospectivePayload = {
+  wentWell?: string;
+  improve?: string;
+  actionItems?: SprintRetrospectiveActionItem[];
+};
+
+function sprintPath(sprintId: string, suffix = "") {
+  return `/agile/sprints/${encodeURIComponent(sprintId)}${suffix}`;
+}
 export function getProjectBoard(token: string, projectId: string) {
   return openApiRequest(
     "/api/v1/agile/projects/{projectId}/board",
@@ -213,6 +244,51 @@ export function removeSprintTask(token: string, sprintId: string, taskId: string
     "delete",
     {
       pathParams: { sprintId, taskId },
+      token,
+    },
+  );
+}
+
+export function listSprintRetrospectives(token: string, sprintId: string) {
+  return apiRequest<SprintRetrospective[]>(sprintPath(sprintId, "/retrospectives"), {
+    token,
+    cache: "no-store",
+  });
+}
+
+export function createSprintRetrospective(
+  token: string,
+  sprintId: string,
+  payload: SprintRetrospectivePayload,
+) {
+  return apiRequest<SprintRetrospective>(sprintPath(sprintId, "/retrospectives"), {
+    method: "POST",
+    token,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateSprintRetrospective(
+  token: string,
+  sprintId: string,
+  retrospectiveId: string,
+  payload: SprintRetrospectivePayload,
+) {
+  return apiRequest<SprintRetrospective>(
+    sprintPath(sprintId, `/retrospectives/${encodeURIComponent(retrospectiveId)}`),
+    {
+      method: "PATCH",
+      token,
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function deleteSprintRetrospective(token: string, sprintId: string, retrospectiveId: string) {
+  return apiRequest<{ ok?: boolean }>(
+    sprintPath(sprintId, `/retrospectives/${encodeURIComponent(retrospectiveId)}`),
+    {
+      method: "DELETE",
       token,
     },
   );

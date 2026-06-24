@@ -25,6 +25,7 @@ import { useWorkspaceAuth } from "@/components/workspace-shell";
 import {
   addTeamMember,
   bulkInviteTenantUsers,
+  cancelTeamMemberInvite,
   createTeam,
   inviteTenantUser,
   inviteTeamMember,
@@ -35,6 +36,7 @@ import {
   listUsers,
   listWorkspaces,
   removeTeamMember,
+  resendTeamMemberInvite,
   updateTeamMemberRole,
   type BulkInviteUserInput,
   type BulkInviteUsersResponse,
@@ -265,6 +267,48 @@ export default function TeamPage() {
     finally { setSaving(false); }
   }
 
+  async function onResendInvite(member: TeamMember) {
+    if (!selectedTeam) return;
+    setSaving(true); setMessage(null);
+    try {
+      const result = await resendTeamMemberInvite(auth.accessToken, selectedTeam.id, member.userId);
+      const description = result.delivery === "in_app"
+        ? "The existing user was notified in the app."
+        : "The invite email was sent again.";
+      setMessage({ text: description, ok: true });
+      toast({ title: "Invite resent", description, variant: "success" });
+    } catch (err) {
+      const description = err instanceof Error ? err.message : "Unable to resend invitation.";
+      setMessage({ text: description, ok: false });
+      toast({ title: "Resend failed", description, variant: "error" });
+    }
+    finally { setSaving(false); }
+  }
+
+  async function onCancelInvite(member: TeamMember) {
+    if (!selectedTeam) return;
+    const confirmed = await confirm({
+      title: "Cancel invitation?",
+      description: `Cancel the pending invite for ${displayName(member.user)}? They will be removed from ${selectedTeam.name}.`,
+      confirmLabel: "Cancel invite",
+      tone: "danger",
+    });
+    if (!confirmed) return;
+    setSaving(true); setMessage(null);
+    try {
+      await cancelTeamMemberInvite(auth.accessToken, selectedTeam.id, member.userId);
+      setMembers((cur) => cur.filter((m) => m.id !== member.id));
+      setMessage({ text: "Invitation cancelled.", ok: true });
+      toast({ title: "Invitation cancelled", description: `${displayName(member.user)} was removed from ${selectedTeam.name}.`, variant: "success" });
+      await loadDirectory();
+    } catch (err) {
+      const description = err instanceof Error ? err.message : "Unable to cancel invitation.";
+      setMessage({ text: description, ok: false });
+      toast({ title: "Cancel failed", description, variant: "error" });
+    }
+    finally { setSaving(false); }
+  }
+
   const TABS: { id: DetailTab; label: string; icon: ReactNode }[] = [
     { id: "members", label: `Members (${members.length})`, icon: <Users className="size-3.5" /> },
     { id: "invite",  label: "Invite",   icon: <Mail className="size-3.5" /> },
@@ -460,7 +504,9 @@ export default function TeamPage() {
                     loading={loadingMembers}
                     members={members}
                     saving={saving}
+                    onCancelInvite={onCancelInvite}
                     onRemove={onRemoveMember}
+                    onResendInvite={onResendInvite}
                     onUpdateRole={onUpdateRole}
                   />
                 )}
@@ -560,10 +606,12 @@ function TeamCard({ active, onSelect, team }: { active: boolean; onSelect: () =>
 
 /* ─── Member list ──────────────────────────────────────────────────────────── */
 
-function MemberList({ loading, members, onRemove, onUpdateRole, saving }: {
+function MemberList({ loading, members, onCancelInvite, onRemove, onResendInvite, onUpdateRole, saving }: {
   loading: boolean;
   members: TeamMember[];
+  onCancelInvite: (m: TeamMember) => void;
   onRemove: (m: TeamMember) => void;
+  onResendInvite: (m: TeamMember) => void;
   onUpdateRole: (m: TeamMember, role: string) => void;
   saving: boolean;
 }) {
@@ -592,7 +640,9 @@ function MemberList({ loading, members, onRemove, onUpdateRole, saving }: {
           key={member.id}
           member={member}
           saving={saving}
+          onCancelInvite={onCancelInvite}
           onRemove={onRemove}
+          onResendInvite={onResendInvite}
           onUpdateRole={onUpdateRole}
         />
       ))}
@@ -600,14 +650,17 @@ function MemberList({ loading, members, onRemove, onUpdateRole, saving }: {
   );
 }
 
-function MemberRow({ member, onRemove, onUpdateRole, saving }: {
+function MemberRow({ member, onCancelInvite, onRemove, onResendInvite, onUpdateRole, saving }: {
   member: TeamMember;
+  onCancelInvite: (m: TeamMember) => void;
   onRemove: (m: TeamMember) => void;
+  onResendInvite: (m: TeamMember) => void;
   onUpdateRole: (m: TeamMember, role: string) => void;
   saving: boolean;
 }) {
   const tenantRoles = member.user.roles?.map((r) => r.role) ?? [];
   const perms       = derivePermissions(member);
+  const isInvited   = member.user.status === "INVITED";
 
   return (
     <article className="group flex items-center gap-4 px-5 py-3.5 transition hover:bg-panel-muted/60">
@@ -663,15 +716,40 @@ function MemberRow({ member, onRemove, onUpdateRole, saving }: {
       </div>
 
       {/* Remove — visible on hover */}
-      <button
-        type="button"
-        onClick={() => onRemove(member)}
-        disabled={saving}
-        className="shrink-0 rounded-lg p-1.5 text-ink-soft/30 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 disabled:opacity-0"
-        aria-label="Remove member"
-      >
-        <Trash2 className="size-4" />
-      </button>
+      <div className="flex shrink-0 items-center gap-1.5">
+        {isInvited ? (
+          <>
+            <button
+              type="button"
+              onClick={() => onResendInvite(member)}
+              disabled={saving}
+              className="inline-flex h-8 items-center gap-1 rounded-lg border border-line bg-background px-2 text-[11px] font-black text-foreground transition hover:border-primary hover:bg-primary/10 disabled:opacity-50"
+            >
+              <RefreshCw className="size-3.5" />
+              Resend
+            </button>
+            <button
+              type="button"
+              onClick={() => onCancelInvite(member)}
+              disabled={saving}
+              className="inline-flex h-8 items-center gap-1 rounded-lg border border-red-100 bg-red-50 px-2 text-[11px] font-black text-red-700 transition hover:bg-red-100 disabled:opacity-50"
+            >
+              <X className="size-3.5" />
+              Cancel
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={() => onRemove(member)}
+            disabled={saving}
+            className="rounded-lg p-1.5 text-ink-soft/30 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 disabled:opacity-0"
+            aria-label="Remove member"
+          >
+            <Trash2 className="size-4" />
+          </button>
+        )}
+      </div>
     </article>
   );
 }

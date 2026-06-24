@@ -4,10 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type
 import {
   Activity,
   BadgeCheck,
+  BriefcaseBusiness,
   Camera,
   CheckCircle2,
   Copy,
   Globe,
+  HelpCircle,
   KeyRound,
   Laptop,
   Lock,
@@ -31,21 +33,29 @@ import {
   WS_BASE_URL,
   changePassword,
   createFileAsset,
+  createSupportRequest,
   createUploadIntent,
   disableMfa,
   enableTotp,
+  getAccountHelp,
+  getAccountOverview,
   getIdentitySecurityOverview,
   regenerateBackupCodes,
   revokeTrustedDevice,
   setupTotp,
   getMe,
+  listAccountWorkspaces,
+  listGuestWorkspaces,
   listTeams,
-  listWorkspaces,
   updateMyProfile,
+  type AccountHelp,
+  type AccountOverview,
+  type AccountWorkspace,
   type IdentitySecurityOverview,
+  type GuestWorkspace,
+  type SupportRequestPayload,
   type Team,
   type TotpSetupResponse,
-  type Workspace,
 } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { getAccessProfile, roleLabel } from "@/lib/access-policy";
@@ -53,13 +63,15 @@ import { uploadWithIntent } from "@/lib/upload";
 
 // Tab system
 
-type SettingsTab = "profile" | "workspace" | "connections" | "security";
+type SettingsTab = "profile" | "workspace" | "guest" | "support" | "connections" | "security";
 
 const TABS: Array<{ id: SettingsTab; label: string; icon: LucideIcon }> = [
-  { id: "profile",     label: "Profile",     icon: User },
-  { id: "workspace",   label: "Workspace",   icon: Users },
-  { id: "connections", label: "Connections", icon: Globe },
-  { id: "security",    label: "Security",    icon: Shield },
+  { id: "profile",     label: "Manage account",   icon: User },
+  { id: "workspace",   label: "Your workspaces",  icon: BriefcaseBusiness },
+  { id: "guest",       label: "Guest spaces",     icon: Users },
+  { id: "support",     label: "Help and support", icon: HelpCircle },
+  { id: "connections", label: "Connections",      icon: Globe },
+  { id: "security",    label: "Security",         icon: Shield },
 ];
 
 const TIMEZONE_OPTIONS = [
@@ -97,7 +109,10 @@ export default function SettingsPage() {
   const access = getAccessProfile(user);
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [accountOverview, setAccountOverview] = useState<AccountOverview | null>(null);
+  const [accountHelp, setAccountHelp] = useState<AccountHelp | null>(null);
+  const [guestWorkspaces, setGuestWorkspaces] = useState<GuestWorkspace[]>([]);
+  const [workspaces, setWorkspaces] = useState<AccountWorkspace[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -110,6 +125,8 @@ export default function SettingsPage() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [profileAvatar, setProfileAvatar] = useState(user.avatarUrl ?? "");
+  const [supportMessage, setSupportMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const [supportSubmitting, setSupportSubmitting] = useState(false);
 
   const visibleTabs = useMemo(() => TABS.filter((tab) => {
     if (tab.id === "connections") return access.canViewDeveloperConnections;
@@ -122,20 +139,27 @@ export default function SettingsPage() {
     setLoading(true);
     setError("");
     try {
-      if (!access.canViewPeopleDirectory) {
-        setWorkspaces([]);
-        setTeams([]);
-      } else {
-        const [workspaceResult, teamResult] = await Promise.allSettled([
-          listWorkspaces(auth.accessToken),
-          listTeams(auth.accessToken),
-        ]);
-        setWorkspaces(workspaceResult.status === "fulfilled" ? workspaceResult.value.data : []);
-        setTeams(teamResult.status === "fulfilled" ? teamResult.value.data : []);
-      }
+      const [overviewResult, workspaceResult, guestResult, helpResult, identityResult, teamResult] = await Promise.allSettled([
+        getAccountOverview(auth.accessToken),
+        listAccountWorkspaces(auth.accessToken, { limit: 100 }),
+        listGuestWorkspaces(auth.accessToken, { limit: 100 }),
+        getAccountHelp(auth.accessToken),
+        getIdentitySecurityOverview(auth.accessToken),
+        access.canViewPeopleDirectory ? listTeams(auth.accessToken) : Promise.resolve({ data: [] }),
+      ]);
 
-      const identity = await getIdentitySecurityOverview(auth.accessToken);
-      setIdentityOverview(identity);
+      setAccountOverview(overviewResult.status === "fulfilled" ? overviewResult.value : null);
+      setWorkspaces(workspaceResult.status === "fulfilled" ? workspaceResult.value.data : []);
+      setGuestWorkspaces(guestResult.status === "fulfilled" ? guestResult.value.data : []);
+      setAccountHelp(helpResult.status === "fulfilled" ? helpResult.value : null);
+      setIdentityOverview(identityResult.status === "fulfilled" ? identityResult.value : null);
+      setTeams(teamResult.status === "fulfilled" ? teamResult.value.data : []);
+
+      const failedCore = [overviewResult, workspaceResult, guestResult, helpResult].filter((result) => result.status === "rejected");
+      if (failedCore.length >= 4) {
+        const reason = failedCore[0]?.reason;
+        setError(reason instanceof Error ? reason.message : "Unable to load account settings.");
+      }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to load settings.");
     } finally {
@@ -288,6 +312,39 @@ export default function SettingsPage() {
       toast({ title: "Profile update failed", description: caught instanceof Error ? caught.message : "Unable to save profile.", variant: "error" });
     } finally {
       setProfileSaving(false);
+    }
+  }
+
+  async function onSupportRequest(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSupportMessage(null);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const payload: SupportRequestPayload = {
+      category: String(formData.get("category") ?? "WORKSPACE") as SupportRequestPayload["category"],
+      priority: String(formData.get("priority") ?? "NORMAL") as SupportRequestPayload["priority"],
+      subject: String(formData.get("subject") ?? "").trim(),
+      message: String(formData.get("message") ?? "").trim(),
+      sourceUrl: window.location.pathname,
+    };
+
+    if (!payload.subject || !payload.message) {
+      setSupportMessage({ ok: false, text: "Subject and message are required." });
+      return;
+    }
+
+    setSupportSubmitting(true);
+    try {
+      const result = await createSupportRequest(auth.accessToken, payload);
+      setSupportMessage({ ok: true, text: result.message });
+      toast({ title: "Support request sent", description: result.message, variant: "success" });
+      form.reset();
+    } catch (caught) {
+      const text = caught instanceof Error ? caught.message : "Unable to create support request.";
+      setSupportMessage({ ok: false, text });
+      toast({ title: "Support request failed", description: text, variant: "error" });
+    } finally {
+      setSupportSubmitting(false);
     }
   }
 
@@ -582,17 +639,18 @@ export default function SettingsPage() {
       {/* WORKSPACE TAB */}
       {selectedTab === "workspace" && (
         <div className="space-y-4 tb-reveal">
-          {!access.canViewPeopleDirectory ? (
-            <SettingsCard icon={Lock} title="Workspace access" subtitle="Role-limited view">
-              <p className="text-sm font-medium text-ink-soft">
-                Your account can use assigned projects and tasks, but tenant-wide workspace, team, and people directories are restricted to admins, project admins, and team managers.
-              </p>
-            </SettingsCard>
-          ) : null}
+          <AccountMetricStrip
+            items={[
+              { label: "Workspaces", value: accountOverview?.counts.workspaces ?? workspaces.length },
+              { label: "Projects", value: accountOverview?.counts.projects ?? 0 },
+              { label: "Teams", value: accountOverview?.counts.teams ?? teams.length },
+              { label: "Open tasks", value: accountOverview?.counts.assignedOpenTasks ?? 0 },
+            ]}
+          />
           <SettingsCard
-            icon={Users}
-            title="Workspaces"
-            subtitle={`${workspaces.length} available`}
+            icon={BriefcaseBusiness}
+            title="Your workspaces"
+            subtitle={`${workspaces.length} visible to your account`}
           >
             {loading ? (
               <SkeletonList count={3} />
@@ -607,22 +665,127 @@ export default function SettingsPage() {
             )}
           </SettingsCard>
 
-          <SettingsCard
-            icon={Settings}
-            title="Teams"
-            subtitle={`${teams.length} teams`}
-          >
+          {access.canViewPeopleDirectory ? (
+            <SettingsCard
+              icon={Settings}
+              title="Teams"
+              subtitle={`${teams.length} teams`}
+            >
+              {loading ? (
+                <SkeletonList count={3} />
+              ) : teams.length ? (
+                <div className="space-y-2">
+                  {teams.map((team) => (
+                    <TeamRow key={team.id} team={team} />
+                  ))}
+                </div>
+              ) : (
+                <EmptyRow label="No teams found." />
+              )}
+            </SettingsCard>
+          ) : (
+            <SettingsCard icon={Lock} title="Team directory" subtitle="Role-limited view">
+              <p className="text-sm font-medium text-ink-soft">
+                Your workspace list is visible here. Tenant-wide team and people directories remain restricted to users with people-directory access.
+              </p>
+            </SettingsCard>
+          )}
+        </div>
+      )}
+
+      {/* GUEST TAB */}
+      {selectedTab === "guest" && (
+        <div className="space-y-4 tb-reveal">
+          <SettingsCard icon={Users} title="Guest workspaces" subtitle={`${guestWorkspaces.length} invited project spaces`}>
+            <p className="mb-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-700">
+              TaskBricks currently scopes one tenant per login. This view shows project spaces where your account was explicitly added as a member.
+            </p>
             {loading ? (
               <SkeletonList count={3} />
-            ) : teams.length ? (
+            ) : guestWorkspaces.length ? (
               <div className="space-y-2">
-                {teams.map((team) => (
-                  <TeamRow key={team.id} team={team} />
+                {guestWorkspaces.map((workspace) => (
+                  <GuestWorkspaceRow key={workspace.id} workspace={workspace} />
                 ))}
               </div>
             ) : (
-              <EmptyRow label="No teams found." />
+              <EmptyRow label="No guest workspace invitations found." />
             )}
+          </SettingsCard>
+        </div>
+      )}
+
+      {/* SUPPORT TAB */}
+      {selectedTab === "support" && (
+        <div className="space-y-4 tb-reveal">
+          <div className="grid gap-3 md:grid-cols-2">
+            {(accountHelp?.categories ?? []).map((category) => (
+              <SupportCategoryCard key={category.id} title={category.title} body={category.description} />
+            ))}
+            {!accountHelp?.categories.length ? (
+              <SupportCategoryCard title="Support center" body="Create a request and tenant admins will be notified in-app." />
+            ) : null}
+          </div>
+
+          <SettingsCard icon={HelpCircle} title="Create support request" subtitle="Recorded in audit trail and routed to tenant admins">
+            <form onSubmit={onSupportRequest} className="grid gap-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <SelectInput
+                  label="Category"
+                  name="category"
+                  defaultValue="WORKSPACE"
+                  options={[
+                    { value: "ACCOUNT", label: "Account" },
+                    { value: "WORKSPACE", label: "Workspace" },
+                    { value: "BILLING", label: "Billing" },
+                    { value: "SECURITY", label: "Security" },
+                    { value: "TECHNICAL", label: "Technical" },
+                    { value: "FEATURE", label: "Feature request" },
+                  ]}
+                />
+                <SelectInput
+                  label="Priority"
+                  name="priority"
+                  defaultValue="NORMAL"
+                  options={[
+                    { value: "LOW", label: "Low" },
+                    { value: "NORMAL", label: "Normal" },
+                    { value: "HIGH", label: "High" },
+                    { value: "URGENT", label: "Urgent" },
+                  ]}
+                />
+              </div>
+              <TextInput label="Subject" name="subject" />
+              <label className="grid gap-1.5">
+                <span className="text-[11px] font-black uppercase tracking-widest text-ink-soft">Message</span>
+                <textarea
+                  className="min-h-32 rounded-lg border border-line bg-background px-3 py-2 text-sm font-semibold text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  name="message"
+                  placeholder="Describe the issue, expected behavior, and what you already tried."
+                  required
+                />
+              </label>
+              {supportMessage ? (
+                <div
+                  className={cn(
+                    "rounded-xl border px-4 py-3 text-sm font-semibold",
+                    supportMessage.ok
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                      : "border-red-200 bg-red-50 text-red-700",
+                  )}
+                >
+                  {supportMessage.text}
+                </div>
+              ) : null}
+              <button
+                type="submit"
+                disabled={supportSubmitting}
+                className="tb-yellow-button inline-flex h-10 w-fit items-center justify-center gap-2 rounded-lg px-4 text-sm font-black disabled:opacity-60"
+              >
+                {supportSubmitting ? <RefreshCw className="size-4 animate-spin" aria-hidden="true" /> : <HelpCircle className="size-4" aria-hidden="true" />}
+                Send request
+              </button>
+            </form>
           </SettingsCard>
         </div>
       )}
@@ -900,6 +1063,37 @@ export default function SettingsPage() {
 
 // Sub-components
 
+function AccountMetricStrip({ items }: { items: Array<{ label: string; value: number | string }> }) {
+  return (
+    <div className="grid gap-2 rounded-2xl border border-line bg-panel p-2 shadow-sm sm:grid-cols-4">
+      {items.map((item, index) => (
+        <div
+          key={item.label}
+          className={cn(
+            "rounded-xl bg-background px-4 py-3",
+            index > 0 && "sm:border-l sm:border-line",
+          )}
+        >
+          <p className="text-xl font-black text-foreground">{item.value}</p>
+          <p className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-ink-soft">{item.label}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SupportCategoryCard({ body, title }: { body: string; title: string }) {
+  return (
+    <div className="rounded-2xl border border-line bg-panel p-5 shadow-sm">
+      <span className="flex size-9 items-center justify-center rounded-xl bg-primary/15">
+        <HelpCircle className="size-4 text-primary-dark" aria-hidden="true" />
+      </span>
+      <h3 className="mt-4 text-sm font-black text-foreground">{title}</h3>
+      <p className="mt-1 text-sm font-medium leading-6 text-ink-soft">{body}</p>
+    </div>
+  );
+}
+
 function TextInput({
   defaultValue,
   label,
@@ -1097,7 +1291,7 @@ function EndpointBlock({
   );
 }
 
-function WorkspaceRow({ workspace }: { workspace: Workspace }) {
+function WorkspaceRow({ workspace }: { workspace: AccountWorkspace }) {
   return (
     <div className="flex items-center gap-3 rounded-xl border border-line bg-background px-4 py-3">
       <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-[11px] font-extrabold text-primary-dark">
@@ -1105,13 +1299,49 @@ function WorkspaceRow({ workspace }: { workspace: Workspace }) {
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-bold text-foreground">{workspace.name}</p>
-        {workspace.description && (
-          <p className="truncate text-[11px] text-ink-soft">{workspace.description}</p>
-        )}
+        <p className="truncate text-[11px] text-ink-soft">
+          {workspace.slug} - {workspace._count?.projects ?? 0} projects - {workspace._count?.teams ?? 0} teams
+        </p>
+        {workspace.description ? <p className="truncate text-[11px] text-ink-soft">{workspace.description}</p> : null}
       </div>
       <span className="shrink-0 rounded-lg border border-line bg-panel px-2 py-0.5 text-[10px] font-bold text-ink-soft">
-        Workspace
+        {workspace.canManage ? "Manage" : "View"}
       </span>
+    </div>
+  );
+}
+
+function GuestWorkspaceRow({ workspace }: { workspace: GuestWorkspace }) {
+  return (
+    <div className="rounded-xl border border-line bg-background px-4 py-3">
+      <div className="flex items-center gap-3">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-[11px] font-extrabold text-emerald-700">
+          {workspace.name.slice(0, 2).toUpperCase()}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-bold text-foreground">{workspace.name}</p>
+          <p className="truncate text-[11px] text-ink-soft">
+            {workspace.projectCount} project{workspace.projectCount === 1 ? "" : "s"} - {workspace.role ?? "member"}
+          </p>
+        </div>
+        <span className="shrink-0 rounded-lg border border-line bg-panel px-2 py-0.5 text-[10px] font-bold text-ink-soft">
+          Guest
+        </span>
+      </div>
+      {workspace.projects.length ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {workspace.projects.slice(0, 5).map((project) => (
+            <span key={project.id} className="rounded-lg border border-line bg-panel px-2 py-1 text-[11px] font-bold text-ink-soft">
+              {project.key} - {project.status}
+            </span>
+          ))}
+          {workspace.projects.length > 5 ? (
+            <span className="rounded-lg border border-line bg-panel px-2 py-1 text-[11px] font-bold text-ink-soft">
+              +{workspace.projects.length - 5} more
+            </span>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -190,6 +190,22 @@ function cleanupLegacyAuthTokens() {
 }
 
 export {
+  createSupportRequest,
+  getAccountHelp,
+  getAccountOverview,
+  listAccountWorkspaces,
+  listGuestWorkspaces,
+  type AccountHelp,
+  type AccountOverview,
+  type AccountPage,
+  type AccountWorkspace,
+  type GuestWorkspace,
+  type GuestWorkspacePage,
+  type GuestWorkspaceProject,
+  type SupportRequestPayload,
+  type SupportRequestResponse,
+} from "./api/accountApi";
+export {
   acceptInvite,
   changePassword,
   completeSso,
@@ -222,11 +238,13 @@ export { bulkInviteTenantUsers, inviteTenantUser, listUsers, updateMyProfile } f
 export { listWorkspaces } from "./api/workspaceApi";
 export {
   addTeamMember,
+  cancelTeamMemberInvite,
   createTeam,
   inviteTeamMember,
   listTeamMembers,
   listTeams,
   removeTeamMember,
+  resendTeamMemberInvite,
   updateTeamMemberRole,
 } from "./api/teamApi";
 export {
@@ -303,6 +321,33 @@ export {
   upsertInternalMailboxMember,
 } from "./api/internalMailApi";
 export {
+  approveApprovalStep,
+  archiveApprovalDefinition,
+  cancelApproval,
+  createApproval,
+  createApprovalDefinition,
+  getApproval,
+  listApprovalDefinitions,
+  listApprovals,
+  listMyPendingApprovals,
+  rejectApprovalStep,
+  reopenApproval,
+  restoreApprovalDefinition,
+  updateApprovalDefinition,
+} from "./api/approvalApi";
+export type {
+  Approval,
+  ApprovalDefinition,
+  ApprovalDefinitionPayload,
+  ApprovalDefinitionQuery,
+  ApprovalDefinitionStep,
+  ApprovalPayload,
+  ApprovalQuery,
+  ApprovalStatus,
+  ApprovalStep,
+  ApprovalStepInput,
+} from "./api/approvalApi";
+export {
   archiveWorkflow,
   cancelWorkflowRun,
   createIntegration,
@@ -339,16 +384,29 @@ export {
   updateWorkflow,
 } from "./api/integrationWorkflowApi";
 export {
+  applyBoardActions,
   archiveAiAgent,
   createAiAgent,
   deleteAiAgent,
+  generateBoardActionPlan,
+  generateBoardSummary,
   getAiSettings,
   listAiAgents,
   restoreAiAgent,
+  scanBoardRisks,
   updateAiAgent,
   updateAiSettings,
 } from "./api/aiApi";
+export type {
+  BoardAiActionPlanResponse,
+  BoardAiApplyActionsPayload,
+  BoardAiApplyResponse,
+  BoardAiPayload,
+  BoardAiRiskScanResponse,
+  BoardAiSummaryResponse,
+} from "./api/aiApi";
 export {
+  confirmBillingCheckout,
   createBillingCheckout,
   createBillingPortal,
   cancelTenantSubscription,
@@ -358,6 +416,7 @@ export {
   getTenantEntitlements,
   getTenantUsageSummary,
   listBillingPlans,
+  listTenantBillingEvents,
   listTenantInvoices,
   listTenantUsageRecords,
   resumeTenantSubscription,
@@ -704,4 +763,10 @@ export {
   deleteSprint,
   addSprintTasks,
   removeSprintTask,
+  listSprintRetrospectives,
+  createSprintRetrospective,
+  updateSprintRetrospective,
+  deleteSprintRetrospective,
+  type SprintRetrospective,
+  type SprintRetrospectiveActionItem,
 } from "./api/agileApi";

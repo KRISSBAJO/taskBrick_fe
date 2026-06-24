@@ -1,4 +1,5 @@
 import {
+apiRequest,
 boundedLimit,
 openApiRequest,
 type OpenApiJsonBody,
@@ -68,4 +69,24 @@ export function inviteTeamMember(token: string, teamId: string, payload: InviteT
     pathParams: { teamId },
     body: payload,
   });
+}
+
+export function resendTeamMemberInvite(token: string, teamId: string, userId: string) {
+  return apiRequest<{ success: boolean; delivery: "email" | "in_app" | "none"; member?: unknown }>(
+    `/teams/${encodeURIComponent(teamId)}/members/${encodeURIComponent(userId)}/resend-invite`,
+    {
+      token,
+      method: "POST",
+    },
+  );
+}
+
+export function cancelTeamMemberInvite(token: string, teamId: string, userId: string) {
+  return apiRequest<{ success: boolean }>(
+    `/teams/${encodeURIComponent(teamId)}/members/${encodeURIComponent(userId)}/invite`,
+    {
+      token,
+      method: "DELETE",
+    },
+  );
 }

@@ -1,5 +1,5 @@
 import type { AiAgent,AiSettings } from "../api";
-import { boundedLimit,openApiRequest,type OpenApiJsonBody,type OpenApiQuery } from "./request";
+import { boundedLimit,openApiRequest,type OpenApiJsonBody,type OpenApiQuery,type OpenApiResponse } from "./request";
 
 type AiSettingsPayload = Partial<Pick<
   AiSettings,
@@ -41,6 +41,12 @@ type UpdateAiAgentPayload = Partial<Pick<
   | "knowledgeScope"
   | "enabled"
 >>;
+export type BoardAiPayload = OpenApiJsonBody<"/api/v1/ai/board-summary", "post">;
+export type BoardAiSummaryResponse = NonNullable<OpenApiResponse<"/api/v1/ai/board-summary", "post">>;
+export type BoardAiRiskScanResponse = NonNullable<OpenApiResponse<"/api/v1/ai/board-risk-scan", "post">>;
+export type BoardAiActionPlanResponse = NonNullable<OpenApiResponse<"/api/v1/ai/board-actions", "post">>;
+export type BoardAiApplyActionsPayload = OpenApiJsonBody<"/api/v1/ai/board-actions/apply", "post">;
+export type BoardAiApplyResponse = NonNullable<OpenApiResponse<"/api/v1/ai/board-actions/apply", "post">>;
 
 export function getAiSettings(token: string) {
   return openApiRequest("/api/v1/ai/settings", "get", {
@@ -116,5 +122,37 @@ export function deleteAiAgent(token: string, agentId: string) {
   return openApiRequest("/api/v1/ai/agents/{agentId}", "delete", {
     token,
     pathParams: { agentId },
+  });
+}
+
+export function generateBoardSummary(token: string, payload: BoardAiPayload) {
+  return openApiRequest("/api/v1/ai/board-summary", "post", {
+    token,
+    pathParams: {},
+    body: payload,
+  });
+}
+
+export function scanBoardRisks(token: string, payload: BoardAiPayload) {
+  return openApiRequest("/api/v1/ai/board-risk-scan", "post", {
+    token,
+    pathParams: {},
+    body: payload,
+  });
+}
+
+export function generateBoardActionPlan(token: string, payload: BoardAiPayload) {
+  return openApiRequest("/api/v1/ai/board-actions", "post", {
+    token,
+    pathParams: {},
+    body: payload,
+  });
+}
+
+export function applyBoardActions(token: string, payload: BoardAiApplyActionsPayload) {
+  return openApiRequest("/api/v1/ai/board-actions/apply", "post", {
+    token,
+    pathParams: {},
+    body: payload,
   });
 }

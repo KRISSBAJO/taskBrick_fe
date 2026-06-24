@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   ArrowUpRight,
   BadgeCheck,
@@ -23,6 +23,7 @@ import { useWorkspaceAuth } from "@/components/workspace-shell";
 import {
   cancelTenantSubscription,
   changeTenantSubscriptionPlan,
+  confirmBillingCheckout,
   createBillingCheckout,
   createBillingPortal,
   getBillingAccountStatus,
@@ -30,6 +31,7 @@ import {
   getTenantEntitlements,
   getTenantUsageSummary,
   listBillingPlans,
+  listTenantBillingEvents,
   listTenantInvoices,
   listTenantUsageRecords,
   resumeTenantSubscription,
@@ -48,6 +50,8 @@ import { cn } from "@/lib/cn";
 const compactButton =
   "inline-flex h-11 items-center justify-center gap-2 rounded-2xl px-4 text-sm font-black transition disabled:pointer-events-none disabled:opacity-55";
 
+type TenantBillingEvent = Awaited<ReturnType<typeof listTenantBillingEvents>>["data"][number];
+
 export default function TenantBillingPage() {
   const { auth, user } = useWorkspaceAuth();
   const { confirm } = useConfirm();
@@ -58,6 +62,7 @@ export default function TenantBillingPage() {
   const [subscription, setSubscription] = useState<SiteSubscription | null>(null);
   const [entitlements, setEntitlements] = useState<BillingEntitlements | null>(null);
   const [invoices, setInvoices] = useState<BillingInvoice[]>([]);
+  const [billingEvents, setBillingEvents] = useState<TenantBillingEvent[]>([]);
   const [usageRecords, setUsageRecords] = useState<BillingUsageRecord[]>([]);
   const [usageSummary, setUsageSummary] = useState<BillingUsageSummary | null>(null);
   const [currency, setCurrency] = useState("USD");
@@ -65,12 +70,13 @@ export default function TenantBillingPage() {
   const [busy, setBusy] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const checkoutHandledRef = useRef(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const [planResult, accountResult, currentResult, entitlementResult, invoiceResult, usageResult, summaryResult] =
+      const [planResult, accountResult, currentResult, entitlementResult, invoiceResult, usageResult, summaryResult, eventResult] =
         await Promise.all([
           listBillingPlans(auth.accessToken, { limit: 100 }),
           getBillingAccountStatus(auth.accessToken),
@@ -79,6 +85,7 @@ export default function TenantBillingPage() {
           listTenantInvoices(auth.accessToken, { limit: 20 }),
           listTenantUsageRecords(auth.accessToken, { limit: 30 }),
           getTenantUsageSummary(auth.accessToken),
+          listTenantBillingEvents(auth.accessToken, { limit: 8 }),
         ]);
       setPlans(planResult.data);
       setAccount(accountResult);
@@ -87,6 +94,7 @@ export default function TenantBillingPage() {
       setInvoices(invoiceResult.data);
       setUsageRecords(usageResult.data);
       setUsageSummary(summaryResult);
+      setBillingEvents(eventResult.data);
       setSeatCount(Math.max(currentResult?.seatCount ?? accountResult.seats.used ?? 1, 1));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to load billing workspace.");
@@ -99,6 +107,51 @@ export default function TenantBillingPage() {
     const timer = window.setTimeout(() => void load(), 0);
     return () => window.clearTimeout(timer);
   }, [load]);
+
+  useEffect(() => {
+    if (checkoutHandledRef.current || typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const checkout = params.get("checkout");
+    if (!checkout) return;
+
+    checkoutHandledRef.current = true;
+    const clearCheckoutQuery = () => {
+      window.history.replaceState(null, "", window.location.pathname);
+    };
+
+    if (checkout === "cancelled") {
+      toast({ title: "Checkout cancelled", description: "No billing changes were applied.", variant: "info" });
+      clearCheckoutQuery();
+      return;
+    }
+
+    if (checkout !== "success") return;
+
+    const providerParam = params.get("provider");
+    const reference = params.get("reference") ?? params.get("trxref") ?? undefined;
+    const sessionId = params.get("session_id") ?? params.get("sessionId") ?? undefined;
+    const provider =
+      providerParam === "paystack" || reference
+        ? "paystack"
+        : providerParam === "stripe" || sessionId
+          ? "stripe"
+          : undefined;
+
+    void (async () => {
+      setBusy("confirm-checkout");
+      try {
+        await confirmBillingCheckout(auth.accessToken, { provider, reference, sessionId });
+        toast({ title: "Payment confirmed", description: "Your subscription is now active.", variant: "success" });
+        await load();
+      } catch (caught) {
+        toast({ title: "Payment confirmation failed", description: errorMessage(caught), variant: "error" });
+      } finally {
+        setBusy("");
+        clearCheckoutQuery();
+      }
+    })();
+  }, [auth.accessToken, load, toast]);
 
   const currencies = useMemo(() => {
     const values = Array.from(new Set(plans.map((plan) => plan.currency.toUpperCase()))).sort();
@@ -165,13 +218,13 @@ export default function TenantBillingPage() {
     setBusy(`checkout:${plan.id}`);
     try {
       const origin = window.location.origin;
-      const provider = plan.currency.toUpperCase() === "NGN" ? "paystack" : undefined;
+      const provider = plan.currency.toUpperCase() === "NGN" ? "paystack" : "stripe";
       const session = await createBillingCheckout(auth.accessToken, {
         planId: plan.id,
         seatCount,
         provider,
-        successUrl: `${origin}/settings/billing?checkout=success`,
-        cancelUrl: `${origin}/settings/billing?checkout=cancelled`,
+        successUrl: `${origin}/settings/billing?checkout=success&provider=${provider}&planId=${plan.id}`,
+        cancelUrl: `${origin}/settings/billing?checkout=cancelled&provider=${provider}&planId=${plan.id}`,
       });
       const url = typeof session.url === "string" ? session.url : "";
       if (url) {
@@ -454,6 +507,31 @@ export default function TenantBillingPage() {
                   ) : null}
                 </div>
               </Panel>
+
+              <Panel eyebrow="Provider health" title="Webhook reliability" action={`${billingEvents.length} recent`}>
+                <div className="max-h-[360px] overflow-auto pr-1 tb-scrollbar">
+                  {billingEvents.map((event) => (
+                    <div key={event.id} className="border-b border-line py-3 last:border-b-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-black text-[#111111]">{event.type}</p>
+                          <p className="mt-1 truncate font-mono text-[11px] font-bold text-ink-soft">
+                            {event.provider} · {event.eventId}
+                          </p>
+                        </div>
+                        <BillingEventStatus status={event.status} />
+                      </div>
+                      <div className="mt-2 flex items-center justify-between gap-3 text-[11px] font-bold text-ink-soft">
+                        <span>{formatDate(event.processedAt ?? event.createdAt)}</span>
+                        {event.error ? <span className="truncate text-red-700">{event.error}</span> : <span>Provider event accepted</span>}
+                      </div>
+                    </div>
+                  ))}
+                  {billingEvents.length === 0 ? (
+                    <EmptyBlock icon={RefreshCw} title="No provider events yet" text="Stripe and Paystack webhook events will appear here after checkout, renewal, or failed payment callbacks." />
+                  ) : null}
+                </div>
+              </Panel>
             </div>
           </section>
 
@@ -690,6 +768,20 @@ function InvoiceStatus({ status }: { status: string }) {
       normalized === "paid" && "bg-emerald-50 text-emerald-700",
       normalized === "open" && "bg-yellow-50 text-[#8a6500]",
       normalized !== "paid" && normalized !== "open" && "bg-red-50 text-red-700",
+    )}>
+      {status}
+    </span>
+  );
+}
+
+function BillingEventStatus({ status }: { status: string }) {
+  return (
+    <span className={cn(
+      "shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em]",
+      status === "PROCESSED" && "bg-emerald-50 text-emerald-700",
+      status === "RECEIVED" && "bg-blue-50 text-blue-700",
+      status === "IGNORED" && "bg-yellow-50 text-[#8a6500]",
+      status === "FAILED" && "bg-red-50 text-red-700",
     )}>
       {status}
     </span>
