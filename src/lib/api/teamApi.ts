@@ -11,6 +11,22 @@ type CreateTeamPayload = OpenApiJsonBody<"/api/v1/teams", "post">;
 type AddTeamMemberPayload = OpenApiJsonBody<"/api/v1/teams/{teamId}/members", "post">;
 type InviteTeamMemberPayload = OpenApiJsonBody<"/api/v1/teams/{teamId}/invite", "post">;
 
+export type TeamInviteDeliveryStatus = {
+  channel: "email" | "in_app" | "none";
+  error?: string;
+  message: string;
+  provider?: string;
+  skipped?: boolean;
+  status: "sent" | "skipped" | "failed";
+};
+
+export type TeamInviteResult<TMember = unknown> = {
+  delivery?: "email" | "in_app" | "none";
+  deliveryStatus?: TeamInviteDeliveryStatus;
+  member?: TMember;
+  success?: boolean;
+};
+
 export function listTeams(token: string, query: ListTeamsQuery = {}) {
   return openApiRequest("/api/v1/teams", "get", {
     token,
@@ -72,7 +88,7 @@ export function inviteTeamMember(token: string, teamId: string, payload: InviteT
 }
 
 export function resendTeamMemberInvite(token: string, teamId: string, userId: string) {
-  return apiRequest<{ success: boolean; delivery: "email" | "in_app" | "none"; member?: unknown }>(
+  return apiRequest<TeamInviteResult & { success: boolean }>(
     `/teams/${encodeURIComponent(teamId)}/members/${encodeURIComponent(userId)}/resend-invite`,
     {
       token,

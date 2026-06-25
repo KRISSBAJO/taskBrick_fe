@@ -43,6 +43,7 @@ import {
   type Permission,
   type Role,
   type Team,
+  type TeamInviteResult,
   type TeamMember,
   type TenantUser,
   type Workspace,
@@ -140,12 +141,13 @@ export default function TeamPage() {
     const roleIds = fd.getAll("roleIds").map(String).filter(Boolean);
     setSaving(true); setMessage(null);
     try {
-      await inviteTeamMember(auth.accessToken, selectedTeam.id, {
+      const result = await inviteTeamMember(auth.accessToken, selectedTeam.id, {
         email: String(fd.get("email") || ""), firstName: String(fd.get("firstName") || ""),
         lastName: String(fd.get("lastName") || ""), teamRole: String(fd.get("teamRole") || "Member"), roleIds,
-      });
-      form.reset(); setMessage({ text: "User invited and added to the team.", ok: true });
-      toast({ title: "User invited", description: "The account was created and added to this team.", variant: "success" });
+      }) as TeamInviteResult;
+      const description = describeInviteDelivery(result);
+      form.reset(); setMessage({ text: description, ok: result.deliveryStatus?.status !== "failed" });
+      toast({ title: "User invited", description, variant: result.deliveryStatus?.status === "failed" ? "warning" : "success" });
       await Promise.all([loadMembers(selectedTeam.id), loadDirectory()]);
     } catch (err) {
       const description = err instanceof Error ? err.message : "Unable to invite user.";
@@ -164,14 +166,19 @@ export default function TeamPage() {
     setSaving(true);
     setMessage(null);
     try {
-      await inviteTenantUser(auth.accessToken, {
+      const result = await inviteTenantUser(auth.accessToken, {
         email: String(fd.get("email") || ""),
         firstName: String(fd.get("firstName") || ""),
         lastName: String(fd.get("lastName") || ""),
         roleIds,
-      });
+      }) as TeamInviteResult;
+      const description = describeInviteDelivery(result, "Tenant user invited.");
       form.reset();
-      toast({ title: "Tenant user invited", description: "The user can now be assigned to teams, projects, and tasks.", variant: "success" });
+      toast({
+        title: "Tenant user invited",
+        description,
+        variant: result.deliveryStatus?.status === "failed" ? "warning" : "success",
+      });
       await loadDirectory();
     } catch (err) {
       const description = err instanceof Error ? err.message : "Unable to create tenant user.";
@@ -272,11 +279,9 @@ export default function TeamPage() {
     setSaving(true); setMessage(null);
     try {
       const result = await resendTeamMemberInvite(auth.accessToken, selectedTeam.id, member.userId);
-      const description = result.delivery === "in_app"
-        ? "The existing user was notified in the app."
-        : "The invite email was sent again.";
-      setMessage({ text: description, ok: true });
-      toast({ title: "Invite resent", description, variant: "success" });
+      const description = describeInviteDelivery(result);
+      setMessage({ text: description, ok: result.deliveryStatus?.status !== "failed" });
+      toast({ title: "Invite resent", description, variant: result.deliveryStatus?.status === "failed" ? "warning" : "success" });
     } catch (err) {
       const description = err instanceof Error ? err.message : "Unable to resend invitation.";
       setMessage({ text: description, ok: false });
@@ -1565,6 +1570,21 @@ function splitCsvLine(line: string) {
 
   values.push(current);
   return values;
+}
+
+function describeInviteDelivery(
+  result?: TeamInviteResult,
+  fallback = "Invite created and user added."
+) {
+  const delivery = result?.deliveryStatus;
+  if (!delivery) return fallback;
+  if (delivery.channel === "in_app") return "Existing user notified in the app.";
+  if (delivery.channel === "none") return delivery.message || fallback;
+  if (delivery.status === "sent") return "Invite email sent.";
+  if (delivery.status === "skipped") {
+    return `Invite created, but email delivery is disabled${delivery.provider ? ` (${delivery.provider})` : ""}. Configure mail and use Resend.`;
+  }
+  return `Invite created, but email delivery failed${delivery.provider ? ` via ${delivery.provider}` : ""}${delivery.error ? `: ${delivery.error}` : "."}`;
 }
 
 function derivePermissions(member: TeamMember) {

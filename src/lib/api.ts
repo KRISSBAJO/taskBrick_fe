@@ -246,6 +246,7 @@ export {
   removeTeamMember,
   resendTeamMemberInvite,
   updateTeamMemberRole,
+  type TeamInviteResult,
 } from "./api/teamApi";
 export {
   assignRole,
