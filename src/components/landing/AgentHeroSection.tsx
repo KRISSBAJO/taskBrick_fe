@@ -2,70 +2,82 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Bot, CheckCircle2, LayoutGrid, ShieldCheck, Workflow } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
-const commandStats = [
-  ["Projects", "48"],
-  ["Open tasks", "312"],
-  ["Approvals", "27"],
-  ["AI actions", "1.8k"],
-] as const;
-
-const capabilities = [
-  { icon: LayoutGrid, label: "Boards" },
-  { icon: Workflow, label: "Sprints" },
-  { icon: ShieldCheck, label: "Approvals" },
-  { icon: Bot, label: "AI" },
+const trustedLogos = [
+  { src: "/figma/flutterwave.svg", alt: "Flutterwave", width: 120, height: 24 },
+  { src: "/figma/piggyvest.svg", alt: "Piggyvest", width: 110, height: 22 },
+  { src: "/figma/google-pay.svg", alt: "Google Pay", width: 65, height: 26 },
+  { src: "/figma/relume.svg", alt: "Relume", width: 90, height: 36 },
 ] as const;
 
 export function AgentHeroSection() {
   return (
     <section
       id="home"
-      className="relative isolate overflow-hidden border-b border-black/[0.06] bg-[#f7f6ef] px-5 pb-14 pt-10 text-[#111111] sm:px-8 lg:px-16 lg:pb-16 lg:pt-12"
+      className="relative isolate overflow-hidden border-b border-black/[0.06] bg-[#f7f6ef] px-5 pb-12 pt-10 text-[#111111] sm:px-8 lg:px-16 lg:pb-14 lg:pt-12"
     >
-      <div className="pointer-events-none absolute inset-0 -z-20" aria-hidden="true">
-        <Image
-          src="/product/board2.png"
-          alt=""
-          fill
-          sizes="100vw"
-          priority
-          className="object-cover opacity-[0.045]"
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(247,246,239,0.96)_0%,rgba(247,246,239,0.9)_58%,#f7f6ef_100%)]" />
-      </div>
+      <div
+        className="pointer-events-none absolute inset-0 -z-20"
+        aria-hidden="true"
+        style={{
+          backgroundImage: "radial-gradient(circle, rgba(17,17,17,0.11) 1px, transparent 1px)",
+          backgroundSize: "24px 24px",
+        }}
+      />
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_bottom,rgba(247,246,239,0.65)_0%,rgba(247,246,239,0.96)_55%,#f7f6ef_100%)]" />
 
       <div className="mx-auto max-w-[1180px]">
+
+        {/* Badge */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
           className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white/84 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.13em] text-[#68645b] shadow-sm backdrop-blur"
         >
-          <span className="size-2 rounded-full bg-[#ffd400]" />
-          Enterprise project command
+          <span className="size-2 animate-pulse rounded-full bg-[#ffd400]" />
+          Enterprise-grade project management
         </motion.div>
 
-        <div className="mt-7 grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_360px] lg:items-end">
+        <div className="mt-8 grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_520px]">
           <div>
             <motion.h1
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.04, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="max-w-[760px] text-[48px] font-extrabold leading-[0.98] tracking-[-0.02em] text-[#111111] sm:text-[70px] lg:text-[78px]"
+              className="max-w-[680px] text-[48px] font-extrabold leading-[1.01] tracking-[-0.025em] text-[#111111] sm:text-[64px] lg:text-[72px]"
             >
-              TaskBricks
+              Projects, sprints,{" "}
+              <span className="relative inline-block">
+                and AI
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 200 10"
+                  className="absolute -bottom-1 left-0 w-full"
+                  preserveAspectRatio="none"
+                  fill="none"
+                >
+                  <path
+                    d="M3 7 Q50 2 100 7 Q150 12 197 7"
+                    stroke="#ffd400"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </span>{" "}
+              in one secure workspace.
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.55 }}
-              className="mt-5 max-w-[650px] text-lg font-semibold leading-8 text-[#4f4b43] sm:text-xl"
+              className="mt-6 max-w-[520px] text-lg leading-[1.8] text-[#4f4b43]"
             >
-              A secure delivery workspace for projects, sprints, meetings, approvals, internal mail, and AI-assisted operations.
+              TaskBricks gives enterprise teams boards, sprints, approvals, internal mail,
+              and AI-assisted operations, fully auditable and built to scale.
             </motion.p>
 
             <motion.div
@@ -76,64 +88,58 @@ export function AgentHeroSection() {
             >
               <Link
                 href="/signup"
-                className="inline-flex h-12 items-center gap-2 rounded-md bg-[#ffd400] px-6 text-sm font-extrabold text-[#111111] shadow-[0_18px_42px_rgba(255,212,0,0.2)] transition hover:-translate-y-0.5 hover:bg-[#f2c200]"
+                className="inline-flex h-12 items-center gap-2 rounded-md bg-[#ffd400] px-6 text-sm font-extrabold text-[#111111] shadow-[0_4px_18px_rgba(255,212,0,0.48)] transition hover:-translate-y-0.5 hover:bg-[#f5ca00] hover:shadow-[0_6px_22px_rgba(255,212,0,0.55)]"
               >
-                Create workspace <ArrowRight className="size-4" aria-hidden="true" />
+                Start free trial <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
               <Link
                 href="/login"
-                className="inline-flex h-12 items-center gap-2 rounded-md border border-black/[0.12] bg-white/86 px-6 text-sm font-extrabold text-[#111111] shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:border-black/[0.22]"
+                className="inline-flex h-12 items-center gap-2 rounded-md border border-black/[0.14] bg-white/80 px-6 text-sm font-extrabold text-[#111111] shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:border-black/[0.24] hover:bg-white"
               >
                 Open dashboard
               </Link>
             </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.65 }}
+              className="mt-9 flex flex-wrap items-center gap-6"
+            >
+              <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#9a9484]">
+                Trusted by
+              </span>
+              {trustedLogos.map((logo) => (
+                <Image
+                  key={logo.alt}
+                  src={logo.src}
+                  alt={logo.alt}
+                  width={logo.width}
+                  height={logo.height}
+                  className="h-5 w-auto opacity-40 grayscale transition hover:opacity-65"
+                />
+              ))}
+            </motion.div>
           </div>
 
           <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18, duration: 0.5 }}
-            className="grid grid-cols-2 gap-2 rounded-md border border-black/[0.08] bg-white/82 p-2 shadow-[0_20px_70px_rgba(17,17,17,0.07)] backdrop-blur"
+            initial={{ opacity: 0, y: 24, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+            className="relative hidden lg:block"
           >
-            {capabilities.map(({ icon: Icon, label }) => (
-              <div key={label} className="flex items-center gap-3 rounded-md bg-[#f3f1e8] px-3 py-3">
-                <span className="flex size-8 items-center justify-center rounded-md bg-white text-[#0256ff] shadow-sm">
-                  <Icon className="size-4" aria-hidden="true" />
-                </span>
-                <span className="text-sm font-extrabold text-[#111111]">{label}</span>
-              </div>
-            ))}
+            <div className="rounded-[28px] border border-black/[0.06] bg-white/72 p-3 shadow-[0_34px_90px_rgba(17,17,17,0.13),0_0_0_1px_rgba(255,255,255,0.65)] backdrop-blur">
+              <Image
+                src="/product/hero_dash.png"
+                alt="TaskBricks dashboard preview"
+                width={920}
+                height={600}
+                className="w-full rounded-2xl object-contain"
+                priority
+              />
+            </div>
           </motion.div>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.22, duration: 0.55 }}
-          className="mt-9 grid overflow-hidden rounded-md border border-black/[0.08] bg-white/88 shadow-[0_18px_60px_rgba(17,17,17,0.07)] backdrop-blur md:grid-cols-[1fr_420px]"
-        >
-          <div className="grid grid-cols-2 md:grid-cols-4">
-            {commandStats.map(([label, value], index) => (
-              <div
-                key={label}
-                className={`px-5 py-5 ${index > 0 ? "md:border-l md:border-black/[0.06]" : ""} ${index > 1 ? "border-t border-black/[0.06] md:border-t-0" : ""}`}
-              >
-                <p className="text-2xl font-extrabold tracking-[-0.02em] text-[#111111]">{value}</p>
-                <p className="mt-1 text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#68645b]">{label}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="hidden items-center gap-3 border-l border-black/[0.06] bg-[#fbfaf6] px-5 py-4 md:flex">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-[#e8f7ec] text-[#08743e]">
-              <CheckCircle2 className="size-5" aria-hidden="true" />
-            </span>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-extrabold text-[#111111]">Live workspace health</p>
-              <p className="truncate text-xs font-semibold text-[#68645b]">Boards, meetings, and controls stay in sync.</p>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </section>
   );

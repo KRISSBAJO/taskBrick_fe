@@ -45,11 +45,11 @@ export function LandingNav() {
         <Link href="/" className="flex items-center gap-2.5">
           <span className="overflow-hidden rounded-xl shadow-[0_4px_20px_rgba(17,17,17,0.08)]">
             <Image
-              src="/product/taskbricks_logo2.png"
+              src="/product/taskbrick_logo.png"
               alt="TaskBricks"
               width={40}
               height={40}
-              className="block"
+              className="block size-10 object-cover"
               priority
             />
           </span>
@@ -63,7 +63,11 @@ export function LandingNav() {
             <a
               key={label}
               href={href}
-              className="rounded-md px-3 py-2 text-sm font-semibold text-[#68645b] transition hover:bg-black/[0.04] hover:text-[#111111]"
+              className={`rounded-md px-3 py-2 text-sm font-semibold transition hover:bg-black/[0.04] hover:text-[#111111] ${
+                label === "Home"
+                  ? "border-b-2 border-[#ffd400] text-[#111111]"
+                  : "border-b-2 border-transparent text-[#68645b]"
+              }`}
             >
               {label}
             </a>
@@ -135,7 +139,7 @@ export function LandingNav() {
                 href="/signup"
                 className="inline-flex h-10 items-center justify-center rounded-md bg-[#ffd400] px-4 text-sm font-black text-[#111111] shadow-[0_14px_34px_rgba(255,212,0,0.16)] transition hover:bg-[#f2c200]"
               >
-                Start Your Free Trial
+                Start free trial
               </Link>
             </>
           )}

@@ -10,14 +10,17 @@ export function LandingFooter() {
         <div className="grid gap-10 lg:grid-cols-[1fr_345px]">
           <div>
             <Link href="/" className="flex items-center gap-3">
-              <span className="overflow-hidden rounded-xl shadow-[0_4px_20px_rgba(255,212,0,0.18)]">
+              <span className="overflow-hidden rounded-lg shadow-[0_4px_20px_rgba(255,212,0,0.18)]">
                 <Image
-                  src="/product/taskBricks_logo.png"
+                  src="/product/taskbrick_logo.png"
                   alt="TaskBricks"
-                  width={110}
-                  height={80}
-                  className="block"
+                  width={40}
+                  height={40}
+                  className="block size-10 object-cover"
                 />
+              </span>
+              <span className="text-xl font-extrabold tracking-tight text-white">
+                Task<span className="text-[#ffd400]">Bricks</span>
               </span>
             </Link>
             <div className="mt-8 flex flex-wrap gap-x-8 gap-y-3 text-sm text-white/70">
@@ -45,7 +48,7 @@ export function LandingFooter() {
             <a href="#home">Terms of Service</a>
             <a href="#home">Cookies Settings</a>
           </div>
-          <p>&copy; 2023 logaxp. All rights reserved.</p>
+          <p>&copy; 2026 TaskBricks. All rights reserved.</p>
         </div>
       </div>
     </footer>
