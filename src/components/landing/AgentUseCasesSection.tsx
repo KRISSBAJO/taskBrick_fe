@@ -614,12 +614,14 @@ function ThreeRubiksCube() {
       twistActiveRef.current = true;
     };
 
-    const clock = new THREE.Clock();
+    const timer = new THREE.Timer();
+    timer.connect(document);
     let rafId: number;
     const animate = () => {
       rafId = requestAnimationFrame(animate);
-      const delta = clock.getDelta();
-      const elapsed = clock.getElapsedTime();
+      timer.update();
+      const delta = timer.getDelta();
+      const elapsed = timer.getElapsed();
 
       // Continuous smooth 360° orbit on Y, gentle float on X — never pauses
       cubeGroup.rotation.y = elapsed * 0.55;
@@ -660,6 +662,7 @@ function ThreeRubiksCube() {
 
     return () => {
       cancelAnimationFrame(rafId);
+      timer.dispose();
       renderer.dispose();
       geo.dispose(); baseMats.forEach(m => m.dispose());
       container.innerHTML = "";
@@ -785,10 +788,12 @@ function ThreeInsights() {
     ptL.position.set(0, 0, 2); scene.add(ptL);
 
     let rafId: number;
-    const clock = new THREE.Clock();
+    const timer = new THREE.Timer();
+    timer.connect(document);
     const animate = () => {
       rafId = requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
+      timer.update();
+      const t = timer.getElapsed();
       sphere.rotation.y = t * 0.28; sphere.rotation.x = t * 0.1;
       ring.rotation.z = t * 0.42;
       const angle = t * 0.42;
@@ -799,6 +804,7 @@ function ThreeInsights() {
     animate();
     return () => {
       cancelAnimationFrame(rafId);
+      timer.dispose();
       renderer.dispose();
       disposeAll([sGeo, sMat, cGeo, cMat, rGeo, rMat, dGeo, dMat]);
       container.innerHTML = "";
@@ -887,13 +893,15 @@ function ThreeMeetings() {
 
     const CONV_PERIOD = 5.2;
     let burstFired = false;
-    const clock = new THREE.Clock();
+    const timer = new THREE.Timer();
+    timer.connect(document);
     let rafId: number;
 
     const animate = () => {
       rafId = requestAnimationFrame(animate);
-      const delta = clock.getDelta();
-      const t = clock.getElapsedTime();
+      timer.update();
+      const delta = timer.getDelta();
+      const t = timer.getElapsed();
       const cycleT = t % CONV_PERIOD;
       const convRaw = Math.max(0, (cycleT - (CONV_PERIOD - 1.4)) / 1.0);
       const convEase = Math.sin(Math.min(convRaw, 1) * Math.PI);
@@ -970,6 +978,7 @@ function ThreeMeetings() {
     animate();
     return () => {
       cancelAnimationFrame(rafId);
+      timer.dispose();
       renderer.dispose();
       disposeAll([...orbGeos, ...orbMats, hubGeo, hubMat, ringGeo, ringMat, scanGeo, scanMat, aGeo, aMat]);
       container.innerHTML = "";
@@ -1041,11 +1050,13 @@ function ThreeProcess() {
     const pMat = new THREE.PointsMaterial({ color: "#f97316", size: 0.085, transparent: true, opacity: 0.92 });
     scene.add(new THREE.Points(pGeo, pMat));
 
-    const clock = new THREE.Clock();
+    const timer = new THREE.Timer();
+    timer.connect(document);
     let rafId: number;
     const animate = () => {
       rafId = requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
+      timer.update();
+      const t = timer.getElapsed();
 
       for (let ch = 0; ch < CHAN; ch++) {
         const pts = lineAttrs[ch].array as Float32Array;
@@ -1103,6 +1114,7 @@ function ThreeProcess() {
     animate();
     return () => {
       cancelAnimationFrame(rafId);
+      timer.dispose();
       renderer.dispose();
       disposeAll([...lineGeos, ...lineMats, glowGeo, glowMat, dGeo, dMat, pGeo, pMat]);
       container.innerHTML = "";
@@ -1188,11 +1200,13 @@ function CinematicOrb() {
     scene.add(colorSpot);
 
     let rafId: number;
-    const clock = new THREE.Clock();
+    const timer = new THREE.Timer();
+    timer.connect(document);
 
     const animate = () => {
       rafId = requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
+      timer.update();
+      const t = timer.getElapsed();
       orbMesh.rotation.y = t * 0.35;
       orbMesh.rotation.x = Math.sin(t * 0.1) * 0.15;
       colorSpot.color.lerp(new THREE.Color().setHSL((t * 0.08) % 1, 0.9, 0.55), 0.05);
@@ -1202,6 +1216,7 @@ function CinematicOrb() {
 
     return () => {
       cancelAnimationFrame(rafId);
+      timer.dispose();
       renderer.dispose();
       geometry.dispose();
       material.dispose();

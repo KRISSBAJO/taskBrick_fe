@@ -5,11 +5,10 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
-const trustedLogos = [
-  { src: "/figma/flutterwave.svg", alt: "Flutterwave", width: 120, height: 24 },
-  { src: "/figma/piggyvest.svg", alt: "Piggyvest", width: 110, height: 22 },
-  { src: "/figma/google-pay.svg", alt: "Google Pay", width: 65, height: 26 },
-  { src: "/figma/relume.svg", alt: "Relume", width: 90, height: 36 },
+const heroStats = [
+  { value: "7+", label: "delivery surfaces" },
+  { value: "AI", label: "risk and action review" },
+  { value: "RBAC", label: "tenant controls" },
 ] as const;
 
 export function AgentHeroSection() {
@@ -18,8 +17,6 @@ export function AgentHeroSection() {
       id="home"
       className="relative isolate overflow-hidden border-b border-black/[0.06] bg-[#fbfaf6] px-5 pb-12 pt-8 text-[#111111] sm:px-8 lg:px-16 lg:pb-14 lg:pt-10"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-40 bg-[radial-gradient(circle_at_50%_0%,rgba(255,212,0,0.16),transparent_58%)]" />
-
       <div className="mx-auto max-w-[1180px]">
 
         {/* Badge */}
@@ -96,20 +93,15 @@ export function AgentHeroSection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.65 }}
-              className="mt-9 flex flex-wrap items-center gap-6"
+              className="mt-8 grid max-w-[560px] grid-cols-3 divide-x divide-black/[0.08] rounded-2xl border border-black/[0.08] bg-white/72 shadow-sm backdrop-blur"
             >
-              <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#9a9484]">
-                Trusted by
-              </span>
-              {trustedLogos.map((logo) => (
-                <Image
-                  key={logo.alt}
-                  src={logo.src}
-                  alt={logo.alt}
-                  width={logo.width}
-                  height={logo.height}
-                  className="h-5 w-auto opacity-40 grayscale transition hover:opacity-65"
-                />
+              {heroStats.map((stat) => (
+                <div key={stat.label} className="min-w-0 px-4 py-3">
+                  <p className="text-lg font-extrabold leading-none text-[#111111]">{stat.value}</p>
+                  <p className="mt-1 truncate text-[10px] font-extrabold uppercase tracking-[0.11em] text-[#8a8578]">
+                    {stat.label}
+                  </p>
+                </div>
               ))}
             </motion.div>
           </div>
