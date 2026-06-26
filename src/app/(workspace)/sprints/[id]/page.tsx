@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState, type Dispatch, type FormEvent, type ReactNode, type SetStateAction } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   CalendarDays,
@@ -24,15 +24,18 @@ import {
   apiRequest,
   completeSprint,
   createSprintRetrospective,
+  deleteSprint,
   deleteSprintRetrospective,
   listTasks,
   listSprintRetrospectives,
   startSprint,
+  updateSprint,
   updateSprintRetrospective,
   type Sprint,
   type SprintRetrospective,
   type Task,
 } from "@/lib/api";
+import { useConfirm } from "@/components/confirm-provider";
 import { cn } from "@/lib/cn";
 import {
   formatShortDate,
@@ -67,11 +70,20 @@ type RetrospectiveDraft = {
   actionItems: string;
 };
 
+type SprintDraft = {
+  endDate: string;
+  goal: string;
+  name: string;
+  startDate: string;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function SprintDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { auth } = useWorkspaceAuth();
+  const { confirm } = useConfirm();
+  const router = useRouter();
 
   const [sprint,         setSprint]         = useState<Sprint | null>(null);
   const [tasks,          setTasks]          = useState<Task[]>([]);
@@ -83,6 +95,8 @@ export default function SprintDetailPage() {
   const [error,          setError]          = useState("");
   const [retroMessage,   setRetroMessage]   = useState<{ text: string; ok: boolean } | null>(null);
   const [retroDraft,     setRetroDraft]     = useState<RetrospectiveDraft>({ wentWell: "", improve: "", actionItems: "" });
+  const [showSprintEdit, setShowSprintEdit] = useState(false);
+  const [sprintDraft,    setSprintDraft]    = useState<SprintDraft>({ endDate: "", goal: "", name: "", startDate: "" });
 
   const load = useCallback(async () => {
     setLoading(true); setError("");
@@ -93,6 +107,7 @@ export default function SprintDetailPage() {
         listSprintRetrospectives(auth.accessToken, id),
       ]);
       setSprint(sprintData);
+      setSprintDraft(sprintToDraft(sprintData));
       setTasks(taskPage.data);
       setRetrospectives(retroData);
     } catch (err) {
@@ -104,9 +119,10 @@ export default function SprintDetailPage() {
 
   // ── Derived ──────────────────────────────────────────────────────────────────
 
-  const isActive    = Boolean(sprint?.startDate && !sprint.completedAt);
-  const isCompleted = Boolean(sprint?.completedAt);
-  const isPlanned   = Boolean(!sprint?.startDate && !sprint?.completedAt);
+  const sprintLifecycle = sprintState(sprint);
+  const isActive    = sprintLifecycle === "active";
+  const isCompleted = sprintLifecycle === "completed";
+  const isPlanned   = sprintLifecycle === "planned";
 
   const done      = tasks.filter((t) => t.status === "DONE").length;
   const inProg    = tasks.filter((t) => t.status === "IN_PROGRESS" || t.status === "REVIEW").length;
@@ -126,18 +142,73 @@ export default function SprintDetailPage() {
 
   async function onStart() {
     if (!sprint) return;
-    setSaving(true);
+    setSaving(true); setError("");
     try { await startSprint(auth.accessToken, sprint.id); await load(); }
-    catch { /* ignore */ }
+    catch (err) { setError(err instanceof Error ? err.message : "Unable to start sprint."); }
     finally { setSaving(false); }
   }
 
   async function onComplete() {
     if (!sprint) return;
-    setSaving(true);
+    setSaving(true); setError("");
     try { await completeSprint(auth.accessToken, sprint.id, { moveIncompleteToBacklog: true }); await load(); }
-    catch { /* ignore */ }
+    catch (err) { setError(err instanceof Error ? err.message : "Unable to complete sprint."); }
     finally { setSaving(false); }
+  }
+
+  async function onSaveSprint(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!sprint) return;
+
+    const scheduleError = validateSprintDates(sprintDraft.startDate, sprintDraft.endDate);
+    if (scheduleError) {
+      setError(scheduleError);
+      return;
+    }
+
+    setSaving(true); setError("");
+    try {
+      const updated = await updateSprint(auth.accessToken, sprint.id, {
+        endDate: sprintDraft.endDate ? toNoonIso(sprintDraft.endDate) : null,
+        goal: sprintDraft.goal.trim() || undefined,
+        name: sprintDraft.name.trim(),
+        startDate: sprintDraft.startDate ? toNoonIso(sprintDraft.startDate) : null,
+      });
+      setSprint(updated);
+      setSprintDraft(sprintToDraft(updated));
+      setShowSprintEdit(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to update sprint.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function onDeleteSprint() {
+    if (!sprint) return;
+
+    if (!canDeleteSprint(sprint, tasks.length, retrospectives.length)) {
+      setError("Only planned sprints with no tasks, meetings, or retrospective notes can be deleted.");
+      return;
+    }
+
+    const ok = await confirm({
+      title: "Delete sprint?",
+      description: `Delete "${sprint.name}"? This only works for planned sprints with no owned records.`,
+      confirmLabel: "Delete sprint",
+      tone: "danger",
+    });
+    if (!ok) return;
+
+    setSaving(true); setError("");
+    try {
+      await deleteSprint(auth.accessToken, sprint.id);
+      router.push("/sprints");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to delete sprint.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   function resetRetroDraft() {
@@ -284,6 +355,16 @@ export default function SprintDetailPage() {
                 >
                   <RefreshCw className={cn("size-4", loading && "animate-spin")} />
                 </button>
+                {!isCompleted && (
+                  <button
+                    type="button"
+                    onClick={() => { setSprintDraft(sprintToDraft(sprint)); setShowSprintEdit(true); }}
+                    disabled={saving}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-white/[0.1] bg-white/[0.06] px-3.5 text-[13px] font-black text-white/65 transition hover:bg-white/[0.12] hover:text-white disabled:opacity-50"
+                  >
+                    <Pencil className="size-4" /> Edit
+                  </button>
+                )}
                 {isPlanned && (
                   <button
                     type="button"
@@ -302,6 +383,16 @@ export default function SprintDetailPage() {
                     className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-emerald-700/60 bg-emerald-950/60 px-4 text-[13px] font-black text-emerald-400 transition hover:bg-emerald-900/50 disabled:opacity-50"
                   >
                     <CheckCircle2 className="size-4" /> Complete sprint
+                  </button>
+                )}
+                {canDeleteSprint(sprint, tasks.length, retrospectives.length) && (
+                  <button
+                    type="button"
+                    onClick={() => void onDeleteSprint()}
+                    disabled={saving}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-red-900/50 bg-red-950/50 px-3.5 text-[13px] font-black text-red-300 transition hover:bg-red-900/50 disabled:opacity-50"
+                  >
+                    <Trash2 className="size-4" /> Delete
                   </button>
                 )}
               </div>
@@ -346,6 +437,12 @@ export default function SprintDetailPage() {
       ) : (
         <div className="rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm font-bold text-red-600">{error || "Sprint not found."}</div>
       )}
+
+      {error && sprint ? (
+        <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-black text-red-700">
+          {error}
+        </div>
+      ) : null}
 
       {/* ── Body grid: task table + sidebar ──────────────────────────────────── */}
       {!loading && sprint && (
@@ -455,11 +552,145 @@ export default function SprintDetailPage() {
           onSubmit={onSaveRetrospective}
         />
       )}
+
+      {showSprintEdit && sprint ? (
+        <SprintEditModal
+          draft={sprintDraft}
+          saving={saving}
+          onChange={setSprintDraft}
+          onClose={() => setShowSprintEdit(false)}
+          onSubmit={onSaveSprint}
+        />
+      ) : null}
     </div>
   );
 }
 
 // ── Task row ─────────────────────────────────────────────────────────────────
+
+function SprintEditModal({
+  draft,
+  onChange,
+  onClose,
+  onSubmit,
+  saving,
+}: {
+  draft: SprintDraft;
+  onChange: Dispatch<SetStateAction<SprintDraft>>;
+  onClose: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  saving: boolean;
+}) {
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+      onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}
+    >
+      <form onSubmit={onSubmit} className="w-full max-w-lg overflow-hidden rounded-3xl bg-panel shadow-[0_32px_80px_rgba(0,0,0,0.42)]">
+        <div className="relative overflow-hidden bg-[#111111] px-7 py-6">
+          <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-primary via-primary/60 to-transparent" />
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex size-10 items-center justify-center rounded-xl bg-primary text-[#111111]">
+                <Pencil className="size-4" />
+              </span>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Sprint management</p>
+                <h2 className="mt-1 text-lg font-black text-white">Edit sprint</h2>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex size-8 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-white/50 transition hover:bg-white/[0.12] hover:text-white"
+              aria-label="Close"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid gap-4 px-7 py-6">
+          <SprintModalField label="Sprint name">
+            <input
+              value={draft.name}
+              onChange={(event) => onChange((current) => ({ ...current, name: event.target.value }))}
+              className={sprintInputClass}
+              maxLength={160}
+              required
+            />
+          </SprintModalField>
+          <SprintModalField label="Goal">
+            <input
+              value={draft.goal}
+              onChange={(event) => onChange((current) => ({ ...current, goal: event.target.value }))}
+              className={sprintInputClass}
+              maxLength={1000}
+              placeholder="What will this sprint deliver?"
+            />
+          </SprintModalField>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SprintModalField label="Start date">
+              <input
+                type="date"
+                value={draft.startDate}
+                onChange={(event) => onChange((current) => ({ ...current, startDate: event.target.value }))}
+                className={sprintInputClass}
+              />
+            </SprintModalField>
+            <SprintModalField label="End date">
+              <input
+                type="date"
+                value={draft.endDate}
+                onChange={(event) => onChange((current) => ({ ...current, endDate: event.target.value }))}
+                className={sprintInputClass}
+              />
+            </SprintModalField>
+          </div>
+          <p className="rounded-2xl bg-panel-muted px-4 py-3 text-xs font-semibold leading-5 text-ink-soft">
+            Clearing both dates keeps the sprint planned. Once a sprint is active, the backend protects the start date so history and reporting stay reliable.
+          </p>
+        </div>
+
+        <div className="flex justify-end gap-2 border-t border-line px-7 py-5">
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-10 rounded-xl border border-line px-5 text-sm font-black text-ink-soft transition hover:bg-panel-muted hover:text-foreground"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={saving || !draft.name.trim()}
+            className="tb-yellow-button h-10 rounded-xl px-6 text-sm font-black disabled:opacity-50"
+          >
+            {saving ? "Saving..." : "Save sprint"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function SprintModalField({ children, label }: { children: ReactNode; label: string }) {
+  return (
+    <label className="grid gap-1.5">
+      <span className="text-[11px] font-black uppercase tracking-[0.14em] text-ink-soft">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+const sprintInputClass = "h-11 w-full rounded-2xl border border-line bg-background px-4 text-sm font-bold text-foreground outline-none transition placeholder:text-ink-soft/45 focus:border-primary focus:ring-4 focus:ring-primary/15";
 
 function SprintTaskRow({ isLast, task }: { isLast: boolean; task: Task }) {
   const assignee  = task.assignees?.[0]?.user;
@@ -895,6 +1126,47 @@ function StatChip({ color, icon, label }: { color: string; icon: ReactNode; labe
       {icon} {label}
     </span>
   );
+}
+
+function sprintToDraft(sprint: Sprint): SprintDraft {
+  return {
+    endDate: toDateInputValue(sprint.endDate),
+    goal: sprint.goal ?? "",
+    name: sprint.name,
+    startDate: toDateInputValue(sprint.startDate),
+  };
+}
+
+function sprintState(sprint: Sprint | null): "active" | "completed" | "planned" {
+  if (sprint?.completedAt) return "completed";
+  if (!sprint?.startDate) return "planned";
+  return new Date(sprint.startDate).getTime() > Date.now() ? "planned" : "active";
+}
+
+function canDeleteSprint(sprint: Sprint, taskCount: number, retrospectiveCount: number) {
+  const counts = sprint._count as (Sprint["_count"] & { meetings?: number }) | undefined;
+  return (
+    sprintState(sprint) === "planned" &&
+    taskCount === 0 &&
+    retrospectiveCount === 0 &&
+    (counts?.meetings ?? 0) === 0
+  );
+}
+
+function validateSprintDates(startDate: string, endDate: string) {
+  if (!startDate && endDate) return "Choose a start date before setting an end date.";
+  if (startDate && endDate && new Date(endDate).getTime() < new Date(startDate).getTime()) {
+    return "Sprint end date must be after the start date.";
+  }
+  return "";
+}
+
+function toDateInputValue(value?: string | null) {
+  return value ? new Date(value).toISOString().slice(0, 10) : "";
+}
+
+function toNoonIso(value: string) {
+  return new Date(`${value}T12:00:00`).toISOString();
 }
 
 function daysRemaining(endDate?: string | null): number | null {

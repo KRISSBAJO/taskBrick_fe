@@ -47,6 +47,8 @@ export type BoardAiRiskScanResponse = NonNullable<OpenApiResponse<"/api/v1/ai/bo
 export type BoardAiActionPlanResponse = NonNullable<OpenApiResponse<"/api/v1/ai/board-actions", "post">>;
 export type BoardAiApplyActionsPayload = OpenApiJsonBody<"/api/v1/ai/board-actions/apply", "post">;
 export type BoardAiApplyResponse = NonNullable<OpenApiResponse<"/api/v1/ai/board-actions/apply", "post">>;
+export type BoardAiHistoryResponse = NonNullable<OpenApiResponse<"/api/v1/ai/board-history", "get">>;
+export type BoardAiHistoryEntry = BoardAiHistoryResponse["data"][number];
 
 export function getAiSettings(token: string) {
   return openApiRequest("/api/v1/ai/settings", "get", {
@@ -154,5 +156,28 @@ export function applyBoardActions(token: string, payload: BoardAiApplyActionsPay
     token,
     pathParams: {},
     body: payload,
+  });
+}
+
+export function listBoardAiHistory(
+  token: string,
+  query: {
+    boardId?: string;
+    limit?: number;
+    page?: number;
+    projectId?: string;
+    search?: string;
+    type?: "board_summary" | "board_risk_scan" | "board_action_plan" | "board_actions_apply";
+  } = {},
+) {
+  return openApiRequest("/api/v1/ai/board-history", "get", {
+    token,
+    cache: "no-store",
+    pathParams: {},
+    query: {
+      ...query,
+      page: query.page ?? 1,
+      limit: boundedLimit(query.limit, 50),
+    } as OpenApiQuery<"/api/v1/ai/board-history", "get">,
   });
 }

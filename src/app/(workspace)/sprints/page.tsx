@@ -13,6 +13,7 @@ import {
   Clock,
   Flag,
   KanbanSquare,
+  Pencil,
   Play,
   Plus,
   RefreshCw,
@@ -30,6 +31,7 @@ import {
   listProjects,
   listSprints,
   startSprint,
+  updateSprint,
   type Project,
   type Sprint,
 } from "@/lib/api";
@@ -49,6 +51,7 @@ export default function SprintsPage() {
   const [loading,           setLoading]           = useState(true);
   const [saving,            setSaving]            = useState(false);
   const [message,           setMessage]           = useState<{ text: string; ok: boolean } | null>(null);
+  const [editingSprint,     setEditingSprint]     = useState<Sprint | null>(null);
   const [showComposer,      setShowComposer]      = useState(false);
   const [showCompleted,     setShowCompleted]     = useState(false);
 
@@ -74,11 +77,11 @@ export default function SprintsPage() {
     return () => window.clearTimeout(t);
   }, [loadSprints]);
 
-  const grouped = useMemo(() => ({
-    planned:   sprints.filter((s) => !s.startDate && !s.completedAt),
-    active:    sprints.filter((s) => s.startDate && !s.completedAt),
-    completed: sprints.filter((s) => Boolean(s.completedAt)),
-  } satisfies Record<SprintLane, Sprint[]>), [sprints]);
+  const grouped = useMemo(() => {
+    const lanes: Record<SprintLane, Sprint[]> = { active: [], completed: [], planned: [] };
+    for (const sprint of sprints) lanes[sprintLane(sprint)].push(sprint);
+    return lanes;
+  }, [sprints]);
 
   const metrics = useMemo(() => ({
     planned:   grouped.planned.length,
@@ -91,25 +94,42 @@ export default function SprintsPage() {
     setSelectedProjectId(id); await loadSprints(id);
   }
 
-  async function onCreateSprint(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault(); if (!selectedProjectId) return;
+  async function onSaveSprint(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     const form = e.currentTarget, fd = new FormData(form);
     const startDate = String(fd.get("startDate") || "");
     const endDate   = String(fd.get("endDate")   || "");
+    const scheduleError = validateSprintDates(startDate, endDate);
+    if (scheduleError) {
+      setMessage({ text: scheduleError, ok: false });
+      return;
+    }
+
     setSaving(true); setMessage(null);
     try {
-      await createSprint(auth.accessToken, {
-        projectId: selectedProjectId,
-        name:      String(fd.get("name") || "").trim(),
-        goal:      String(fd.get("goal") || "").trim() || undefined,
-        startDate: startDate ? toNoonIso(startDate) : undefined,
-        endDate:   endDate   ? toNoonIso(endDate)   : undefined,
-      });
-      form.reset(); setShowComposer(false);
-      setMessage({ text: "Sprint created.", ok: true });
+      if (editingSprint) {
+        await updateSprint(auth.accessToken, editingSprint.id, {
+          name: String(fd.get("name") || "").trim(),
+          goal: String(fd.get("goal") || "").trim() || undefined,
+          startDate: startDate ? toNoonIso(startDate) : null,
+          endDate: endDate ? toNoonIso(endDate) : null,
+        });
+        setMessage({ text: "Sprint updated.", ok: true });
+      } else {
+        if (!selectedProjectId) return;
+        await createSprint(auth.accessToken, {
+          projectId: selectedProjectId,
+          name: String(fd.get("name") || "").trim(),
+          goal: String(fd.get("goal") || "").trim() || undefined,
+          startDate: startDate ? toNoonIso(startDate) : undefined,
+          endDate: endDate ? toNoonIso(endDate) : undefined,
+        });
+        setMessage({ text: "Sprint created.", ok: true });
+      }
+      form.reset(); setShowComposer(false); setEditingSprint(null);
       await loadSprints(selectedProjectId);
     } catch (err) {
-      setMessage({ text: err instanceof Error ? err.message : "Unable to create sprint.", ok: false });
+      setMessage({ text: err instanceof Error ? err.message : "Unable to save sprint.", ok: false });
     } finally { setSaving(false); }
   }
 
@@ -136,9 +156,17 @@ export default function SprintsPage() {
   }
 
   async function onDeleteSprint(sprint: Sprint) {
+    if (!canDeleteSprint(sprint)) {
+      setMessage({
+        text: "Only planned sprints with no tasks, meetings, or retrospective notes can be deleted.",
+        ok: false
+      });
+      return;
+    }
+
     const confirmed = await confirm({
       title: "Delete sprint?",
-      description: `Delete "${sprint.name}"? Only allowed when the sprint has no assigned tasks.`,
+      description: `Delete "${sprint.name}"? This is only allowed for planned sprints with no tasks, meetings, or retrospective notes.`,
       confirmLabel: "Delete sprint",
       tone: "danger",
     });
@@ -260,7 +288,13 @@ export default function SprintsPage() {
             ) : (
               <div className="flex flex-col gap-3">
                 {grouped.active.map((sprint) => (
-                  <ActiveSprintCard key={sprint.id} sprint={sprint} saving={saving} onComplete={onCompleteSprint} />
+                  <ActiveSprintCard
+                    key={sprint.id}
+                    sprint={sprint}
+                    saving={saving}
+                    onComplete={onCompleteSprint}
+                    onEdit={setEditingSprint}
+                  />
                 ))}
               </div>
             )}
@@ -280,6 +314,7 @@ export default function SprintsPage() {
                     saving={saving}
                     isLast={idx === grouped.planned.length - 1}
                     onDelete={onDeleteSprint}
+                    onEdit={setEditingSprint}
                     onStart={onStartSprint}
                   />
                 ))}
@@ -328,11 +363,12 @@ export default function SprintsPage() {
       )}
 
       {/* ── New sprint modal ─────────────────────────────────────────────────── */}
-      {showComposer && (
-        <NewSprintModal
+      {(showComposer || editingSprint) && (
+        <SprintModal
+          sprint={editingSprint}
           saving={saving}
-          onClose={() => setShowComposer(false)}
-          onSubmit={onCreateSprint}
+          onClose={() => { setShowComposer(false); setEditingSprint(null); }}
+          onSubmit={onSaveSprint}
         />
       )}
     </div>
@@ -341,8 +377,9 @@ export default function SprintsPage() {
 
 /* ─── Active sprint card ─────────────────────────────────────────────────────── */
 
-function ActiveSprintCard({ onComplete, saving, sprint }: {
+function ActiveSprintCard({ onComplete, onEdit, saving, sprint }: {
   onComplete: (id: string) => void;
+  onEdit: (sprint: Sprint) => void;
   saving: boolean;
   sprint: Sprint;
 }) {
@@ -386,6 +423,14 @@ function ActiveSprintCard({ onComplete, saving, sprint }: {
 
           {/* Action buttons */}
           <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onEdit(sprint)}
+              disabled={saving}
+              className="inline-flex h-8 items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.06] px-3 text-[12px] font-semibold text-white/60 transition hover:bg-white/[0.12] hover:text-white disabled:opacity-50"
+            >
+              <Pencil className="size-3.5" /> Edit
+            </button>
             <button
               type="button"
               onClick={() => onComplete(sprint.id)}
@@ -456,14 +501,15 @@ function ActiveSprintCard({ onComplete, saving, sprint }: {
 
 /* ─── Planned sprint row ─────────────────────────────────────────────────────── */
 
-function PlannedSprintRow({ isLast, onDelete, onStart, saving, sprint }: {
+function PlannedSprintRow({ isLast, onDelete, onEdit, onStart, saving, sprint }: {
   isLast: boolean;
   onDelete: (sprint: Sprint) => void;
+  onEdit: (sprint: Sprint) => void;
   onStart: (id: string) => void;
   saving: boolean;
   sprint: Sprint;
 }) {
-  const isEmpty   = (sprint._count?.tasks ?? 0) === 0;
+  const isEmpty   = canDeleteSprint(sprint);
   const taskCount = sprint._count?.tasks ?? 0;
 
   return (
@@ -508,6 +554,15 @@ function PlannedSprintRow({ isLast, onDelete, onStart, saving, sprint }: {
         >
           View <ArrowRight className="size-3" />
         </Link>
+        <button
+          type="button"
+          onClick={() => onEdit(sprint)}
+          disabled={saving}
+          className="flex size-7 items-center justify-center rounded-lg text-ink-soft/45 transition hover:bg-panel-muted hover:text-foreground disabled:opacity-40"
+          aria-label="Edit sprint"
+        >
+          <Pencil className="size-3.5" />
+        </button>
         {isEmpty && (
           <button
             type="button"
@@ -556,10 +611,11 @@ function CompletedSprintRow({ sprint }: { sprint: Sprint }) {
 
 /* ─── New sprint modal ───────────────────────────────────────────────────────── */
 
-function NewSprintModal({ onClose, onSubmit, saving }: {
+function SprintModal({ onClose, onSubmit, saving, sprint }: {
   onClose: () => void;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
   saving: boolean;
+  sprint: Sprint | null;
 }) {
   useEffect(() => {
     function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
@@ -594,8 +650,8 @@ function NewSprintModal({ onClose, onSubmit, saving }: {
                   <Target className="size-4 text-[#111]" />
                 </span>
                 <div>
-                  <h2 className="text-[16px] font-black leading-none text-white">New sprint</h2>
-                  <p className="mt-0.5 text-[11px] text-white/35">Define the window and goal</p>
+                  <h2 className="text-[16px] font-black leading-none text-white">{sprint ? "Edit sprint" : "New sprint"}</h2>
+                  <p className="mt-0.5 text-[11px] text-white/35">Define the plan, goal, and schedule</p>
                 </div>
               </div>
             </div>
@@ -619,6 +675,7 @@ function NewSprintModal({ onClose, onSubmit, saving }: {
                 name="name"
                 required
                 maxLength={160}
+                defaultValue={sprint?.name ?? ""}
                 placeholder="e.g. Sprint 2026.07"
                 className={modalFieldCls}
                 autoFocus
@@ -628,6 +685,7 @@ function NewSprintModal({ onClose, onSubmit, saving }: {
             <ModalField label="Goal">
               <input
                 name="goal"
+                defaultValue={sprint?.goal ?? ""}
                 placeholder="What will this sprint deliver?"
                 className={modalFieldCls}
               />
@@ -635,12 +693,18 @@ function NewSprintModal({ onClose, onSubmit, saving }: {
 
             <div className="grid grid-cols-2 gap-4">
               <ModalField label="Start date">
-                <input name="startDate" type="date" className={modalFieldCls} />
+                <input name="startDate" type="date" defaultValue={toDateInputValue(sprint?.startDate)} className={modalFieldCls} />
               </ModalField>
               <ModalField label="End date">
-                <input name="endDate" type="date" className={modalFieldCls} />
+                <input name="endDate" type="date" defaultValue={toDateInputValue(sprint?.endDate)} className={modalFieldCls} />
               </ModalField>
             </div>
+
+            {sprint ? (
+              <p className="rounded-xl bg-panel-muted px-3 py-2 text-[12px] font-semibold leading-5 text-ink-soft">
+                Clear both dates to keep this as a planned sprint. Active sprint start dates are protected by the backend.
+              </p>
+            ) : null}
 
           </div>
 
@@ -658,7 +722,7 @@ function NewSprintModal({ onClose, onSubmit, saving }: {
               disabled={saving}
               className="tb-yellow-button h-10 rounded-xl px-6 text-[13px] font-black disabled:opacity-55"
             >
-              {saving ? "Creating…" : "Create sprint"}
+              {saving ? "Saving..." : sprint ? "Save sprint" : "Create sprint"}
             </button>
           </div>
         </form>
@@ -735,6 +799,34 @@ const modalFieldCls =
   "h-10 w-full rounded-xl border border-line bg-background px-3.5 text-[13px] font-medium text-foreground placeholder:text-ink-soft/60 transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10";
 
 /* ─── Pure helpers ───────────────────────────────────────────────────────────── */
+
+function sprintLane(sprint: Sprint): SprintLane {
+  if (sprint.completedAt) return "completed";
+  if (!sprint.startDate) return "planned";
+  return new Date(sprint.startDate).getTime() > Date.now() ? "planned" : "active";
+}
+
+function canDeleteSprint(sprint: Sprint) {
+  const counts = sprint._count as (Sprint["_count"] & { meetings?: number }) | undefined;
+  return (
+    sprintLane(sprint) === "planned" &&
+    (counts?.tasks ?? 0) === 0 &&
+    (counts?.meetings ?? 0) === 0 &&
+    (counts?.retrospectives ?? 0) === 0
+  );
+}
+
+function validateSprintDates(startDate: string, endDate: string) {
+  if (!startDate && endDate) return "Choose a start date before setting an end date.";
+  if (startDate && endDate && new Date(endDate).getTime() < new Date(startDate).getTime()) {
+    return "Sprint end date must be after the start date.";
+  }
+  return "";
+}
+
+function toDateInputValue(value?: string | null) {
+  return value ? new Date(value).toISOString().slice(0, 10) : "";
+}
 
 function toNoonIso(v: string) { return new Date(`${v}T12:00:00`).toISOString(); }
 
