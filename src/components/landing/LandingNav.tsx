@@ -40,10 +40,10 @@ export function LandingNav() {
     : "";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-[#020202]/92 text-white backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-black/[0.06] bg-[#f7f6ef]/92 text-[#111111] backdrop-blur-xl">
       <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-16">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="overflow-hidden rounded-xl shadow-[0_4px_20px_rgba(255,212,0,0.22)]">
+          <span className="overflow-hidden rounded-xl shadow-[0_4px_20px_rgba(17,17,17,0.08)]">
             <Image
               src="/product/taskbricks_logo2.png"
               alt="TaskBricks"
@@ -53,7 +53,7 @@ export function LandingNav() {
               priority
             />
           </span>
-          <span className="text-[18px] font-black tracking-tight text-white">
+          <span className="text-[18px] font-extrabold tracking-tight text-[#111111]">
             Task<span className="text-[#ffd400]">Bricks</span>
           </span>
         </Link>
@@ -63,7 +63,7 @@ export function LandingNav() {
             <a
               key={label}
               href={href}
-              className="rounded-md px-3 py-2 text-sm font-semibold text-white/66 transition hover:bg-white/[0.07] hover:text-white"
+              className="rounded-md px-3 py-2 text-sm font-semibold text-[#68645b] transition hover:bg-black/[0.04] hover:text-[#111111]"
             >
               {label}
             </a>
@@ -75,7 +75,7 @@ export function LandingNav() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setOpen((v) => !v)}
-                className="flex items-center gap-2.5 rounded-xl border border-white/[0.1] bg-white/[0.045] px-3 py-2 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(0,0,0,0.22)] backdrop-blur-xl transition hover:border-white/[0.18] hover:bg-white/[0.08]"
+                className="flex items-center gap-2.5 rounded-xl border border-black/[0.08] bg-white px-3 py-2 text-sm font-semibold text-[#111111] shadow-[0_14px_34px_rgba(17,17,17,0.08)] backdrop-blur-xl transition hover:border-black/[0.14]"
                 aria-expanded={open}
                 aria-haspopup="true"
               >
@@ -86,7 +86,7 @@ export function LandingNav() {
                   {user.firstName} {user.lastName}
                 </span>
                 <ChevronDown
-                  className={`size-3.5 shrink-0 text-white/55 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                  className={`size-3.5 shrink-0 text-[#68645b] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
                   aria-hidden="true"
                 />
               </button>
@@ -127,7 +127,7 @@ export function LandingNav() {
             <>
               <Link
                 href="/login"
-                className="hidden h-10 w-[120px] items-center justify-center rounded-md border border-white/[0.12] bg-white/[0.04] text-sm font-semibold text-white shadow-sm backdrop-blur-xl transition hover:border-white/[0.2] hover:bg-white/[0.08] sm:inline-flex"
+                className="hidden h-10 w-[120px] items-center justify-center rounded-md border border-black/[0.1] bg-white text-sm font-semibold text-[#111111] shadow-sm backdrop-blur-xl transition hover:border-black/[0.18] hover:bg-[#fbfaf6] sm:inline-flex"
               >
                 Login
               </Link>

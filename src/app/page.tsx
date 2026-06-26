@@ -14,7 +14,7 @@ import {
 
 export default function Home() {
   return (
-    <main className="min-h-dvh overflow-hidden bg-[#fffdf3] text-[#111111]">
+    <main className="min-h-dvh overflow-hidden bg-[#f7f6ef] text-[#111111]">
       <LandingNav />
       <AgentHeroSection />
       <TrustedCompanies />
