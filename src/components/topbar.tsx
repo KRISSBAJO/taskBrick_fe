@@ -14,6 +14,7 @@ import {
   FileText,
   Hash,
   Loader2,
+  Menu,
   MessageSquare,
   Plus,
   Search,
@@ -65,7 +66,7 @@ const searchIcons: Record<GlobalSearchResultType, LucideIcon> = {
   WORKSPACE: Building2,
 };
 
-export function Topbar() {
+export function Topbar({ onOpenSidebar }: { onOpenSidebar?: () => void }) {
   const { auth, user } = useWorkspaceAuth();
   const pathname = usePathname();
   const { notificationVersion, status } = useRealtime();
@@ -212,8 +213,19 @@ export function Topbar() {
   }
 
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-background/85 px-4 backdrop-blur-xl md:px-5">
+    <header className="sticky top-0 z-20 border-b border-line bg-background/85 px-3 backdrop-blur-xl sm:px-4 md:px-5">
       <div className="flex h-14 items-center gap-3">
+        {onOpenSidebar ? (
+          <button
+            type="button"
+            onClick={onOpenSidebar}
+            aria-label="Open workspace navigation"
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-line bg-panel text-foreground shadow-sm transition hover:border-primary/45 hover:bg-panel-muted lg:hidden"
+          >
+            <Menu className="size-4" aria-hidden="true" />
+          </button>
+        ) : null}
+
         <div className="relative hidden flex-1 md:block">
           <Search
             className="pointer-events-none absolute left-3.5 top-1/2 size-3.5 -translate-y-1/2 text-ink-soft"

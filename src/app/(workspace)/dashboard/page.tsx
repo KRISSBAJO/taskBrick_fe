@@ -159,7 +159,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="mx-auto grid max-w-[1480px] gap-5">
+    <div className="mx-auto grid w-full max-w-[1480px] gap-4 sm:gap-5">
       <section className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
@@ -305,7 +305,7 @@ function TrendAnalysisCard({
         </div>
       </div>
 
-      <div className="grid gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_220px]">
+      <div className="grid min-w-0 gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_220px]">
         {loading ? (
           <div className="h-[280px] animate-pulse rounded-2xl bg-panel-muted" />
         ) : (
@@ -355,7 +355,7 @@ function LineTrendChart({ trend }: { trend: TrendPoint[] }) {
     `${line(key)} L ${x(trend.length - 1).toFixed(1)} ${(pad.top + innerHeight).toFixed(1)} L ${pad.left} ${(pad.top + innerHeight).toFixed(1)} Z`;
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="h-[280px] w-full">
+    <svg viewBox={`0 0 ${width} ${height}`} className="h-[220px] w-full sm:h-[280px]">
       <defs>
         <linearGradient id="dashboard-completed-area" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />

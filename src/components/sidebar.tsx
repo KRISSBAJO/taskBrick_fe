@@ -34,6 +34,10 @@ import { cn } from "@/lib/cn";
 import { getAccessProfile, roleLabel } from "@/lib/access-policy";
 
 type NavItem = { label: string; href: string; icon: LucideIcon };
+type SidebarProps = {
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+};
 
 const PRIMARY_NAV: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -72,7 +76,7 @@ function userInitials(first: string, last: string, email: string) {
   return i || email.slice(0, 2).toUpperCase();
 }
 
-export function Sidebar() {
+export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useWorkspaceAuth();
   const [panelOpen, setPanelOpen] = useState(false);
@@ -86,6 +90,16 @@ export function Sidebar() {
     if (item.href === "/settings/billing") return access.canViewBilling;
     return true;
   });
+  const showPanel = panelOpen || mobileOpen;
+
+  function closePanel() {
+    if (mobileOpen) {
+      onMobileClose?.();
+      return;
+    }
+
+    setPanelOpen(false);
+  }
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -102,8 +116,9 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "hidden min-h-dvh shrink-0 border-r border-line bg-[#f4f1e7] transition-[width] duration-200 lg:flex",
-        panelOpen ? "w-[336px]" : "w-[58px]",
+        "fixed inset-y-0 left-0 z-50 flex min-h-dvh shrink-0 border-r border-line bg-[#f4f1e7] shadow-[20px_0_80px_rgba(17,17,17,0.22)] transition-[transform,width] duration-200 lg:sticky lg:top-0 lg:z-30 lg:translate-x-0 lg:shadow-none",
+        mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+        showPanel ? "w-[calc(100vw-24px)] max-w-[336px] lg:w-[336px]" : "w-[58px]",
       )}
     >
       <div className="flex w-[58px] shrink-0 flex-col items-center border-r border-line bg-panel">
@@ -119,32 +134,38 @@ export function Sidebar() {
 
         <nav className="flex w-full flex-1 flex-col items-center gap-1.5 px-1.5 py-4" aria-label="Primary navigation">
           {PRIMARY_NAV.slice(0, 1).map((item) => (
-            <RailLink key={item.href} item={item} active={isActive(item.href)} />
+            <RailLink key={item.href} item={item} active={isActive(item.href)} onNavigate={onMobileClose} />
           ))}
 
-          <WorkHubRail active={isActive("/work-hub")} isActive={isActive} />
+          <WorkHubRail active={isActive("/work-hub")} isActive={isActive} onNavigate={onMobileClose} />
 
           {PRIMARY_NAV.slice(1).map((item) => (
-            <RailLink key={item.href} item={item} active={isActive(item.href)} />
+            <RailLink key={item.href} item={item} active={isActive(item.href)} onNavigate={onMobileClose} />
           ))}
 
           <button
             type="button"
-            onClick={() => setPanelOpen((open) => !open)}
-            aria-label={panelOpen ? "Close tools panel" : "Open tools panel"}
+            onClick={() => {
+              if (mobileOpen) {
+                onMobileClose?.();
+                return;
+              }
+              setPanelOpen((open) => !open);
+            }}
+            aria-label={showPanel ? "Close tools panel" : "Open tools panel"}
             className={cn(
               "group relative mt-2 flex size-11 items-center justify-center rounded-2xl text-ink-soft transition",
-              panelOpen
+              showPanel
                 ? "bg-[#111111] text-primary shadow-[0_16px_34px_rgba(17,17,17,0.18)]"
                 : "hover:bg-panel-muted hover:text-foreground",
             )}
           >
-            {panelOpen ? <X className="size-4" aria-hidden="true" /> : <Ellipsis className="size-5" aria-hidden="true" />}
-            <RailTooltip label={panelOpen ? "Close more tools" : "More tools"} />
+            {showPanel ? <X className="size-4" aria-hidden="true" /> : <Ellipsis className="size-5" aria-hidden="true" />}
+            <RailTooltip label={showPanel ? "Close more tools" : "More tools"} />
           </button>
 
           <div className="mt-auto flex w-full flex-col items-center gap-1.5 border-t border-line pt-4">
-            <RailLink item={SETTINGS_NAV[0]} active={isActive("/settings")} />
+            <RailLink item={SETTINGS_NAV[0]} active={isActive("/settings")} onNavigate={onMobileClose} />
             <button
               type="button"
               onClick={logout}
@@ -158,7 +179,7 @@ export function Sidebar() {
         </nav>
       </div>
 
-      {panelOpen ? (
+      {showPanel ? (
         <div className="flex min-w-0 flex-1 flex-col p-3">
           <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-line bg-panel shadow-sm">
             <div className="flex items-start justify-between gap-3 border-b border-line px-4 py-4">
@@ -168,7 +189,7 @@ export function Sidebar() {
               </div>
               <button
                 type="button"
-                onClick={() => setPanelOpen(false)}
+                onClick={closePanel}
                 aria-label="Close tools panel"
                 className="flex size-8 shrink-0 items-center justify-center rounded-xl text-ink-soft transition hover:bg-panel-muted hover:text-foreground"
               >
@@ -179,7 +200,7 @@ export function Sidebar() {
             <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4 tb-scrollbar" aria-label="More tools">
               <PanelSection label="Operations">
                 {visibleTools.map((item) => (
-                  <PanelLink key={item.href} item={item} active={isActive(item.href)} />
+                  <PanelLink key={item.href} item={item} active={isActive(item.href)} onNavigate={onMobileClose} />
                 ))}
               </PanelSection>
             </nav>
@@ -211,13 +232,22 @@ export function Sidebar() {
   );
 }
 
-function RailLink({ active, item }: { active: boolean; item: NavItem }) {
+function RailLink({
+  active,
+  item,
+  onNavigate,
+}: {
+  active: boolean;
+  item: NavItem;
+  onNavigate?: () => void;
+}) {
   const Icon = item.icon;
 
   return (
     <Link
       href={item.href}
       aria-label={item.label}
+      onClick={onNavigate}
       className={cn(
         "group relative flex size-11 items-center justify-center rounded-2xl transition",
         active
@@ -234,9 +264,11 @@ function RailLink({ active, item }: { active: boolean; item: NavItem }) {
 function WorkHubRail({
   active,
   isActive,
+  onNavigate,
 }: {
   active: boolean;
   isActive: (href: string) => boolean;
+  onNavigate?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const closeTimerRef = useRef<number | null>(null);
@@ -272,6 +304,7 @@ function WorkHubRail({
       <Link
         href="/work-hub/for-you"
         aria-label="Work Hub"
+        onClick={onNavigate}
         className={cn(
           "group relative flex size-11 items-center justify-center rounded-2xl transition",
           active
@@ -308,7 +341,10 @@ function WorkHubRail({
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => setOpen(false)}
+                  onClick={() => {
+                    setOpen(false);
+                    onNavigate?.();
+                  }}
                   className={cn(
                     "group flex min-h-12 items-center gap-3 rounded-2xl px-3 py-2 text-sm font-black transition",
                     itemActive
@@ -382,12 +418,21 @@ function PanelSection({
   );
 }
 
-function PanelLink({ active, item }: { active: boolean; item: NavItem }) {
+function PanelLink({
+  active,
+  item,
+  onNavigate,
+}: {
+  active: boolean;
+  item: NavItem;
+  onNavigate?: () => void;
+}) {
   const Icon = item.icon;
 
   return (
     <Link
       href={item.href}
+      onClick={onNavigate}
       className={cn(
         "group flex h-12 items-center gap-3 rounded-xl px-2.5 text-[14px] font-bold transition",
         active

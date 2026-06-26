@@ -16,17 +16,9 @@ export function AgentHeroSection() {
   return (
     <section
       id="home"
-      className="relative isolate overflow-hidden border-b border-black/[0.06] bg-[#f7f6ef] px-5 pb-12 pt-10 text-[#111111] sm:px-8 lg:px-16 lg:pb-14 lg:pt-12"
+      className="relative isolate overflow-hidden border-b border-black/[0.06] bg-[#fbfaf6] px-5 pb-12 pt-8 text-[#111111] sm:px-8 lg:px-16 lg:pb-14 lg:pt-10"
     >
-      <div
-        className="pointer-events-none absolute inset-0 -z-20"
-        aria-hidden="true"
-        style={{
-          backgroundImage: "radial-gradient(circle, rgba(17,17,17,0.11) 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
-        }}
-      />
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_bottom,rgba(247,246,239,0.65)_0%,rgba(247,246,239,0.96)_55%,#f7f6ef_100%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-40 bg-[radial-gradient(circle_at_50%_0%,rgba(255,212,0,0.16),transparent_58%)]" />
 
       <div className="mx-auto max-w-[1180px]">
 
@@ -41,7 +33,7 @@ export function AgentHeroSection() {
           Enterprise-grade project management
         </motion.div>
 
-        <div className="mt-8 grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_520px]">
+        <div className="mt-7 grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_520px]">
           <div>
             <motion.h1
               initial={{ opacity: 0, y: 16 }}
@@ -128,16 +120,14 @@ export function AgentHeroSection() {
             transition={{ delay: 0.2, duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
             className="relative hidden lg:block"
           >
-            <div className="rounded-[28px] border border-black/[0.06] bg-white/72 p-3 shadow-[0_34px_90px_rgba(17,17,17,0.13),0_0_0_1px_rgba(255,255,255,0.65)] backdrop-blur">
-              <Image
-                src="/product/hero_dash.png"
-                alt="TaskBricks dashboard preview"
-                width={920}
-                height={600}
-                className="w-full rounded-2xl object-contain"
-                priority
-              />
-            </div>
+            <Image
+              src="/product/hero_dash.png"
+              alt="TaskBricks dashboard preview"
+              width={920}
+              height={600}
+              className="w-full object-contain drop-shadow-[0_30px_70px_rgba(17,17,17,0.12)]"
+              priority
+            />
           </motion.div>
         </div>
       </div>
