@@ -64,6 +64,7 @@ import {
   replyInternalMailThread,
   restoreInternalMailThread,
   searchInternalMailboxes,
+  sendInternalMailDraft,
   setInternalMailFlag,
   setInternalMailPin,
   setInternalMailStar,
@@ -395,7 +396,7 @@ function InternalMailClient({
     }
   }
 
-  async function runThreadAction(action: "archive" | "delete" | "restore" | "star" | "flag" | "pin" | "unread" | "read" | "snooze" | "junk") {
+  async function runThreadAction(action: "archive" | "delete" | "restore" | "star" | "flag" | "pin" | "unread" | "read" | "snooze" | "junk" | "sendDraft") {
     if (!selectedThread) {
       toast({ title: "Select a mail item first", variant: "warning" });
       return;
@@ -410,13 +411,14 @@ function InternalMailClient({
       if (action === "pin") await setInternalMailPin(auth.accessToken, selectedThread.id, !selectedThread.currentParticipant.pinnedAt);
       if (action === "unread") await markInternalMailUnread(auth.accessToken, selectedThread.id);
       if (action === "read") await markInternalMailRead(auth.accessToken, selectedThread.id);
+      if (action === "sendDraft") await sendInternalMailDraft(auth.accessToken, selectedThread.id);
       if (action === "snooze") {
         const tomorrow = new Date(Date.now() + 86_400_000);
         await snoozeInternalMailThread(auth.accessToken, selectedThread.id, tomorrow.toISOString());
       }
       if (action === "junk") await moveInternalMailThread(auth.accessToken, selectedThread.id, "JUNK");
 
-      toast({ title: "Mailbox updated", variant: "success" });
+      toast({ title: action === "sendDraft" ? "Draft sent" : "Mailbox updated", variant: "success" });
       await loadThreads();
       await onChanged();
     } catch (caught) {
@@ -466,6 +468,9 @@ function InternalMailClient({
             </button>
             <span className="hidden h-8 w-px bg-line sm:block" aria-hidden="true" />
             <div className="flex flex-wrap items-center gap-1 rounded-2xl border border-line bg-white p-1 shadow-sm">
+              {activeMailbox.key === "DRAFTS" ? (
+                <ToolbarButton disabled={!hasSelectedThread} icon={Send} label="Send draft" onClick={() => runThreadAction("sendDraft")} />
+              ) : null}
               <ToolbarButton disabled={!hasSelectedThread} icon={Trash2} label="Delete" onClick={() => runThreadAction("delete")} />
               <ToolbarButton disabled={!hasSelectedThread} icon={Archive} label="Archive" onClick={() => runThreadAction("archive")} />
               <ToolbarButton disabled={!hasSelectedThread} icon={ShieldAlert} label="Report" onClick={() => runThreadAction("junk")} />
@@ -549,6 +554,7 @@ function InternalMailClient({
             await loadThreads(selectedThread?.id);
             await onChanged();
           }}
+          onSendDraft={() => runThreadAction("sendDraft")}
           selectedThread={selectedThread}
         />
       </div>
@@ -635,18 +641,24 @@ function MailRow({ active, onClick, thread }: { active: boolean; onClick: () => 
 
 function ReadingPane({
   onReplySent,
+  onSendDraft,
   selectedThread,
 }: {
   onReplySent: () => Promise<void> | void;
+  onSendDraft: () => Promise<void> | void;
   selectedThread: InternalMailThread | null;
 }) {
   const { auth } = useWorkspaceAuth();
   const { toast } = useToast();
   const [replyDraft, setReplyDraft] = useState<RichMailValue>(EMPTY_RICH_MAIL);
+  const [replyOpen, setReplyOpen] = useState(false);
   const [replying, setReplying] = useState(false);
 
   useEffect(() => {
-    const timeout = window.setTimeout(() => setReplyDraft(EMPTY_RICH_MAIL), 0);
+    const timeout = window.setTimeout(() => {
+      setReplyDraft(EMPTY_RICH_MAIL);
+      setReplyOpen(false);
+    }, 0);
     return () => window.clearTimeout(timeout);
   }, [selectedThread?.id]);
 
@@ -660,6 +672,7 @@ function ReadingPane({
         bodyText: replyDraft.text.trim(),
       });
       setReplyDraft(EMPTY_RICH_MAIL);
+      setReplyOpen(false);
       await onReplySent();
       toast({ title: "Reply sent", variant: "success" });
     } catch (caught) {
@@ -683,6 +696,7 @@ function ReadingPane({
 
   const latest = selectedThread.messages[selectedThread.messages.length - 1] ?? selectedThread.latestMessage;
   const recipientGroups = groupRecipients(latest?.recipients ?? []);
+  const isDraft = selectedThread.currentParticipant.folder === "DRAFTS" || selectedThread.messages.some((message) => message.isDraft);
 
   return (
     <div className="min-w-0 bg-panel">
@@ -751,19 +765,61 @@ function ReadingPane({
           );
         })}
 
-        <form onSubmit={handleReply} className="rounded-2xl border border-line bg-[#fbfaf5] p-4">
-          <RichMailEditor minHeight="min-h-[160px]" onChange={setReplyDraft} placeholder="Write a reply" value={replyDraft} />
-          <div className="mt-3 flex justify-end">
-            <button
-              type="submit"
-              disabled={replying || !replyDraft.text.trim()}
-              className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-black text-[#111111] transition hover:bg-primary-dark disabled:opacity-60"
-            >
-              {replying ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <Reply className="size-4" aria-hidden="true" />}
-              Reply
-            </button>
+        {isDraft ? (
+          <div className="rounded-2xl border border-line bg-[#fffdf3] p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-primary-dark">Draft</p>
+                <p className="mt-1 text-sm font-semibold text-ink-soft">Review the recipients and send this saved internal mail when it is ready.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void onSendDraft()}
+                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-black text-[#111111] transition hover:bg-primary-dark"
+              >
+                <Send className="size-4" aria-hidden="true" />
+                Send draft
+              </button>
+            </div>
           </div>
-        </form>
+        ) : (
+          <div className="rounded-2xl border border-line bg-[#fbfaf5] p-3">
+            {!replyOpen ? (
+              <button
+                type="button"
+                onClick={() => setReplyOpen(true)}
+                className="inline-flex h-10 items-center gap-2 rounded-xl border border-line bg-white px-4 text-sm font-black text-foreground transition hover:bg-panel-muted"
+              >
+                <Reply className="size-4" aria-hidden="true" />
+                Reply
+              </button>
+            ) : (
+              <form onSubmit={handleReply}>
+                <RichMailEditor minHeight="min-h-[160px]" onChange={setReplyDraft} placeholder="Write a reply" value={replyDraft} />
+                <div className="mt-3 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReplyDraft(EMPTY_RICH_MAIL);
+                      setReplyOpen(false);
+                    }}
+                    className="inline-flex h-10 items-center gap-2 rounded-xl border border-line bg-white px-4 text-sm font-black text-foreground transition hover:bg-panel-muted"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={replying || !replyDraft.text.trim()}
+                    className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-black text-[#111111] transition hover:bg-primary-dark disabled:opacity-60"
+                  >
+                    {replying ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <Reply className="size-4" aria-hidden="true" />}
+                    Send reply
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -874,6 +930,7 @@ function ComposeModal({
 
   const recipientCount = toRecipients.length + ccRecipients.length + bccRecipients.length;
   const hasUploadingAttachments = attachments.some((attachment) => attachment.status === "uploading");
+  const workspaceMail = user.internalEmail ?? user.internalMailbox?.address ?? user.email;
   const selectedMailboxIds = useMemo(
     () => new Set([...toRecipients, ...ccRecipients, ...bccRecipients].map((mailbox) => mailbox.id)),
     [bccRecipients, ccRecipients, toRecipients],
@@ -1148,8 +1205,11 @@ function ComposeModal({
             Save draft
           </button>
           <span className="mx-1 hidden h-8 w-px bg-line sm:block" aria-hidden="true" />
-          <span className="min-w-0 flex-1 truncate px-1 text-sm font-semibold text-[#4b5563]">
-            From: <span className="font-black text-foreground">{user.email}</span>
+          <span className="min-w-0 flex-1 px-1 text-sm font-semibold text-[#4b5563]">
+            <span className="block truncate">
+              From: <span className="font-black text-foreground">{workspaceMail}</span>
+            </span>
+            <span className="block truncate text-[11px] font-bold text-ink-soft">Login: {user.email}</span>
           </span>
           <button
             type="button"

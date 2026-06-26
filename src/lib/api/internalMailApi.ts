@@ -13,6 +13,7 @@ type SearchInternalMailboxesQuery = OpenApiQuery<"/api/v1/internal-mail/mailboxe
 type CreateInternalMailboxPayload = OpenApiJsonBody<"/api/v1/internal-mail/mailboxes", "post">;
 type UpdateInternalMailboxPayload = OpenApiJsonBody<"/api/v1/internal-mail/mailboxes/{mailboxId}", "patch">;
 type CreateInternalMailboxAliasPayload = OpenApiJsonBody<"/api/v1/internal-mail/mailboxes/{mailboxId}/aliases", "post">;
+type RegenerateInternalMailboxAddressPayload = OpenApiJsonBody<"/api/v1/internal-mail/mailboxes/{mailboxId}/regenerate-address", "post">;
 type UpsertInternalMailboxMemberPayload = OpenApiJsonBody<"/api/v1/internal-mail/mailboxes/{mailboxId}/members", "post">;
 type ListInternalMailThreadsQuery = OpenApiQuery<"/api/v1/internal-mail/threads", "get">;
 type GetInternalMailThreadQuery = OpenApiQuery<"/api/v1/internal-mail/threads/{threadId}", "get">;
@@ -79,6 +80,14 @@ export function createInternalMailboxAlias(token: string, mailboxId: string, pay
   });
 }
 
+export function regenerateInternalMailboxAddress(token: string, mailboxId: string, payload: RegenerateInternalMailboxAddressPayload = {}) {
+  return openApiRequest("/api/v1/internal-mail/mailboxes/{mailboxId}/regenerate-address", "post", {
+    token,
+    pathParams: { mailboxId },
+    body: payload,
+  });
+}
+
 export function upsertInternalMailboxMember(token: string, mailboxId: string, payload: UpsertInternalMailboxMemberPayload) {
   return openApiRequest("/api/v1/internal-mail/mailboxes/{mailboxId}/members", "post", {
     token,
@@ -133,6 +142,13 @@ export function replyInternalMailThread(token: string, threadId: string, payload
     token,
     pathParams: { threadId },
     body: payload as ReplyInternalMailThreadPayload,
+  });
+}
+
+export function sendInternalMailDraft(token: string, threadId: string) {
+  return openApiRequest("/api/v1/internal-mail/threads/{threadId}/send-draft", "post", {
+    token,
+    pathParams: { threadId },
   });
 }
 

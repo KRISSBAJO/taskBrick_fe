@@ -402,6 +402,7 @@ export default function SettingsPage() {
     `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.trim() ||
     user.email.slice(0, 2).toUpperCase();
   const avatarPreview = profileAvatar.trim() || user.avatarUrl || "";
+  const workspaceMail = user.internalEmail ?? user.internalMailbox?.address ?? null;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -477,7 +478,16 @@ export default function SettingsPage() {
                     {user.status}
                   </span>
                 </div>
-                <p className="text-sm text-white/50">{user.email}</p>
+                <div className="grid gap-1 text-sm">
+                  <p className="text-white/80">
+                    <span className="font-bold text-white">Workspace mail:</span>{" "}
+                    <span className="break-all">{workspaceMail ?? "Creating mailbox..."}</span>
+                  </p>
+                  <p className="text-white/45">
+                    <span className="font-bold text-white/60">Login email:</span>{" "}
+                    <span className="break-all">{user.email}</span>
+                  </p>
+                </div>
 
                 {/* IDs row */}
                 <div className="flex flex-wrap gap-2 pt-1">

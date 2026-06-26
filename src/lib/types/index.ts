@@ -161,6 +161,7 @@ export type InternalMailRecipientKind = Schemas["InternalMailRecipientKind"];
 export type InternalMailboxType = Schemas["InternalMailboxType"];
 export type InternalMailboxStatus = Schemas["InternalMailboxStatus"];
 export type InternalMailboxMemberRole = Schemas["InternalMailboxMemberRole"];
+export type InternalMailboxIdentity = Schemas["InternalMailboxIdentity"];
 export type InternalMailboxAlias = Schemas["InternalMailboxAlias"];
 export type InternalMailboxMember = Schemas["InternalMailboxMember"];
 export type InternalMailbox = Schemas["InternalMailbox"];

@@ -666,6 +666,7 @@ function MemberRow({ member, onCancelInvite, onRemove, onResendInvite, onUpdateR
   const tenantRoles = member.user.roles?.map((r) => r.role) ?? [];
   const perms       = derivePermissions(member);
   const isInvited   = member.user.status === "INVITED";
+  const workspaceMail = userWorkspaceMail(member.user);
 
   return (
     <article className="group flex items-center gap-4 px-5 py-3.5 transition hover:bg-panel-muted/60">
@@ -678,7 +679,10 @@ function MemberRow({ member, onCancelInvite, onRemove, onResendInvite, onUpdateR
       <div className="min-w-0 flex-1">
         <p className="truncate text-[13px] font-bold text-foreground">{displayName(member.user)}</p>
         <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-          <span className="truncate text-[11px] text-ink-soft">{member.user.email}</span>
+          <span className="truncate text-[11px] font-semibold text-ink-soft">{workspaceMail}</span>
+          {workspaceMail !== member.user.email ? (
+            <span className="truncate text-[10px] text-ink-soft/60">Login {member.user.email}</span>
+          ) : null}
           <StatusBadge status={member.user.status} />
           {member.createdAt && (
             <span className="text-[10px] text-ink-soft/60">· joined {formatShortDate(member.createdAt)}</span>
@@ -936,7 +940,10 @@ function TenantUsersPanel({
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-black text-foreground">{displayName(user)}</p>
-                  <p className="truncate text-[11px] text-ink-soft">{user.email}</p>
+                  <p className="truncate text-[11px] font-semibold text-ink-soft">{userWorkspaceMail(user)}</p>
+                  {userWorkspaceMail(user) !== user.email ? (
+                    <p className="truncate text-[10px] text-ink-soft/60">Login {user.email}</p>
+                  ) : null}
                 </div>
                 <div className="hidden min-w-0 max-w-[280px] flex-1 flex-wrap justify-end gap-1 md:flex">
                   {user.roles?.length ? (
@@ -1595,6 +1602,10 @@ function derivePermissions(member: TeamMember) {
 function permKey(p: Permission) { return `${p.action}:${p.subject}`; }
 function displayName(u: { email: string; firstName?: string | null; lastName?: string | null }) {
   return [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email;
+}
+
+function userWorkspaceMail(u: { email: string; internalEmail?: string | null; internalMailbox?: { address?: string | null } | null }) {
+  return u.internalEmail ?? u.internalMailbox?.address ?? u.email;
 }
 
 const fieldCls = "h-9 w-full rounded-lg border border-line bg-background px-3 text-[13px] text-foreground placeholder:text-ink-soft transition focus:border-primary focus:outline-none";
