@@ -240,11 +240,13 @@ export {
   addTeamMember,
   cancelTeamMemberInvite,
   createTeam,
+  deleteTeam,
   inviteTeamMember,
   listTeamMembers,
   listTeams,
   removeTeamMember,
   resendTeamMemberInvite,
+  updateTeam,
   updateTeamMemberRole,
   type TeamInviteResult,
 } from "./api/teamApi";

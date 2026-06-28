@@ -7,7 +7,9 @@ import {
   ClipboardList,
   FileUp,
   FolderOpen,
+  ImagePlus,
   Mail,
+  Pencil,
   Plus,
   RefreshCw,
   Search,
@@ -26,7 +28,10 @@ import {
   addTeamMember,
   bulkInviteTenantUsers,
   cancelTeamMemberInvite,
+  createFileAsset,
   createTeam,
+  createUploadIntent,
+  deleteTeam,
   inviteTenantUser,
   inviteTeamMember,
   listPermissions,
@@ -37,6 +42,7 @@ import {
   listWorkspaces,
   removeTeamMember,
   resendTeamMemberInvite,
+  updateTeam,
   updateTeamMemberRole,
   type BulkInviteUserInput,
   type BulkInviteUsersResponse,
@@ -49,6 +55,7 @@ import {
   type Workspace,
 } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { uploadWithIntent } from "@/lib/upload";
 import { formatShortDate, userInitials } from "@/lib/workspace-ui";
 
 type DetailTab = "members" | "invite" | "add" | "directory" | "bulk" | "roles";
@@ -85,6 +92,7 @@ export default function TeamPage() {
   const [loadingMembers,  setLoadingMembers]  = useState(false);
   const [saving,          setSaving]          = useState(false);
   const [showComposer,    setShowComposer]    = useState(false);
+  const [editingTeam,     setEditingTeam]     = useState<Team | null>(null);
   const [query,           setQuery]           = useState("");
   const [activeTab,       setActiveTab]       = useState<DetailTab>("members");
 
@@ -145,6 +153,53 @@ export default function TeamPage() {
   async function onTeamCreated(team: Team) {
     setShowComposer(false); setSelectedTeamId(team.id); setActiveTab("members");
     await loadDirectory();
+  }
+
+  async function onTeamSaved(team: Team) {
+    setEditingTeam(null);
+    setTeams((current) => current.map((item) => item.id === team.id ? team : item));
+    setSelectedTeamId(team.id);
+    await loadDirectory();
+    toast({ title: "Team updated", description: `${team.name} is up to date.`, variant: "success" });
+  }
+
+  async function onDeleteTeam(team: Team) {
+    const count = team._count;
+    const hasData = Boolean((count?.members ?? 0) || (count?.projects ?? 0));
+    const confirmed = await confirm({
+      title: hasData ? "Soft delete this team?" : "Delete this team?",
+      description: hasData
+        ? `${team.name} has members or project data, so it will be hidden from active team management instead of being hard-deleted.`
+        : `${team.name} is empty and will be permanently removed.`,
+      confirmLabel: hasData ? "Soft delete team" : "Delete team",
+      tone: "danger",
+    });
+    if (!confirmed) return;
+
+    setSaving(true);
+    try {
+      const result = await deleteTeam(auth.accessToken, team.id) as { mode?: "deleted" | "soft_deleted"; success?: boolean };
+      const nextTeam = teams.find((item) => item.id !== team.id);
+      setTeams((current) => current.filter((item) => item.id !== team.id));
+      setSelectedTeamId((current) => current === team.id ? nextTeam?.id ?? "" : current);
+      setMembers((current) => current.filter((member) => member.teamId !== team.id));
+      toast({
+        title: result.mode === "soft_deleted" ? "Team hidden" : "Team deleted",
+        description: result.mode === "soft_deleted"
+          ? `${team.name} was soft-deleted because it still has related data.`
+          : `${team.name} was permanently deleted.`,
+        variant: "success",
+      });
+      await loadDirectory();
+    } catch (err) {
+      toast({
+        title: "Delete failed",
+        description: err instanceof Error ? err.message : "Unable to delete this team.",
+        variant: "error",
+      });
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function onInvite(e: FormEvent<HTMLFormElement>) {
@@ -387,8 +442,27 @@ export default function TeamPage() {
 
       {/* ── Team composer modal ───────────────────────────────── */}
       {showComposer && (
-        <TeamModal onClose={() => setShowComposer(false)}>
-          <TeamComposer token={auth.accessToken} onCancel={() => setShowComposer(false)} onCreated={onTeamCreated} />
+        <TeamModal
+          onClose={() => setShowComposer(false)}
+          title="Create new team"
+          subtitle="Organize members by unit or workspace"
+        >
+          <TeamComposer token={auth.accessToken} onCancel={() => setShowComposer(false)} onSaved={onTeamCreated} />
+        </TeamModal>
+      )}
+
+      {editingTeam && (
+        <TeamModal
+          onClose={() => setEditingTeam(null)}
+          title="Edit team"
+          subtitle="Update identity, workspace, and avatar"
+        >
+          <TeamComposer
+            token={auth.accessToken}
+            initialTeam={editingTeam}
+            onCancel={() => setEditingTeam(null)}
+            onSaved={onTeamSaved}
+          />
         </TeamModal>
       )}
 
@@ -443,12 +517,21 @@ export default function TeamPage() {
               <div className="shrink-0 border-b border-line px-5 py-4">
                 <div className="flex flex-wrap items-start gap-4">
                   {/* Avatar */}
-                  <span
-                    className="flex size-12 shrink-0 items-center justify-center rounded-2xl text-base font-black text-white"
-                    style={{ background: teamAccent(selectedTeam.name) }}
-                  >
-                    {teamInitials(selectedTeam.name)}
-                  </span>
+                  {selectedTeam.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={selectedTeam.avatarUrl}
+                      alt=""
+                      className="size-12 shrink-0 rounded-2xl object-cover ring-1 ring-line"
+                    />
+                  ) : (
+                    <span
+                      className="flex size-12 shrink-0 items-center justify-center rounded-2xl text-base font-black text-white"
+                      style={{ background: teamAccent(selectedTeam.name) }}
+                    >
+                      {teamInitials(selectedTeam.name)}
+                    </span>
+                  )}
 
                   <div className="min-w-0 flex-1">
                     <h2 className="text-lg font-black text-foreground">{selectedTeam.name}</h2>
@@ -473,6 +556,26 @@ export default function TeamPage() {
                         <p className="mt-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-ink-soft">{label}</p>
                       </div>
                     ))}
+                  </div>
+
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditingTeam(selectedTeam)}
+                      className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-line bg-background px-3 text-[12px] font-black text-foreground transition hover:bg-panel-muted"
+                    >
+                      <Pencil className="size-3.5" />
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void onDeleteTeam(selectedTeam)}
+                      disabled={saving}
+                      className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-red-100 bg-red-50 px-3 text-[12px] font-black text-red-700 transition hover:bg-red-100 disabled:opacity-50"
+                    >
+                      <Trash2 className="size-3.5" />
+                      Delete
+                    </button>
                   </div>
                 </div>
 
@@ -579,12 +682,21 @@ function TeamCard({ active, onSelect, team }: { active: boolean; onSelect: () =>
       {active && <div className="absolute inset-y-0 left-0 w-[3px]" style={{ background: accent }} />}
 
       <div className="flex items-center gap-3 pl-0.5">
-        <span
-          className="flex size-9 shrink-0 items-center justify-center rounded-xl text-[11px] font-black text-white"
-          style={{ background: active ? accent : "#111111" }}
-        >
-          {teamInitials(team.name)}
-        </span>
+        {team.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={team.avatarUrl}
+            alt=""
+            className="size-9 shrink-0 rounded-xl object-cover ring-1 ring-line"
+          />
+        ) : (
+          <span
+            className="flex size-9 shrink-0 items-center justify-center rounded-xl text-[11px] font-black text-white"
+            style={{ background: active ? accent : "#111111" }}
+          >
+            {teamInitials(team.name)}
+          </span>
+        )}
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] font-black text-foreground">{team.name}</p>
           <p className="truncate text-[11px] text-ink-soft">{team.workspace?.name ?? "Tenant-wide"}</p>
@@ -1262,7 +1374,17 @@ function RoleCatalog({ roles }: { roles: Role[] }) {
 
 /* ─── Team modal ───────────────────────────────────────────────────────────── */
 
-function TeamModal({ children, onClose }: { children: ReactNode; onClose: () => void }) {
+function TeamModal({
+  children,
+  onClose,
+  subtitle,
+  title,
+}: {
+  children: ReactNode;
+  onClose: () => void;
+  subtitle: string;
+  title: string;
+}) {
   useEffect(() => {
     function handleKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
     document.addEventListener("keydown", handleKey);
@@ -1297,8 +1419,8 @@ function TeamModal({ children, onClose }: { children: ReactNode; onClose: () => 
                 <Users className="size-4 text-[#111111]" />
               </span>
               <div>
-                <p className="text-[13px] font-black text-white">Create new team</p>
-                <p className="text-[11px] text-white/40">Organize members by unit or workspace</p>
+                <p className="text-[13px] font-black text-white">{title}</p>
+                <p className="text-[11px] text-white/40">{subtitle}</p>
               </div>
             </div>
             <button
@@ -1321,15 +1443,20 @@ function TeamModal({ children, onClose }: { children: ReactNode; onClose: () => 
 
 /* ─── Team composer ────────────────────────────────────────────────────────── */
 
-function TeamComposer({ onCancel, onCreated, token }: {
+function TeamComposer({ initialTeam, onCancel, onSaved, token }: {
+  initialTeam?: Team;
   onCancel: () => void;
-  onCreated: (team: Team) => void;
+  onSaved: (team: Team) => void;
   token: string;
 }) {
-  const [saving,     setSaving]     = useState(false);
+  const isEditing = Boolean(initialTeam);
+  const [saving, setSaving] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [message,    setMessage]    = useState<{ text: string; ok: boolean } | null>(null);
-  const [nameValue,  setNameValue]  = useState("");
+  const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
+  const [nameValue, setNameValue] = useState(initialTeam?.name ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(initialTeam?.avatarUrl ?? "");
+  const [avatarPublicId, setAvatarPublicId] = useState(initialTeam?.avatarPublicId ?? "");
 
   useEffect(() => {
     listWorkspaces(token).then((p) => setWorkspaces(p.data)).catch(() => setWorkspaces([]));
@@ -1338,19 +1465,77 @@ function TeamComposer({ onCancel, onCreated, token }: {
   const accent   = nameValue.trim() ? teamAccent(nameValue.trim()) : "#e8e0c8";
   const initials = nameValue.trim() ? teamInitials(nameValue.trim()) : null;
 
+  async function onAvatarFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setMessage({ ok: false, text: "Use a PNG, JPG, WebP, GIF, or another image file." });
+      return;
+    }
+
+    setAvatarUploading(true);
+    setMessage(null);
+    try {
+      const intent = await createUploadIntent(token, {
+        fileName: file.name,
+        mimeType: file.type || "application/octet-stream",
+        sizeBytes: file.size,
+        scope: "TEAM",
+        entityType: "TEAM",
+        entityId: initialTeam?.id,
+        visibility: "TEAM",
+      });
+      const uploadedUrl = await uploadWithIntent(intent, file);
+      await createFileAsset(token, {
+        fileName: file.name,
+        fileUrl: uploadedUrl,
+        storageKey: intent.storageKey,
+        provider: intent.provider,
+        mimeType: file.type || intent.mimeType || undefined,
+        sizeBytes: file.size,
+        scope: "TEAM",
+        entityType: "TEAM",
+        entityId: initialTeam?.id,
+        visibility: "TEAM",
+        metadata: {
+          source: "team-avatar-upload",
+          kind: "avatar",
+        },
+      });
+      setAvatarUrl(uploadedUrl);
+      setAvatarPublicId(intent.storageKey ?? "");
+      setMessage({ ok: true, text: "Team avatar uploaded. Save the team to apply it." });
+    } catch (err) {
+      setMessage({ ok: false, text: err instanceof Error ? err.message : "Unable to upload team avatar." });
+    } finally {
+      setAvatarUploading(false);
+    }
+  }
+
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget, fd = new FormData(form);
     setSaving(true); setMessage(null);
     try {
-      const team = await createTeam(token, {
+      const payload = {
         name:        String(fd.get("name") || ""),
         description: String(fd.get("description") || "") || undefined,
         workspaceId: String(fd.get("workspaceId") || "") || undefined,
-      });
-      form.reset(); setNameValue(""); onCreated(team);
+        avatarUrl: isEditing ? (avatarUrl || null) : (avatarUrl || undefined),
+        avatarPublicId: isEditing ? (avatarPublicId || null) : (avatarPublicId || undefined),
+      };
+      const team = initialTeam
+        ? await updateTeam(token, initialTeam.id, payload)
+        : await createTeam(token, payload);
+      form.reset();
+      setNameValue("");
+      setAvatarUrl("");
+      setAvatarPublicId("");
+      onSaved(team);
     } catch (err) {
-      setMessage({ text: err instanceof Error ? err.message : "Unable to create team.", ok: false });
+      setMessage({ text: err instanceof Error ? err.message : `Unable to ${isEditing ? "update" : "create"} team.`, ok: false });
     } finally { setSaving(false); }
   }
 
@@ -1359,20 +1544,48 @@ function TeamComposer({ onCancel, onCreated, token }: {
       {/* Live avatar preview */}
       <div className="mb-5 flex items-center gap-4 rounded-2xl border border-line bg-background px-4 py-3.5 transition-all">
         <span
-          className="flex size-14 shrink-0 items-center justify-center rounded-2xl text-lg font-black text-white transition-all duration-300"
+          className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl text-lg font-black text-white transition-all duration-300"
           style={{
             background: initials ? accent : "#e8e0c8",
             boxShadow: initials ? `0 6px 20px ${accent}50` : "none",
           }}
         >
-          {initials ?? <Users className="size-5 text-[#a09580]" />}
+          {avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            initials ?? <Users className="size-5 text-[#a09580]" />
+          )}
         </span>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className={cn("truncate text-[14px] font-black transition-colors", nameValue.trim() ? "text-foreground" : "text-ink-soft/50")}>
             {nameValue.trim() || "Your team name"}
           </p>
-          <p className="mt-0.5 text-[11px] text-ink-soft">Avatar preview — updates as you type</p>
+          <p className="mt-0.5 text-[11px] text-ink-soft">Avatar preview updates as you type</p>
         </div>
+      </div>
+
+      <div className="mb-5 flex flex-wrap items-center gap-2">
+        <label className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl border border-line bg-panel px-3 text-[12px] font-black text-foreground transition hover:bg-panel-muted">
+          <ImagePlus className="size-3.5" />
+          {avatarUploading ? "Uploading..." : "Upload team avatar"}
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            disabled={avatarUploading || saving}
+            onChange={(event) => void onAvatarFileChange(event)}
+          />
+        </label>
+        {avatarUrl ? (
+          <button
+            type="button"
+            onClick={() => { setAvatarUrl(""); setAvatarPublicId(""); }}
+            className="inline-flex h-9 items-center rounded-xl border border-line bg-background px-3 text-[12px] font-black text-ink-soft transition hover:bg-panel-muted hover:text-foreground"
+          >
+            Remove avatar
+          </button>
+        ) : null}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-[1fr_188px]">
@@ -1389,7 +1602,7 @@ function TeamComposer({ onCancel, onCreated, token }: {
           />
         </FormField>
         <FormField label="Workspace">
-          <select name="workspaceId" className={fieldCls}>
+          <select name="workspaceId" defaultValue={initialTeam?.workspaceId ?? ""} className={fieldCls}>
             <option value="">Tenant-wide</option>
             {workspaces.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
           </select>
@@ -1399,6 +1612,7 @@ function TeamComposer({ onCancel, onCreated, token }: {
           <textarea
             name="description"
             rows={3}
+            defaultValue={initialTeam?.description ?? ""}
             placeholder="What does this team work on?"
             className="w-full resize-none rounded-lg border border-line bg-background px-3 py-2 text-[13px] text-foreground placeholder:text-ink-soft/60 transition focus:border-primary focus:outline-none"
           />
@@ -1417,18 +1631,18 @@ function TeamComposer({ onCancel, onCreated, token }: {
         </button>
         <button
           type="submit"
-          disabled={saving || !nameValue.trim()}
+          disabled={saving || avatarUploading || !nameValue.trim()}
           className="tb-yellow-button inline-flex h-10 items-center gap-2 rounded-xl px-6 text-[13px] font-black disabled:opacity-55"
         >
           {saving ? (
             <>
               <span className="inline-block size-3.5 animate-spin rounded-full border-2 border-foreground/25 border-t-foreground" />
-              Creating…
+              {isEditing ? "Saving..." : "Creating..."}
             </>
           ) : (
             <>
               <Users className="size-3.5" />
-              Create team
+              {isEditing ? "Save team" : "Create team"}
             </>
           )}
         </button>

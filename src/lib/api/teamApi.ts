@@ -8,6 +8,7 @@ type OpenApiQuery,
 
 type ListTeamsQuery = OpenApiQuery<"/api/v1/teams", "get">;
 type CreateTeamPayload = OpenApiJsonBody<"/api/v1/teams", "post">;
+type UpdateTeamPayload = OpenApiJsonBody<"/api/v1/teams/{teamId}", "patch">;
 type AddTeamMemberPayload = OpenApiJsonBody<"/api/v1/teams/{teamId}/members", "post">;
 type InviteTeamMemberPayload = OpenApiJsonBody<"/api/v1/teams/{teamId}/invite", "post">;
 
@@ -45,6 +46,21 @@ export function createTeam(token: string, payload: CreateTeamPayload) {
     token,
     pathParams: {},
     body: payload,
+  });
+}
+
+export function updateTeam(token: string, teamId: string, payload: UpdateTeamPayload) {
+  return openApiRequest("/api/v1/teams/{teamId}", "patch", {
+    token,
+    pathParams: { teamId },
+    body: payload,
+  });
+}
+
+export function deleteTeam(token: string, teamId: string) {
+  return openApiRequest("/api/v1/teams/{teamId}", "delete", {
+    token,
+    pathParams: { teamId },
   });
 }
 
