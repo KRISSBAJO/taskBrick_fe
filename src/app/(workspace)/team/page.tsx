@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import {
   CheckCircle2,
@@ -80,6 +81,15 @@ function isDefaultMemberRole(role: Role) {
   return role.name.trim().toLowerCase() === "member";
 }
 
+function getInitialTeamTab(): DetailTab {
+  if (typeof window === "undefined") return "members";
+
+  const tab = new URLSearchParams(window.location.search).get("tab");
+  return tab && ["members", "invite", "add", "directory", "bulk", "roles"].includes(tab)
+    ? (tab as DetailTab)
+    : "members";
+}
+
 export default function TeamPage() {
   const { auth } = useWorkspaceAuth();
   const { confirm } = useConfirm();
@@ -96,7 +106,7 @@ export default function TeamPage() {
   const [showComposer,    setShowComposer]    = useState(false);
   const [editingTeam,     setEditingTeam]     = useState<Team | null>(null);
   const [query,           setQuery]           = useState("");
-  const [activeTab,       setActiveTab]       = useState<DetailTab>("members");
+  const [activeTab,       setActiveTab]       = useState<DetailTab>(getInitialTeamTab);
 
   const selectedTeam = teams.find((t) => t.id === selectedTeamId) ?? null;
 
@@ -1403,7 +1413,11 @@ function RoleCatalog({ roles }: { roles: Role[] }) {
       {roles.map((role) => {
         const rolePerms = role.permissions?.map((rp) => rp.permission) ?? [];
         return (
-          <article key={role.id} className="rounded-xl border border-line bg-background p-4 transition hover:border-primary/30 hover:shadow-sm">
+          <Link
+            key={role.id}
+            href={`/team/roles/${role.id}`}
+            className="block rounded-xl border border-line bg-background p-4 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+          >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[13px] font-black text-foreground">{role.name}</p>
@@ -1425,8 +1439,13 @@ function RoleCatalog({ roles }: { roles: Role[] }) {
                 <span className="rounded-md bg-panel-muted px-1.5 py-0.5 text-[9px] font-black text-ink-soft">+{rolePerms.length - 4}</span>
               )}
             </div>
-            <p className="mt-2 text-[10px] font-bold text-ink-soft/60">{rolePerms.length} permission{rolePerms.length !== 1 ? "s" : ""}</p>
-          </article>
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <p className="text-[10px] font-bold text-ink-soft/60">{rolePerms.length} permission{rolePerms.length !== 1 ? "s" : ""}</p>
+              <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.12em] text-blue-700">
+                View table <ChevronRight className="size-3" />
+              </span>
+            </div>
+          </Link>
         );
       })}
     </div>
