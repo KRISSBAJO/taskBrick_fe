@@ -214,7 +214,7 @@ export function Topbar({ onOpenSidebar }: { onOpenSidebar?: () => void }) {
 
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-background/85 px-3 backdrop-blur-xl sm:px-4 md:px-5">
-      <div className="flex h-14 items-center gap-3">
+      <div className="flex h-14 min-w-0 items-center gap-2 sm:gap-3">
         {onOpenSidebar ? (
           <button
             type="button"
@@ -263,7 +263,7 @@ export function Topbar({ onOpenSidebar }: { onOpenSidebar?: () => void }) {
           ) : null}
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-2">
           {access.canViewSiteAdmin ? (
             <div className="hidden h-9 items-center rounded-xl border border-line bg-panel p-1 shadow-sm md:flex">
               <Link
@@ -346,7 +346,7 @@ export function Topbar({ onOpenSidebar }: { onOpenSidebar?: () => void }) {
           <Link
             href="/settings"
             aria-label="Settings"
-            className="inline-flex size-9 items-center justify-center rounded-lg border border-line bg-panel text-ink-soft transition hover:border-primary/40 hover:text-foreground"
+            className="hidden size-9 items-center justify-center rounded-lg border border-line bg-panel text-ink-soft transition hover:border-primary/40 hover:text-foreground sm:inline-flex"
           >
             <Settings className="size-4" aria-hidden="true" />
           </Link>
@@ -355,18 +355,18 @@ export function Topbar({ onOpenSidebar }: { onOpenSidebar?: () => void }) {
             <button
               type="button"
               onClick={() => setShowUserMenu((current) => !current)}
-              className="flex h-9 items-center gap-2 rounded-lg border border-line bg-panel pl-1.5 pr-2 transition hover:border-primary/40"
+              className="flex h-9 shrink-0 items-center justify-center rounded-lg border border-line bg-panel px-1.5 transition hover:border-primary/40 lg:max-w-[170px] lg:justify-start lg:gap-2 lg:pr-2"
               aria-label="User menu"
             >
               <span className="flex size-6 items-center justify-center rounded-md bg-[#0f1117] text-[10px] font-extrabold text-white">
                 {userInitials(user.firstName, user.lastName, user.email)}
               </span>
-              <span className="hidden max-w-[96px] truncate text-[12px] font-semibold text-foreground sm:block">
+              <span className="hidden max-w-[110px] truncate text-[12px] font-semibold text-foreground lg:block">
                 {displayName}
               </span>
               <ChevronDown
                 className={cn(
-                  "size-3 text-ink-soft transition-transform duration-150",
+                  "hidden size-3 text-ink-soft transition-transform duration-150 lg:block",
                   showUserMenu && "rotate-180",
                 )}
                 aria-hidden="true"
@@ -521,7 +521,7 @@ function NotificationMenu({
   unread: number;
 }) {
   return (
-    <section className="absolute right-0 top-[calc(100%+8px)] z-20 w-[360px] overflow-hidden rounded-2xl border border-line bg-panel shadow-[0_28px_86px_rgba(17,17,17,0.18)]">
+    <section className="absolute right-0 top-[calc(100%+8px)] z-20 w-[calc(100vw-1.5rem)] max-w-[360px] overflow-hidden rounded-2xl border border-line bg-panel shadow-[0_28px_86px_rgba(17,17,17,0.18)]">
       <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
         <div>
           <p className="text-[13px] font-black text-foreground">Notifications</p>
@@ -623,7 +623,7 @@ function UserMenu({
   const { logout } = useWorkspaceAuth();
 
   return (
-    <div className="absolute right-0 top-[calc(100%+6px)] z-20 w-[220px] overflow-hidden rounded-xl border border-line bg-panel shadow-xl">
+    <div className="absolute right-0 top-[calc(100%+6px)] z-20 w-[min(220px,calc(100vw-1.5rem))] overflow-hidden rounded-xl border border-line bg-panel shadow-xl">
       <div className="flex items-center gap-3 border-b border-line px-3 py-3">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#0f1117] text-[11px] font-extrabold text-white">
           {initials}

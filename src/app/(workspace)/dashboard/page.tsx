@@ -185,9 +185,9 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="mx-auto grid w-full max-w-[1480px] gap-4 sm:gap-5">
-      <section className="flex flex-wrap items-center justify-between gap-3">
-        <div>
+    <div className="mx-auto grid w-full min-w-0 max-w-[1480px] gap-4 overflow-hidden sm:gap-5">
+      <section className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-black text-emerald-700">
               <span className="size-1.5 rounded-full bg-emerald-500" />
@@ -197,15 +197,15 @@ export default function DashboardPage() {
               {formatLongDate()}
             </span>
           </div>
-          <h1 className="mt-2 text-2xl font-black tracking-tight text-foreground sm:text-3xl">
+          <h1 className="mt-2 break-words text-2xl font-black tracking-tight text-foreground sm:text-3xl">
             Delivery cockpit
           </h1>
-          <p className="mt-1 text-sm font-medium text-ink-soft">
+          <p className="mt-1 max-w-2xl text-sm font-medium text-ink-soft">
             Real portfolio, task, and team signals for {user.firstName || user.email}.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <Link
             href="/projects"
             className="tb-yellow-button inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-black"
@@ -231,7 +231,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
+      <section className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
         <TrendAnalysisCard
           loading={loading}
           metrics={metrics}
@@ -240,7 +240,7 @@ export default function DashboardPage() {
         <TaskCompletionCard loading={loading} metrics={metrics} />
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           color="#10b981"
           icon={FolderOpen}
@@ -276,17 +276,17 @@ export default function DashboardPage() {
         />
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <section className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <PortfolioPanel loading={loading} projects={projectRows} />
         <RightNowPanel loading={loading} now={now} tasks={attentionTasks} />
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[1fr_1fr]">
+      <section className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <TaskDistributionCard distribution={distribution} loading={loading} />
         <TeamPerformanceCard loading={loading} points={weekly} />
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[1fr_380px]">
+      <section className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <ProjectHealthPanel health={health} loading={loading} />
         <WorkspaceScopePanel data={data} loading={loading} metrics={metrics} />
       </section>
@@ -304,7 +304,7 @@ function TrendAnalysisCard({
   trend: TrendPoint[];
 }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line px-5 py-4">
         <div>
           <h2 className="text-base font-black text-foreground">Trend analysis</h2>
@@ -322,7 +322,9 @@ function TrendAnalysisCard({
         {loading ? (
           <div className="h-[280px] animate-pulse rounded-2xl bg-panel-muted" />
         ) : (
-          <LineTrendChart trend={trend} />
+          <div className="min-w-0 overflow-hidden">
+            <LineTrendChart trend={trend} />
+          </div>
         )}
 
         <div className="grid content-start gap-3">
@@ -368,7 +370,7 @@ function LineTrendChart({ trend }: { trend: TrendPoint[] }) {
     `${line(key)} L ${x(trend.length - 1).toFixed(1)} ${(pad.top + innerHeight).toFixed(1)} L ${pad.left} ${(pad.top + innerHeight).toFixed(1)} Z`;
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="h-[220px] w-full sm:h-[280px]">
+    <svg viewBox={`0 0 ${width} ${height}`} className="block h-[220px] w-full max-w-full sm:h-[280px]">
       <defs>
         <linearGradient id="dashboard-completed-area" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />
@@ -431,7 +433,7 @@ function TaskCompletionCard({
   const offset = circumference - (metrics.deliveryRate / 100) * circumference;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
       <div className="border-b border-line px-5 py-4">
         <h2 className="text-base font-black text-foreground">Task completion</h2>
         <p className="mt-0.5 text-xs font-medium text-ink-soft">Live status mix</p>
@@ -503,7 +505,7 @@ function MetricCard({
   const TrendIcon = trend >= 0 ? TrendingUp : TrendingDown;
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-line bg-panel p-4 shadow-sm">
+    <article className="min-w-0 overflow-hidden rounded-2xl border border-line bg-panel p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <span className="flex size-10 items-center justify-center rounded-xl" style={{ background: `${color}18` }}>
           <Icon className="size-5" style={{ color }} aria-hidden="true" />
@@ -527,7 +529,7 @@ function MetricCard({
 
 function PortfolioPanel({ loading, projects }: { loading: boolean; projects: Project[] }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
+    <section className="min-w-0 overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
       <div className="flex items-center justify-between border-b border-line px-5 py-4">
         <div>
           <h2 className="text-base font-black text-foreground">Portfolio health</h2>
@@ -570,7 +572,7 @@ function ProjectCard({ project }: { project: Project }) {
   return (
     <Link
       href={`/projects/${project.id}`}
-      className="group overflow-hidden rounded-2xl border border-line bg-background p-4 transition hover:-translate-y-0.5 hover:shadow-md"
+      className="group min-w-0 overflow-hidden rounded-2xl border border-line bg-background p-4 transition hover:-translate-y-0.5 hover:shadow-md"
     >
       <div className="flex items-start justify-between gap-2">
         <span className="rounded-lg px-2 py-1 text-[10px] font-black tracking-widest" style={{ background: `${accent}18`, color: accent }}>
@@ -598,7 +600,7 @@ function ProjectCard({ project }: { project: Project }) {
 
 function RightNowPanel({ loading, now, tasks }: { loading: boolean; now: number; tasks: Task[] }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
+    <section className="min-w-0 overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
       <div className="flex items-center justify-between border-b border-line px-5 py-4">
         <div>
           <h2 className="text-base font-black text-foreground">Right now</h2>
@@ -667,7 +669,7 @@ function TaskDistributionCard({
   const total = distribution.reduce((sum, item) => sum + item.count, 0);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
+    <section className="min-w-0 overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
       <div className="border-b border-line px-5 py-4">
         <h2 className="text-base font-black text-foreground">Task distribution</h2>
         <p className="mt-0.5 text-xs font-medium text-ink-soft">Live work by task type</p>
@@ -718,7 +720,7 @@ function TeamPerformanceCard({ loading, points }: { loading: boolean; points: We
   const max = Math.max(1, ...points.map((point) => point.value));
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
+    <section className="min-w-0 overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
       <div className="border-b border-line px-5 py-4">
         <h2 className="text-base font-black text-foreground">Team performance</h2>
         <p className="mt-0.5 text-xs font-medium text-ink-soft">Completed work this week</p>
@@ -760,7 +762,7 @@ function ProjectHealthPanel({
   loading: boolean;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
+    <section className="min-w-0 overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
       <div className="flex items-center justify-between border-b border-line px-5 py-4">
         <div>
           <h2 className="text-base font-black text-foreground">Project health mix</h2>
@@ -801,7 +803,7 @@ function WorkspaceScopePanel({
   metrics: ReturnType<typeof buildMetrics>;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
+    <section className="min-w-0 overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
       <div className="flex items-center justify-between border-b border-line px-5 py-4">
         <div>
           <h2 className="text-base font-black text-foreground">Workspace scope</h2>

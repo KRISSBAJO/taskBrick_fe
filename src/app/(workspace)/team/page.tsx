@@ -377,7 +377,7 @@ export default function TeamPage() {
   ];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex w-full min-w-0 flex-col gap-4 overflow-hidden">
 
       {/* ── Page hero ─────────────────────────────────────────── */}
       <div
@@ -391,20 +391,20 @@ export default function TeamPage() {
             backgroundSize: "28px 28px",
           }}
         />
-        <div className="relative flex flex-wrap items-center gap-4">
+        <div className="relative flex min-w-0 flex-wrap items-center gap-4">
           <span
             className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl"
             style={{ background: "linear-gradient(135deg,#ffe45c 0%,#ffd400 46%,#f6b900 100%)", boxShadow: "0 0 20px rgba(255,212,0,0.35)" }}
           >
             <Users className="size-5 text-[#111111]" />
           </span>
-          <div className="min-w-0 flex-1">
+          <div className="min-w-[220px] flex-1">
             <h1 className="text-xl font-black tracking-tight text-white">Team management</h1>
             <p className="text-[12px] text-white/35">Invite users, manage roles, and inspect RBAC permissions.</p>
           </div>
 
           {/* Stats */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="grid w-full grid-cols-4 gap-2 sm:w-auto sm:gap-3">
             {[
               { label: "Teams",       value: teams.length },
               { label: "Users",       value: users.length },
@@ -418,7 +418,7 @@ export default function TeamPage() {
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
             <button
               type="button"
               onClick={() => void loadDirectory()}
@@ -468,10 +468,10 @@ export default function TeamPage() {
 
       {/* ── Banners ───────────────────────────────────────────── */}
       {/* ── Main layout ───────────────────────────────────────── */}
-      <div className="grid min-h-[680px] gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
+      <div className="grid min-h-[680px] min-w-0 gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
 
         {/* ── Team list sidebar ─────────────────────────────── */}
-        <aside className="flex flex-col gap-3 rounded-2xl border border-line bg-panel p-3 shadow-sm">
+        <aside className="min-w-0 overflow-hidden rounded-2xl border border-line bg-panel p-3 shadow-sm">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-ink-soft" />
             <input
@@ -482,7 +482,7 @@ export default function TeamPage() {
             />
           </div>
 
-          <div className="flex-1 overflow-y-auto tb-scrollbar">
+          <div className="mt-3 max-h-[360px] overflow-y-auto tb-scrollbar xl:max-h-none">
             {loadingDir ? (
               <div className="grid gap-2">
                 {Array.from({ length: 4 }).map((_, i) => (
@@ -510,12 +510,12 @@ export default function TeamPage() {
         </aside>
 
         {/* ── Right panel ───────────────────────────────────── */}
-        <section className="flex min-h-0 flex-col rounded-2xl border border-line bg-panel shadow-sm">
+        <section className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
           {selectedTeam ? (
             <>
               {/* Team identity banner */}
-              <div className="shrink-0 border-b border-line px-5 py-4">
-                <div className="flex flex-wrap items-start gap-4">
+              <div className="shrink-0 border-b border-line px-4 py-4 sm:px-5">
+                <div className="flex min-w-0 flex-wrap items-start gap-4">
                   {/* Avatar */}
                   {selectedTeam.avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -544,7 +544,7 @@ export default function TeamPage() {
                   </div>
 
                   {/* Member stats */}
-                  <div className="flex items-center gap-4">
+                  <div className="grid w-full grid-cols-4 gap-2 sm:w-auto sm:gap-4">
                     {[
                       { label: "Members", value: members.length },
                       { label: "Active",  value: activeMembers   },
@@ -558,7 +558,7 @@ export default function TeamPage() {
                     ))}
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-2">
+                  <div className="flex w-full shrink-0 items-center justify-end gap-2 sm:w-auto">
                     <button
                       type="button"
                       onClick={() => setEditingTeam(selectedTeam)}
@@ -580,14 +580,14 @@ export default function TeamPage() {
                 </div>
 
                 {/* Tab bar */}
-                <div className="mt-4 flex gap-1">
+                <div className="mt-4 flex gap-1 overflow-x-auto pb-1 tb-scrollbar">
                   {TABS.map((tab) => (
                     <button
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveTab(tab.id)}
                       className={cn(
-                        "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-bold transition",
+                        "inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-bold transition",
                         activeTab === tab.id
                           ? "bg-foreground text-white shadow-sm"
                           : "text-ink-soft hover:bg-panel-muted hover:text-foreground",
@@ -776,14 +776,14 @@ function MemberRow({ member, onCancelInvite, onRemove, onResendInvite, onUpdateR
   const workspaceMail = userWorkspaceMail(member.user);
 
   return (
-    <article className="group flex items-center gap-4 px-5 py-3.5 transition hover:bg-panel-muted/60">
+    <article className="group grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-3 px-4 py-3.5 transition hover:bg-panel-muted/60 sm:px-5 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,180px)_auto_auto] lg:items-center lg:gap-4">
       {/* Avatar */}
       <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#111111] text-[10px] font-black text-white">
         {userInitials(member.user)}
       </span>
 
       {/* Identity */}
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0">
         <p className="truncate text-[13px] font-bold text-foreground">{displayName(member.user)}</p>
         <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
           <span className="truncate text-[11px] font-semibold text-ink-soft">{workspaceMail}</span>
@@ -819,7 +819,7 @@ function MemberRow({ member, onCancelInvite, onRemove, onResendInvite, onUpdateR
       </div>
 
       {/* Team role select */}
-      <div className="shrink-0">
+      <div className="col-span-2 min-w-0 lg:col-auto lg:shrink-0">
         <select
           name={`role-${member.id}`}
           value={member.role || "Member"}
@@ -832,7 +832,7 @@ function MemberRow({ member, onCancelInvite, onRemove, onResendInvite, onUpdateR
       </div>
 
       {/* Remove — visible on hover */}
-      <div className="flex shrink-0 items-center gap-1.5">
+      <div className="col-span-2 flex min-w-0 flex-wrap items-center gap-1.5 lg:col-auto lg:shrink-0 lg:justify-end">
         {isInvited ? (
           <>
             <button
@@ -859,7 +859,7 @@ function MemberRow({ member, onCancelInvite, onRemove, onResendInvite, onUpdateR
             type="button"
             onClick={() => onRemove(member)}
             disabled={saving}
-            className="rounded-lg p-1.5 text-ink-soft/30 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 disabled:opacity-0"
+            className="rounded-lg border border-line bg-background p-1.5 text-ink-soft transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50 lg:border-transparent lg:bg-transparent lg:text-ink-soft/30 lg:opacity-0 lg:group-hover:opacity-100"
             aria-label="Remove member"
           >
             <Trash2 className="size-4" />
