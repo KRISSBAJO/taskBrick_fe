@@ -6,9 +6,9 @@ import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 const heroStats = [
-  { value: "7+", label: "delivery surfaces" },
-  { value: "AI", label: "risk and action review" },
-  { value: "RBAC", label: "tenant controls" },
+  { value: "7+", label: "core modules" },
+  { value: "AI", label: "smart automation" },
+  { value: "RBAC", label: "tenant security" },
 ] as const;
 
 export function AgentHeroSection() {
@@ -18,8 +18,6 @@ export function AgentHeroSection() {
       className="relative isolate overflow-hidden border-b border-black/[0.06] bg-[#fbfaf6] px-5 pb-12 pt-8 text-[#111111] sm:px-8 lg:px-16 lg:pb-14 lg:pt-10"
     >
       <div className="mx-auto max-w-[1180px]">
-
-        {/* Badge */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -27,46 +25,57 @@ export function AgentHeroSection() {
           className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white/84 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.13em] text-[#68645b] shadow-sm backdrop-blur"
         >
           <span className="size-2 animate-pulse rounded-full bg-[#ffd400]" />
-          Enterprise-grade project management
+          AI-powered enterprise work management
         </motion.div>
 
         <div className="mt-7 grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_520px]">
           <div>
-            <motion.h1
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.04, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="max-w-[680px] text-[48px] font-extrabold leading-[1.01] tracking-[-0.025em] text-[#111111] sm:text-[64px] lg:text-[72px]"
+           <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              delay: 0.04,
+              duration: 0.6,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="max-w-[700px] text-[44px] font-extrabold leading-[1.08] tracking-[-0.03em] text-[#111111] sm:text-[54px] lg:text-[60px]"
+          >
+            Manage Projects,
+            <br />
+            Sprints &{" "}
+            <span
+              className="relative inline-block drop-shadow-[0_0_10px_rgba(255,212,0,0.25)]"
             >
-              Projects, sprints,{" "}
-              <span className="relative inline-block">
-                and AI
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 200 10"
-                  className="absolute -bottom-1 left-0 w-full"
-                  preserveAspectRatio="none"
-                  fill="none"
-                >
-                  <path
-                    d="M3 7 Q50 2 100 7 Q150 12 197 7"
-                    stroke="#ffd400"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>{" "}
-              in one secure workspace.
-            </motion.h1>
-
+              AI
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 200 10"
+                className="absolute -bottom-1 left-0 w-full"
+                preserveAspectRatio="none"
+                fill="none"
+              >
+                <path
+                  d="M3 7 Q50 2 100 7 Q150 12 197 7"
+                  stroke="#ffd400"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
+            <br />
+            <span className="text-[#111111]">
+              in One Secure Workspace.
+            </span>
+          </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.55 }}
-              className="mt-6 max-w-[520px] text-lg leading-[1.8] text-[#4f4b43]"
+              className="mt-6 max-w-[560px] text-lg leading-[1.8] text-[#4f4b43]"
             >
-              TaskBricks gives enterprise teams boards, sprints, approvals, internal mail,
-              and AI-assisted operations, fully auditable and built to scale.
+              Plan projects, manage agile sprints, automate approvals, collaborate through
+              internal messaging, and use AI to identify risks, summarize progress, and
+              accelerate delivery.
             </motion.p>
 
             <motion.div
@@ -79,13 +88,14 @@ export function AgentHeroSection() {
                 href="/signup"
                 className="inline-flex h-12 items-center gap-2 rounded-md bg-[#ffd400] px-6 text-sm font-extrabold text-[#111111] shadow-[0_4px_18px_rgba(255,212,0,0.48)] transition hover:-translate-y-0.5 hover:bg-[#f5ca00] hover:shadow-[0_6px_22px_rgba(255,212,0,0.55)]"
               >
-                Start free trial <ArrowRight className="size-4" aria-hidden="true" />
+                Start for free <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
+
               <Link
                 href="/login"
                 className="inline-flex h-12 items-center gap-2 rounded-md border border-black/[0.14] bg-white/80 px-6 text-sm font-extrabold text-[#111111] shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:border-black/[0.24] hover:bg-white"
               >
-                Open dashboard
+                View demo
               </Link>
             </motion.div>
 
@@ -97,7 +107,9 @@ export function AgentHeroSection() {
             >
               {heroStats.map((stat) => (
                 <div key={stat.label} className="min-w-0 px-4 py-3">
-                  <p className="text-lg font-extrabold leading-none text-[#111111]">{stat.value}</p>
+                  <p className="text-lg font-extrabold leading-none text-[#111111]">
+                    {stat.value}
+                  </p>
                   <p className="mt-1 truncate text-[10px] font-extrabold uppercase tracking-[0.11em] text-[#8a8578]">
                     {stat.label}
                   </p>
@@ -113,11 +125,11 @@ export function AgentHeroSection() {
             className="relative hidden lg:block"
           >
             <Image
-              src="/product/hero_dash.png"
+              src="/product/test2.png"
               alt="TaskBricks dashboard preview"
               width={920}
               height={600}
-              className="w-full object-contain drop-shadow-[0_30px_70px_rgba(17,17,17,0.12)]"
+              className="w-full object-contain drop-shadow-[0_40px_90px_rgba(17,17,17,0.18)]"
               priority
             />
           </motion.div>
