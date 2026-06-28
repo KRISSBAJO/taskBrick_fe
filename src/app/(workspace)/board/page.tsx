@@ -7,7 +7,8 @@ import {
   DndContext,
   DragOverlay,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useDroppable,
   useSensor,
   useSensors,
@@ -71,6 +72,7 @@ import {
   updateBoardColumn,
   updateTask,
   updateTaskBoardOrder,
+  updateTaskStatus,
   type BoardColumn,
   type Project,
   type ProjectBoard,
@@ -177,7 +179,8 @@ export default function BoardPage() {
   const [viewMode,           setViewMode]           = useState<ViewMode>("board");
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
@@ -528,11 +531,22 @@ export default function BoardPage() {
       setMessage({ text: "Your role cannot edit this task.", ok: false });
       return;
     }
+    if (patch.status && (!canMoveTasks || task.permissions?.canMove === false)) {
+      setMessage({ text: "Your role cannot move this task.", ok: false });
+      return;
+    }
     const before = board;
-    setBoard(updateTaskInBoard(board, task.id, applyTaskCardPatch(task, patch)));
+    setBoard(applyQuickTaskBoardPatch(board, task, patch));
     setSaving(true); setMessage(null);
     try {
-      await updateTask(auth.accessToken, task.id, patch);
+      const { status, ...detailPatch } = patch;
+      if (status) {
+        await updateTaskStatus(auth.accessToken, task.id, { status });
+      }
+      if (Object.keys(detailPatch).length > 0) {
+        await updateTask(auth.accessToken, task.id, detailPatch);
+      }
+      await loadBoard(selectedProjectId);
     } catch (err) {
       setBoard(before);
       setMessage({ text: err instanceof Error ? err.message : "Unable to update task.", ok: false });
@@ -2393,6 +2407,26 @@ function getTaskSwimlane(task: Task, mode: SwimlaneMode, sprints: Sprint[], spri
     return { id: `priority:${task.priority}`, name: priorityLabels[task.priority], sort: priorities.indexOf(task.priority) };
   }
   return { id: "all", name: "All tasks", sort: 0 };
+}
+
+function applyQuickTaskBoardPatch(
+  board: ProjectBoard,
+  task: Task,
+  patch: Partial<Pick<Task, "status" | "priority" | "dueDate">>,
+) {
+  let nextBoard = board;
+
+  if (patch.status) {
+    const targetColumn = board.columns.find((column) => column.status === patch.status);
+    const currentColumn = board.columns.find((column) => (column.tasks ?? []).some((item) => item.id === task.id));
+
+    if (targetColumn && currentColumn?.id !== targetColumn.id) {
+      const targetIndex = (targetColumn.tasks ?? []).filter((item) => item.id !== task.id).length;
+      nextBoard = moveTaskOnBoard(board, task.id, targetColumn.id, targetIndex, patch.status);
+    }
+  }
+
+  return updateTaskInBoard(nextBoard, task.id, applyTaskCardPatch(task, patch));
 }
 
 function applyTaskCardPatch(task: Task, patch: Partial<Pick<Task, "status" | "priority" | "dueDate">>): Partial<Task> {
