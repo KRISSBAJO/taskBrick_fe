@@ -20,6 +20,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useWorkspaceAuth } from "@/components/workspace-shell";
+import { useToast } from "@/components/toast-provider";
 import {
   listProjects,
   listTasks,
@@ -103,6 +104,7 @@ const typeAccent: Partial<Record<TaskType, string>> = {
 
 export default function DashboardPage() {
   const { auth, user } = useWorkspaceAuth();
+  const { toast } = useToast();
   const [data, setData] = useState<DashboardData>({
     projects: [],
     tasks: [],
@@ -110,27 +112,51 @@ export default function DashboardPage() {
     workspaces: [],
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [now] = useState(() => Date.now());
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
-    setError("");
     try {
-      const [projects, tasks, teams, workspaces] = await Promise.all([
+      const canLoadTeams = canUsePermission(user.permissions, "manage:teams");
+      const canLoadWorkspaces = canUsePermission(user.permissions, "manage:workspaces");
+      const optionalFailures: string[] = [];
+
+      const [projects, tasks] = await Promise.all([
         fetchAllPages((page) => listProjects(auth.accessToken, { page, limit: 100 })),
         fetchAllPages((page) => listTasks(auth.accessToken, { page, limit: 100, sortBy: "updatedAt", sortDirection: "desc" })),
-        fetchAllPages((page) => listTeams(auth.accessToken, { page, limit: 100 })),
-        fetchAllPages((page) => listWorkspaces(auth.accessToken, { page, limit: 100 })),
+      ]);
+
+      const [teams, workspaces] = await Promise.all([
+        canLoadTeams
+          ? fetchAllPages((page) => listTeams(auth.accessToken, { page, limit: 100 })).catch(() => {
+              optionalFailures.push("team scope");
+              return [];
+            })
+          : Promise.resolve([]),
+        canLoadWorkspaces
+          ? fetchAllPages((page) => listWorkspaces(auth.accessToken, { page, limit: 100 })).catch(() => {
+              optionalFailures.push("workspace scope");
+              return [];
+            })
+          : Promise.resolve([]),
       ]);
 
       setData({ projects, tasks, teams, workspaces });
+
+      if (optionalFailures.length) {
+        toast({
+          title: "Some dashboard sections were skipped",
+          description: `${optionalFailures.join(" and ")} could not be loaded with your current permissions.`,
+          variant: "warning",
+        });
+      }
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Unable to load dashboard data.");
+      const message = caught instanceof Error ? caught.message : "Unable to load dashboard data.";
+      toast({ title: "Dashboard unavailable", description: message, variant: "error" });
     } finally {
       setLoading(false);
     }
-  }, [auth.accessToken]);
+  }, [auth.accessToken, toast, user.permissions]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => void loadDashboard(), 0);
@@ -204,19 +230,6 @@ export default function DashboardPage() {
           </button>
         </div>
       </section>
-
-      {error ? (
-        <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
-          {error}
-          <button
-            type="button"
-            onClick={() => void loadDashboard()}
-            className="rounded-xl border border-red-200 bg-white px-3 py-1.5 text-xs font-black text-red-700 transition hover:bg-red-50"
-          >
-            Retry
-          </button>
-        </section>
-      ) : null}
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
         <TrendAnalysisCard
@@ -930,6 +943,14 @@ async function fetchAllPages<T>(loader: (page: number) => Promise<PaginatedRespo
   }
 
   return items;
+}
+
+function canUsePermission(permissions: readonly string[] | undefined, permission: string) {
+  const granted = new Set(permissions ?? []);
+  if (granted.has("manage:all") || granted.has(permission)) return true;
+
+  const subject = permission.split(":")[1];
+  return subject ? granted.has(`manage:${subject}`) : false;
 }
 
 function buildMetrics(data: DashboardData, now: number) {

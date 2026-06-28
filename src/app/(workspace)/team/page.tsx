@@ -67,6 +67,10 @@ function teamInitials(name: string) {
   return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
+function isDefaultMemberRole(role: Role) {
+  return role.name.trim().toLowerCase() === "member";
+}
+
 export default function TeamPage() {
   const { auth } = useWorkspaceAuth();
   const { confirm } = useConfirm();
@@ -80,8 +84,6 @@ export default function TeamPage() {
   const [loadingDir,      setLoadingDir]      = useState(true);
   const [loadingMembers,  setLoadingMembers]  = useState(false);
   const [saving,          setSaving]          = useState(false);
-  const [error,           setError]           = useState("");
-  const [message,         setMessage]         = useState<{ text: string; ok: boolean } | null>(null);
   const [showComposer,    setShowComposer]    = useState(false);
   const [query,           setQuery]           = useState("");
   const [activeTab,       setActiveTab]       = useState<DetailTab>("members");
@@ -89,7 +91,7 @@ export default function TeamPage() {
   const selectedTeam = teams.find((t) => t.id === selectedTeamId) ?? null;
 
   const loadDirectory = useCallback(async () => {
-    setLoadingDir(true); setError("");
+    setLoadingDir(true);
     try {
       const [teamPage, userPage, roleList, permList] = await Promise.all([
         listTeams(auth.accessToken), listUsers(auth.accessToken),
@@ -99,17 +101,27 @@ export default function TeamPage() {
       setRoles(roleList); setPermissions(permList);
       setSelectedTeamId((cur) => cur || teamPage.data[0]?.id || "");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to load team data.");
+      toast({
+        title: "Unable to load team management",
+        description: err instanceof Error ? err.message : "Unable to load team data.",
+        variant: "error",
+      });
     } finally { setLoadingDir(false); }
-  }, [auth.accessToken]);
+  }, [auth.accessToken, toast]);
 
   const loadMembers = useCallback(async (teamId = selectedTeamId) => {
     if (!teamId) { setMembers([]); return; }
-    setLoadingMembers(true); setMessage(null);
+    setLoadingMembers(true);
     try { setMembers(await listTeamMembers(auth.accessToken, teamId)); }
-    catch (err) { setMessage({ text: err instanceof Error ? err.message : "Unable to load members.", ok: false }); }
+    catch (err) {
+      toast({
+        title: "Unable to load team members",
+        description: err instanceof Error ? err.message : "Unable to load members.",
+        variant: "error",
+      });
+    }
     finally { setLoadingMembers(false); }
-  }, [auth.accessToken, selectedTeamId]);
+  }, [auth.accessToken, selectedTeamId, toast]);
 
   useEffect(() => { const t = window.setTimeout(() => void loadDirectory(), 0); return () => window.clearTimeout(t); }, [loadDirectory]);
   useEffect(() => { const t = window.setTimeout(() => void loadMembers(selectedTeamId), 0); return () => window.clearTimeout(t); }, [loadMembers, selectedTeamId]);
@@ -139,19 +151,18 @@ export default function TeamPage() {
     e.preventDefault(); if (!selectedTeam) return;
     const form = e.currentTarget, fd = new FormData(form);
     const roleIds = fd.getAll("roleIds").map(String).filter(Boolean);
-    setSaving(true); setMessage(null);
+    setSaving(true);
     try {
       const result = await inviteTeamMember(auth.accessToken, selectedTeam.id, {
         email: String(fd.get("email") || ""), firstName: String(fd.get("firstName") || ""),
         lastName: String(fd.get("lastName") || ""), teamRole: String(fd.get("teamRole") || "Member"), roleIds,
       }) as TeamInviteResult;
       const description = describeInviteDelivery(result);
-      form.reset(); setMessage({ text: description, ok: result.deliveryStatus?.status !== "failed" });
+      form.reset();
       toast({ title: "User invited", description, variant: result.deliveryStatus?.status === "failed" ? "warning" : "success" });
       await Promise.all([loadMembers(selectedTeam.id), loadDirectory()]);
     } catch (err) {
       const description = err instanceof Error ? err.message : "Unable to invite user.";
-      setMessage({ text: description, ok: false });
       toast({ title: "Invite failed", description, variant: "error" });
     }
     finally { setSaving(false); }
@@ -164,7 +175,6 @@ export default function TeamPage() {
     const roleIds = fd.getAll("roleIds").map(String).filter(Boolean);
 
     setSaving(true);
-    setMessage(null);
     try {
       const result = await inviteTenantUser(auth.accessToken, {
         email: String(fd.get("email") || ""),
@@ -183,7 +193,6 @@ export default function TeamPage() {
     } catch (err) {
       const description = err instanceof Error ? err.message : "Unable to create tenant user.";
       toast({ title: "Tenant invite failed", description, variant: "error" });
-      setMessage({ text: description, ok: false });
     } finally {
       setSaving(false);
     }
@@ -195,7 +204,6 @@ export default function TeamPage() {
     sendInvites?: boolean;
   }): Promise<BulkInviteUsersResponse> {
     setSaving(true);
-    setMessage(null);
     try {
       const result = await bulkInviteTenantUsers(auth.accessToken, payload);
       toast({
@@ -208,7 +216,6 @@ export default function TeamPage() {
     } catch (err) {
       const description = err instanceof Error ? err.message : "Unable to import tenant users.";
       toast({ title: "Bulk import failed", description, variant: "error" });
-      setMessage({ text: description, ok: false });
       throw err;
     } finally {
       setSaving(false);
@@ -220,15 +227,14 @@ export default function TeamPage() {
     const form = e.currentTarget, fd = new FormData(form);
     const userId = String(fd.get("userId") || "");
     if (!userId) return;
-    setSaving(true); setMessage(null);
+    setSaving(true);
     try {
       await addTeamMember(auth.accessToken, selectedTeam.id, { userId, role: String(fd.get("teamRole") || "Member") });
-      form.reset(); setMessage({ text: "Member added to the team.", ok: true });
+      form.reset();
       toast({ title: "Member added", description: "The tenant user now belongs to this team.", variant: "success" });
       await Promise.all([loadMembers(selectedTeam.id), loadDirectory()]);
     } catch (err) {
       const description = err instanceof Error ? err.message : "Unable to add member.";
-      setMessage({ text: description, ok: false });
       toast({ title: "Add member failed", description, variant: "error" });
     }
     finally { setSaving(false); }
@@ -236,15 +242,13 @@ export default function TeamPage() {
 
   async function onUpdateRole(member: TeamMember, role: string) {
     if (!selectedTeam) return;
-    setSaving(true); setMessage(null);
+    setSaving(true);
     try {
       await updateTeamMemberRole(auth.accessToken, selectedTeam.id, member.userId, role);
       setMembers((cur) => cur.map((m) => m.id === member.id ? { ...m, role } : m));
-      setMessage({ text: "Team role updated.", ok: true });
       toast({ title: "Team role updated", description: `${displayName(member.user)} is now ${role}.`, variant: "success" });
     } catch (err) {
       const description = err instanceof Error ? err.message : "Unable to update role.";
-      setMessage({ text: description, ok: false });
       toast({ title: "Role update failed", description, variant: "error" });
     }
     finally { setSaving(false); }
@@ -259,16 +263,14 @@ export default function TeamPage() {
       tone: "danger",
     });
     if (!confirmed) return;
-    setSaving(true); setMessage(null);
+    setSaving(true);
     try {
       await removeTeamMember(auth.accessToken, selectedTeam.id, member.userId);
       setMembers((cur) => cur.filter((m) => m.id !== member.id));
-      setMessage({ text: "Member removed.", ok: true });
       toast({ title: "Member removed", description: `${displayName(member.user)} was removed from ${selectedTeam.name}.`, variant: "success" });
       await loadDirectory();
     } catch (err) {
       const description = err instanceof Error ? err.message : "Unable to remove member.";
-      setMessage({ text: description, ok: false });
       toast({ title: "Remove member failed", description, variant: "error" });
     }
     finally { setSaving(false); }
@@ -276,15 +278,13 @@ export default function TeamPage() {
 
   async function onResendInvite(member: TeamMember) {
     if (!selectedTeam) return;
-    setSaving(true); setMessage(null);
+    setSaving(true);
     try {
       const result = await resendTeamMemberInvite(auth.accessToken, selectedTeam.id, member.userId);
       const description = describeInviteDelivery(result);
-      setMessage({ text: description, ok: result.deliveryStatus?.status !== "failed" });
       toast({ title: "Invite resent", description, variant: result.deliveryStatus?.status === "failed" ? "warning" : "success" });
     } catch (err) {
       const description = err instanceof Error ? err.message : "Unable to resend invitation.";
-      setMessage({ text: description, ok: false });
       toast({ title: "Resend failed", description, variant: "error" });
     }
     finally { setSaving(false); }
@@ -299,16 +299,14 @@ export default function TeamPage() {
       tone: "danger",
     });
     if (!confirmed) return;
-    setSaving(true); setMessage(null);
+    setSaving(true);
     try {
       await cancelTeamMemberInvite(auth.accessToken, selectedTeam.id, member.userId);
       setMembers((cur) => cur.filter((m) => m.id !== member.id));
-      setMessage({ text: "Invitation cancelled.", ok: true });
       toast({ title: "Invitation cancelled", description: `${displayName(member.user)} was removed from ${selectedTeam.name}.`, variant: "success" });
       await loadDirectory();
     } catch (err) {
       const description = err instanceof Error ? err.message : "Unable to cancel invitation.";
-      setMessage({ text: description, ok: false });
       toast({ title: "Cancel failed", description, variant: "error" });
     }
     finally { setSaving(false); }
@@ -395,9 +393,6 @@ export default function TeamPage() {
       )}
 
       {/* ── Banners ───────────────────────────────────────────── */}
-      {error   && <Banner ok={false}>{error}</Banner>}
-      {message && <Banner ok={message.ok}>{message.text}</Banner>}
-
       {/* ── Main layout ───────────────────────────────────────── */}
       <div className="grid min-h-[680px] gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
 
@@ -805,7 +800,7 @@ function InviteForm({ onSubmit, roles, saving }: {
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             {roles.map((role) => (
               <label key={role.id} className="flex items-start gap-2 rounded-xl border border-line bg-background px-3 py-2.5 transition hover:border-primary/40 hover:bg-panel-muted">
-                <input name="roleIds" type="checkbox" value={role.id} className="mt-0.5 accent-[#ffd400]" />
+                <input name="roleIds" type="checkbox" value={role.id} defaultChecked={isDefaultMemberRole(role)} className="mt-0.5 accent-[#ffd400]" />
                 <span className="min-w-0">
                   <span className="block text-[12px] font-black text-foreground">{role.name}</span>
                   <span className="block text-[11px] text-ink-soft">{role.permissions?.length ?? 0} permissions</span>
@@ -1001,7 +996,7 @@ function TenantUsersPanel({
               <div className="mt-2 grid gap-2">
                 {roles.map((role) => (
                   <label key={role.id} className="flex items-start gap-2 rounded-xl border border-line bg-panel px-3 py-2.5 transition hover:border-primary/40">
-                    <input name="roleIds" type="checkbox" value={role.id} className="mt-0.5 accent-[#ffd400]" />
+                    <input name="roleIds" type="checkbox" value={role.id} defaultChecked={isDefaultMemberRole(role)} className="mt-0.5 accent-[#ffd400]" />
                     <span>
                       <span className="block text-[12px] font-black text-foreground">{role.name}</span>
                       <span className="block text-[11px] text-ink-soft">{role.permissions?.length ?? 0} permissions</span>
@@ -1040,9 +1035,15 @@ function BulkUserImportPanel({
   saving: boolean;
 }) {
   const [csv, setCsv] = useState("email,firstName,lastName,roles\nada@example.com,Ada,Lovelace,Member");
-  const [defaultRoleIds, setDefaultRoleIds] = useState<string[]>([]);
+  const [selectedDefaultRoleIds, setSelectedDefaultRoleIds] = useState<string[] | null>(null);
   const [sendInvites, setSendInvites] = useState(true);
   const [result, setResult] = useState<BulkInviteUsersResponse | null>(null);
+
+  const defaultRoleIds = useMemo(() => {
+    if (selectedDefaultRoleIds) return selectedDefaultRoleIds;
+    const memberRole = roles.find(isDefaultMemberRole);
+    return memberRole ? [memberRole.id] : [];
+  }, [roles, selectedDefaultRoleIds]);
 
   const preview = useMemo(() => parseTenantUserCsv(csv, roles), [csv, roles]);
 
@@ -1115,8 +1116,10 @@ function BulkUserImportPanel({
                       key={role.id}
                       type="button"
                       onClick={() =>
-                        setDefaultRoleIds((current) =>
-                          checked ? current.filter((id) => id !== role.id) : [...current, role.id],
+                        setSelectedDefaultRoleIds((current) =>
+                          checked
+                            ? (current ?? defaultRoleIds).filter((id) => id !== role.id)
+                            : [...(current ?? defaultRoleIds), role.id],
                         )
                       }
                       className={cn(
