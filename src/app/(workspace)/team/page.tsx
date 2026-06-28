@@ -26,6 +26,7 @@ import { useToast } from "@/components/toast-provider";
 import { useWorkspaceAuth } from "@/components/workspace-shell";
 import {
   addTeamMember,
+  assignRole,
   bulkInviteTenantUsers,
   cancelTeamMemberInvite,
   createFileAsset,
@@ -40,6 +41,7 @@ import {
   listTeams,
   listUsers,
   listWorkspaces,
+  removeRoleFromUser,
   removeTeamMember,
   resendTeamMemberInvite,
   updateTeam,
@@ -307,6 +309,28 @@ export default function TeamPage() {
       toast({ title: "Role update failed", description, variant: "error" });
     }
     finally { setSaving(false); }
+  }
+
+  async function onToggleTenantUserRole(user: TenantUser, role: Role, assign: boolean) {
+    setSaving(true);
+    try {
+      if (assign) {
+        await assignRole(auth.accessToken, { userId: user.id, roleId: role.id });
+      } else {
+        await removeRoleFromUser(auth.accessToken, role.id, user.id);
+      }
+      toast({
+        title: assign ? "RBAC group assigned" : "RBAC group removed",
+        description: `${displayName(user)} ${assign ? "now has" : "no longer has"} ${role.name}.`,
+        variant: "success",
+      });
+      await loadDirectory();
+    } catch (err) {
+      const description = err instanceof Error ? err.message : "Unable to update RBAC groups.";
+      toast({ title: "RBAC update failed", description, variant: "error" });
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function onRemoveMember(member: TeamMember) {
@@ -625,6 +649,7 @@ export default function TeamPage() {
                 )}
                 {activeTab === "directory" && (
                   <TenantUsersPanel
+                    onToggleRole={onToggleTenantUserRole}
                     roles={roles}
                     saving={saving}
                     users={users}
@@ -994,11 +1019,13 @@ function AddExistingForm({ onSubmit, saving, users }: {
 
 function TenantUsersPanel({
   onInvite,
+  onToggleRole,
   roles,
   saving,
   users,
 }: {
   onInvite: (e: FormEvent<HTMLFormElement>) => void;
+  onToggleRole: (user: TenantUser, role: Role, assign: boolean) => void;
   roles: Role[];
   saving: boolean;
   users: TenantUser[];
@@ -1035,42 +1062,76 @@ function TenantUsersPanel({
 
         <div className="divide-y divide-line">
           {filteredUsers.length ? (
-            filteredUsers.map((user) => (
-              <article key={user.id} className="flex items-center gap-3 px-4 py-3 transition hover:bg-panel-muted/70">
-                {user.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={user.avatarUrl} alt="" className="size-10 rounded-xl object-cover" />
-                ) : (
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#111111] text-[11px] font-black text-white">
-                    {userInitials(user)}
-                  </span>
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-black text-foreground">{displayName(user)}</p>
-                  <p className="truncate text-[11px] font-semibold text-ink-soft">{userWorkspaceMail(user)}</p>
-                  {userWorkspaceMail(user) !== user.email ? (
-                    <p className="truncate text-[10px] text-ink-soft/60">Login {user.email}</p>
-                  ) : null}
-                </div>
-                <div className="hidden min-w-0 max-w-[280px] flex-1 flex-wrap justify-end gap-1 md:flex">
-                  {user.roles?.length ? (
-                    user.roles.slice(0, 3).map((assignment) => (
-                      <span key={assignment.role.id} className="rounded-md border border-line bg-panel px-1.5 py-0.5 text-[9px] font-black text-foreground">
-                        {assignment.role.name}
+            filteredUsers.map((user) => {
+              const assignedRoleIds = new Set(user.roles?.map((assignment) => assignment.role.id) ?? []);
+              return (
+                <article key={user.id} className="px-4 py-3 transition hover:bg-panel-muted/70">
+                  <div className="flex items-center gap-3">
+                    {user.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={user.avatarUrl} alt="" className="size-10 rounded-xl object-cover" />
+                    ) : (
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#111111] text-[11px] font-black text-white">
+                        {userInitials(user)}
                       </span>
-                    ))
-                  ) : (
-                    <span className="text-[11px] text-ink-soft">No RBAC role</span>
-                  )}
-                  {(user.roles?.length ?? 0) > 3 ? (
-                    <span className="rounded-md bg-panel-muted px-1.5 py-0.5 text-[9px] font-black text-ink-soft">
-                      +{(user.roles?.length ?? 0) - 3}
-                    </span>
-                  ) : null}
-                </div>
-                <StatusBadge status={user.status} />
-              </article>
-            ))
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13px] font-black text-foreground">{displayName(user)}</p>
+                      <p className="truncate text-[11px] font-semibold text-ink-soft">{userWorkspaceMail(user)}</p>
+                      {userWorkspaceMail(user) !== user.email ? (
+                        <p className="truncate text-[10px] text-ink-soft/60">Login {user.email}</p>
+                      ) : null}
+                    </div>
+                    <div className="hidden min-w-0 max-w-[280px] flex-1 flex-wrap justify-end gap-1 md:flex">
+                      {user.roles?.length ? (
+                        user.roles.slice(0, 3).map((assignment) => (
+                          <span key={assignment.role.id} className="rounded-md border border-line bg-panel px-1.5 py-0.5 text-[9px] font-black text-foreground">
+                            {assignment.role.name}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-[11px] text-ink-soft">No RBAC role</span>
+                      )}
+                      {(user.roles?.length ?? 0) > 3 ? (
+                        <span className="rounded-md bg-panel-muted px-1.5 py-0.5 text-[9px] font-black text-ink-soft">
+                          +{(user.roles?.length ?? 0) - 3}
+                        </span>
+                      ) : null}
+                    </div>
+                    <StatusBadge status={user.status} />
+                  </div>
+
+                  <details className="group mt-3 rounded-xl border border-line bg-panel px-3 py-2">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[11px] font-black uppercase tracking-[0.14em] text-ink-soft">
+                      <span>RBAC groups</span>
+                      <ChevronRight className="size-3.5 transition group-open:rotate-90" />
+                    </summary>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {roles.map((role) => {
+                        const assigned = assignedRoleIds.has(role.id);
+                        return (
+                          <button
+                            key={role.id}
+                            type="button"
+                            disabled={saving}
+                            onClick={() => onToggleRole(user, role, !assigned)}
+                            className={cn(
+                              "rounded-full border px-3 py-1.5 text-[11px] font-black transition disabled:cursor-not-allowed disabled:opacity-50",
+                              assigned
+                                ? "border-[#111111] bg-[#111111] text-white"
+                                : "border-line bg-background text-ink-soft hover:border-primary hover:text-foreground",
+                            )}
+                          >
+                            {assigned ? "Assigned: " : "+ "}
+                            {role.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </details>
+                </article>
+              );
+            })
           ) : (
             <div className="flex min-h-56 flex-col items-center justify-center gap-2 p-8">
               <Users className="size-7 text-line" />
