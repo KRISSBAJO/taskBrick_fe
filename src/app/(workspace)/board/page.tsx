@@ -956,6 +956,20 @@ export default function BoardPage() {
           />
         ) : viewMode === "list" ? (
           <ListView board={filteredBoard} density={density} sprints={sprints} />
+        ) : filteredBoard.columns.length === 0 ? (
+          <BoardEmptyCanvas
+            canManageColumns={canManageColumns}
+            onShowColumnComposer={() => setShowColComposer(true)}
+            title="No board columns yet"
+            message="Create delivery columns such as Backlog, To Do, In Progress, Testing, and Done before adding cards to this board."
+          />
+        ) : visibleTasks.length === 0 ? (
+          <BoardEmptyCanvas
+            canManageColumns={false}
+            onShowColumnComposer={() => undefined}
+            title="No tasks match this view"
+            message="Try clearing filters, switching sprint scope, or creating a new task for this project."
+          />
         ) : swimlane !== "NONE" ? (
           <SwimlaneBoard
             density={density}
@@ -2763,6 +2777,40 @@ function EmptyBoard() {
         <CircleDot className="mx-auto size-8 text-line" />
         <h3 className="mt-3 text-sm font-black text-foreground">No board available</h3>
         <p className="mt-1 text-sm text-ink-soft">Create a project first, then return to the board.</p>
+      </div>
+    </div>
+  );
+}
+
+function BoardEmptyCanvas({
+  canManageColumns,
+  message,
+  onShowColumnComposer,
+  title,
+}: {
+  canManageColumns: boolean;
+  message: string;
+  onShowColumnComposer: () => void;
+  title: string;
+}) {
+  return (
+    <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-line bg-panel px-6 py-10">
+      <div className="max-w-md text-center">
+        <span className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-primary/15 text-primary-dark">
+          <KanbanSquare className="size-6" aria-hidden="true" />
+        </span>
+        <h3 className="mt-4 text-base font-black text-foreground">{title}</h3>
+        <p className="mt-2 text-sm font-semibold leading-6 text-ink-soft">{message}</p>
+        {canManageColumns ? (
+          <button
+            type="button"
+            onClick={onShowColumnComposer}
+            className="tb-yellow-button mt-5 inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-black"
+          >
+            <Plus className="size-4" />
+            Create columns
+          </button>
+        ) : null}
       </div>
     </div>
   );

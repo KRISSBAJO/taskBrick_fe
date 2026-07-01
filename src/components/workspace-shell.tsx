@@ -1,9 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Loader2, ShieldCheck } from "lucide-react";
 import {
   AUTH_UPDATED_EVENT,
   ApiError,
@@ -21,6 +19,7 @@ import { Topbar } from "@/components/topbar";
 import { ConfirmProvider } from "@/components/confirm-provider";
 import { RealtimeProvider } from "@/components/realtime-provider";
 import { ToastProvider } from "@/components/toast-provider";
+import { AppLoadingSurface } from "@/components/ui/loading-surface";
 
 type WorkspaceAuthContextValue = {
   auth: StoredAuth;
@@ -210,46 +209,11 @@ export function AuthenticatedSessionProvider({
 
   if (initializing || !value) {
     return (
-      <div className={`relative flex min-h-dvh items-center justify-center overflow-hidden px-5 text-center ${loadingClassName}`}>
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(255,212,0,0.18),transparent_34%),linear-gradient(180deg,#fffdf6_0%,#ffffff_65%)]" />
-        <div className="relative w-full max-w-[430px] rounded-[28px] border border-line bg-white/92 p-6 shadow-[0_28px_80px_rgba(17,17,17,0.10)] backdrop-blur">
-          <div className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-line bg-white shadow-sm">
-            <Image
-              src="/product/taskbrick_logo.png"
-              alt="TaskBricks"
-              width={34}
-              height={34}
-              className="size-8 object-contain"
-              priority
-            />
-          </div>
-          <div className="mt-5 flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-primary-dark">
-            <ShieldCheck className="size-3.5" aria-hidden="true" />
-            Secure workspace
-          </div>
-          <p className="mt-3 text-lg font-black text-foreground">{loadingTitle}</p>
-          <p className="mt-2 text-sm font-semibold text-ink-soft">{loadingSubtitle}</p>
-
-          <div className="mt-6 overflow-hidden rounded-full bg-panel-muted">
-            <span className="block h-1.5 w-1/2 origin-left rounded-full bg-primary shadow-[0_0_24px_rgba(255,212,0,0.55)] animate-[tb-loading-bar_1.45s_ease-in-out_infinite]" />
-          </div>
-
-          <div className="mt-5 grid grid-cols-3 gap-2 text-left">
-            {["Session", "Access", "Realtime"].map((label, index) => (
-              <div key={label} className="rounded-2xl border border-line bg-[#fbfaf6] p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-[0.12em] text-ink-soft">{label}</span>
-                  <Loader2
-                    className="size-3 animate-spin text-primary-dark"
-                    aria-hidden="true"
-                    style={{ animationDelay: `${index * 120}ms` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <AppLoadingSurface
+        className={loadingClassName}
+        title={loadingTitle}
+        subtitle={loadingSubtitle}
+      />
     );
   }
 
