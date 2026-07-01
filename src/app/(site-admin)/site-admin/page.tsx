@@ -1689,50 +1689,46 @@ function OverviewDashboard({
 
   return (
     <div className="space-y-5">
-      <section className="overflow-hidden rounded-[28px] bg-white shadow-[0_18px_60px_rgba(17,17,17,0.08)]" style={{ border: "1px solid #ded8c8" }}>
-        <div className="grid gap-5 p-5 md:p-6 lg:grid-cols-[1fr_auto] lg:items-start">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <OverviewPill icon={<ShieldCheck className="size-3.5" />} label="Platform overview" color="#f87171" />
-              <OverviewPill icon={<LockKeyhole className="size-3.5" />} label={platformLevel} color="#8a6b00" />
-            </div>
-            <h1 className="mt-4 text-2xl font-black leading-tight tracking-tight text-[#111111] md:text-[34px]">
-              Site Admin Dashboard
-            </h1>
-            <p className="mt-2 max-w-2xl text-[13px] font-semibold leading-6 text-[#665f54]">
-              Platform-level view of tenants, users, active sessions, security pressure, and audit volume. Tenant-owner tools stay inside workspace admin.
-            </p>
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="rounded-[28px] bg-white p-5 shadow-[0_14px_44px_rgba(17,17,17,0.055)] md:p-6" style={{ border: "1px solid #ded8c8" }}>
+          <div className="flex flex-wrap items-center gap-2">
+            <OverviewPill icon={<ShieldCheck className="size-3.5" />} label="Site admin" color="#ffd400" />
+            <OverviewPill icon={<LockKeyhole className="size-3.5" />} label={platformLevel} color="#111111" />
           </div>
-
-          <div className="grid min-w-[250px] grid-cols-[82px_1fr] items-center gap-4 rounded-[24px] bg-[#fbfaf6] p-4" style={{ border: "1px solid #e7dfcf" }}>
-            <div
-              className="grid size-[82px] place-items-center rounded-full text-xl font-black"
-              style={{
-                background: `conic-gradient(${healthColor} ${healthScore * 3.6}deg, #ece7da 0deg)`,
-                color: healthColor,
-              }}
-            >
-              <span className="grid size-[66px] place-items-center rounded-full bg-white">{healthScore}</span>
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <Gauge className="size-4" style={{ color: healthColor }} aria-hidden="true" />
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a8375]">Health</p>
-              </div>
-              <p className="mt-1 text-lg font-black" style={{ color: healthColor }}>{healthLabel}</p>
-              <p className="mt-1 text-[11px] font-semibold leading-5 text-[#766f63]">
-                {openEvents > 0 ? `${openEvents} open security event${openEvents === 1 ? "" : "s"}` : "No open security events"}
+          <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+            <div className="min-w-0">
+              <h1 className="text-2xl font-black leading-tight tracking-tight text-[#111111] md:text-[32px]">
+                Platform command
+              </h1>
+              <p className="mt-2 max-w-2xl text-[13px] font-semibold leading-6 text-[#665f54]">
+                A clean platform-level snapshot for tenants, users, live sessions, security pressure, and audit volume.
               </p>
             </div>
+            <div className="flex items-center gap-3 rounded-[20px] bg-[#fbfaf6] px-4 py-3" style={{ border: "1px solid #e7dfcf" }}>
+              <Gauge className="size-4" style={{ color: healthColor }} aria-hidden="true" />
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a8375]">Platform health</p>
+                <p className="mt-0.5 text-[13px] font-black" style={{ color: healthColor }}>
+                  {healthScore}% {healthLabel}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+            <OverviewMetricCard icon={Building2} label="Tenants" value={totalTenants} meta={`${activeTenants} active / ${trialTenants} trial`} color="#a78bfa" />
+            <OverviewMetricCard icon={Users} label="Users" value={totalUsers} meta={`${overview.users.INVITED ?? 0} invited`} color="#60a5fa" />
+            <OverviewMetricCard icon={Activity} label="Sessions" value={overview.sessions.active} meta="active now" color="#34d399" />
+            <OverviewMetricCard icon={AlertTriangle} label="Security" value={openEvents} meta={`${eventPressure}% pressure`} color={openEvents > 0 ? "#f87171" : "#34d399"} />
           </div>
         </div>
 
-        <div className="grid gap-2.5 border-t border-[#eee8dc] p-5 pt-4 sm:grid-cols-2 lg:grid-cols-4 md:p-6 md:pt-4">
-          <OverviewMetricCard icon={Building2} label="Tenants" value={totalTenants} meta={`${activeTenants} active / ${trialTenants} trial`} color="#a78bfa" />
-          <OverviewMetricCard icon={Users} label="Users" value={totalUsers} meta={`${overview.users.INVITED ?? 0} invited`} color="#60a5fa" />
-          <OverviewMetricCard icon={Activity} label="Sessions" value={overview.sessions.active} meta="active now" color="#34d399" />
-          <OverviewMetricCard icon={AlertTriangle} label="Security" value={openEvents} meta={`${eventPressure}% pressure`} color={openEvents > 0 ? "#f87171" : "#34d399"} />
-        </div>
+        <OverviewPanel title="Priority queue" eyebrow="Needs attention" accent={openEvents > 0 ? "#f87171" : "#34d399"}>
+          <div className="space-y-2.5">
+            {queueItems.map((item) => (
+              <OverviewQueueItem key={item.label} {...item} />
+            ))}
+          </div>
+        </OverviewPanel>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_330px]">
@@ -1765,11 +1761,20 @@ function OverviewDashboard({
           </div>
         </OverviewPanel>
 
-        <OverviewPanel title="Priority queue" eyebrow="Needs attention" accent={openEvents > 0 ? "#f87171" : "#34d399"}>
-          <div className="space-y-2.5">
-            {queueItems.map((item) => (
-              <OverviewQueueItem key={item.label} {...item} />
-            ))}
+        <OverviewPanel title="Access boundary" eyebrow="Current scope" accent="#ffd400">
+          <div className="rounded-2xl bg-[#fbfaf6] p-4" style={{ border: "1px solid #e7dfcf" }}>
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl" style={{ background: "rgba(255,212,0,0.12)", border: "1px solid rgba(255,212,0,0.24)" }}>
+                <LockKeyhole className="size-4" style={{ color: "#d6a900" }} aria-hidden="true" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[12px] font-black text-[#111111]">{currentRole}</p>
+                <p className="mt-0.5 text-[10px] font-bold text-[#8a8375]">{platformLevel} platform grant</p>
+              </div>
+            </div>
+            <p className="mt-3 text-[12px] font-semibold leading-5 text-[#665f54]">
+              Site-admin permissions are separate from tenant-owner workspace administration and every platform action is recorded.
+            </p>
           </div>
         </OverviewPanel>
       </section>
@@ -1790,32 +1795,13 @@ function OverviewDashboard({
           </div>
         </OverviewPanel>
 
-        <div className="space-y-4">
-          <OverviewPanel title="Security stream" eyebrow="Recent signals" accent="#f87171">
-            <OverviewEventList events={recentEvents} />
-            <Link href="/site-admin/security" className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl border border-[#ded8c8] bg-[#fbfaf6] text-[12px] font-black text-[#111111] transition hover:bg-[#ffd400]">
-              Open security page
-              <ArrowRight className="size-3.5" aria-hidden="true" />
-            </Link>
-          </OverviewPanel>
-
-          <OverviewPanel title="Access boundary" eyebrow="Current scope" accent="#ffd400">
-            <div className="rounded-2xl bg-[#fbfaf6] p-4" style={{ border: "1px solid #e7dfcf" }}>
-              <div className="flex items-center gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl" style={{ background: "rgba(255,212,0,0.12)", border: "1px solid rgba(255,212,0,0.24)" }}>
-                  <LockKeyhole className="size-4" style={{ color: "#ffd400" }} aria-hidden="true" />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-[12px] font-black text-[#111111]">{currentRole}</p>
-                  <p className="mt-0.5 text-[10px] font-bold text-[#8a8375]">{platformLevel} platform grant</p>
-                </div>
-              </div>
-              <p className="mt-3 text-[12px] font-semibold leading-5 text-[#665f54]">
-                Site Admin controls are separate from tenant-owner workspace administration and every platform action is recorded.
-              </p>
-            </div>
-          </OverviewPanel>
-        </div>
+        <OverviewPanel title="Security stream" eyebrow="Recent signals" accent="#f87171">
+          <OverviewEventList events={recentEvents} />
+          <Link href="/site-admin/security" className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl border border-[#ded8c8] bg-[#fbfaf6] text-[12px] font-black text-[#111111] transition hover:bg-[#ffd400]">
+            Open security page
+            <ArrowRight className="size-3.5" aria-hidden="true" />
+          </Link>
+        </OverviewPanel>
       </section>
     </div>
   );
