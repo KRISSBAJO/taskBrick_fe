@@ -1233,11 +1233,11 @@ function TenantUsersPanel({
                           Reactivate invite
                         </button>
                       ) : null}
-                      <span className="text-[11px] font-semibold text-ink-soft">
-                        {invitePending
-                          ? "Sends a fresh link using the configured production frontend."
-                          : "Creates a new pending invite for this canceled user."}
-                      </span>
+                      {inviteCancelled ? (
+                        <span className="text-[11px] font-semibold text-ink-soft">
+                          Creates a new pending invite for this canceled user.
+                        </span>
+                      ) : null}
                     </div>
                   ) : null}
 

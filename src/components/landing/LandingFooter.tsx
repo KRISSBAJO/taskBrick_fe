@@ -6,18 +6,18 @@ const footerColumns = [
   {
     title: "Product",
     links: [
-      ["Projects", "#services"],
-      ["Sprints", "#services"],
-      ["Meetings", "#services"],
-      ["AI actions", "#services"],
+      ["Projects", "/projects"],
+      ["Sprints", "/sprints"],
+      ["Meetings", "/meetings"],
+      ["AI actions", "/board/ai"],
     ],
   },
   {
     title: "Company",
     links: [
-      ["About", "#about"],
-      ["Pricing", "#pricing"],
-      ["Contact", "#contact"],
+      ["About", "/#about"],
+      ["Pricing", "/#pricing"],
+      ["Contact", "/#contact"],
       ["Dashboard", "/dashboard"],
     ],
   },
@@ -96,9 +96,9 @@ export function LandingFooter() {
           <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-5 text-xs font-bold text-white/42 md:flex-row md:items-center md:justify-between">
             <p>&copy; 2026 TaskBricks. All rights reserved.</p>
             <div className="flex flex-wrap gap-x-5 gap-y-2">
-              <a href="#contact" className="transition hover:text-[#ffd400]">Privacy</a>
-              <a href="#contact" className="transition hover:text-[#ffd400]">Terms</a>
-              <a href="#contact" className="transition hover:text-[#ffd400]">Cookies</a>
+              <Link href="/privacy" className="transition hover:text-[#ffd400]">Privacy</Link>
+              <Link href="/terms" className="transition hover:text-[#ffd400]">Terms</Link>
+              <Link href="/cookies" className="transition hover:text-[#ffd400]">Cookies</Link>
             </div>
           </div>
         </div>
