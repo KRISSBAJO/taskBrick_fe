@@ -85,7 +85,13 @@ import {
   type TaskType,
   type TenantUser,
 } from "@/lib/api";
-import { getQaTaskSummary } from "@/lib/api/qaApi";
+import {
+  completeQaTestRun,
+  createQaExecution,
+  createQaTestCase,
+  createQaTestRun,
+  getQaTaskSummary,
+} from "@/lib/api/qaApi";
 import { cn } from "@/lib/cn";
 import {
   formatShortDate,
@@ -97,7 +103,7 @@ import {
 
 type SprintFilter = "ALL" | "BACKLOG" | string;
 type BoardDensity = "comfortable" | "compact";
-type ViewMode     = "board" | "list";
+type ViewMode     = "board" | "list" | "qa";
 type SwimlaneMode = "NONE" | "SPRINT" | "ASSIGNEE" | "EPIC" | "PRIORITY";
 type DueFilter = "" | "OVERDUE" | "TODAY" | "UPCOMING" | "NONE";
 type BoardFilters = {
@@ -124,6 +130,47 @@ type BoardQaBadge = {
   ready: boolean;
   total: number;
   untested: number;
+};
+type BoardQaExecutionStatus = "UNTESTED" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "FLAKY";
+type BoardQaCasePriority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+type BoardQaCaseType =
+  | "FUNCTIONAL"
+  | "REGRESSION"
+  | "SMOKE"
+  | "INTEGRATION"
+  | "PERFORMANCE"
+  | "SECURITY"
+  | "ACCESSIBILITY"
+  | "ACCEPTANCE";
+type BoardQaExecutionSummary = BoardQaBadge & {
+  flaky: number;
+  skipped: number;
+};
+type BoardQaLinkedTestCase = {
+  id?: string;
+  linkType?: string;
+  testCaseId?: string;
+  testCase: {
+    id: string;
+    priority?: BoardQaCasePriority;
+    status?: string;
+    title: string;
+    type?: BoardQaCaseType;
+  };
+};
+type BoardQaLatestExecution = {
+  executedAt?: string | null;
+  id: string;
+  status: BoardQaExecutionStatus;
+  testCaseId?: string | null;
+  testRunId?: string;
+  updatedAt?: string;
+};
+type BoardQaTaskSummary = {
+  evidence: unknown[];
+  executions: BoardQaExecutionSummary;
+  latestExecutions: BoardQaLatestExecution[];
+  linkedTestCases: BoardQaLinkedTestCase[];
 };
 
 const DEFAULT_BOARD_FILTERS: BoardFilters = {
@@ -188,6 +235,8 @@ export default function BoardPage() {
   const [activeTask,         setActiveTask]         = useState<Task | null>(null);
   const [activeColumn,       setActiveColumn]       = useState<BoardColumn | null>(null);
   const [qaByTaskId,         setQaByTaskId]         = useState<Record<string, BoardQaBadge>>({});
+  const [qaSummaryByTaskId,  setQaSummaryByTaskId]  = useState<Record<string, BoardQaTaskSummary>>({});
+  const [qaActionBusy,       setQaActionBusy]       = useState<string | null>(null);
   const [viewMode,           setViewMode]           = useState<ViewMode>("board");
 
   const sensors = useSensors(
@@ -266,6 +315,7 @@ export default function BoardPage() {
       void Promise.resolve().then(() => {
         if (!cancelled) {
           setQaByTaskId({});
+          setQaSummaryByTaskId({});
         }
       });
       return () => {
@@ -277,18 +327,21 @@ export default function BoardPage() {
 
     void Promise.allSettled(
       ids.map(async (id) => {
-        const summary = await getQaTaskSummary(auth.accessToken, id);
-        return [id, normalizeBoardQaBadge(summary)] as const;
+        const summary = normalizeBoardQaTaskSummary(await getQaTaskSummary(auth.accessToken, id));
+        return [id, summary, normalizeBoardQaBadge(summary)] as const;
       }),
     ).then((results) => {
       if (cancelled) return;
       const next: Record<string, BoardQaBadge> = {};
+      const summaries: Record<string, BoardQaTaskSummary> = {};
       results.forEach((result) => {
         if (result.status !== "fulfilled") return;
-        const [id, badge] = result.value;
+        const [id, summary, badge] = result.value;
+        summaries[id] = summary;
         if (badge) next[id] = badge;
       });
       setQaByTaskId(next);
+      setQaSummaryByTaskId(summaries);
     });
 
     return () => { cancelled = true; };
@@ -627,6 +680,82 @@ export default function BoardPage() {
     } finally { setSaving(false); }
   }
 
+  async function refreshQaTask(taskIdValue: string) {
+    const summary = normalizeBoardQaTaskSummary(await getQaTaskSummary(auth.accessToken, taskIdValue));
+    const badge = normalizeBoardQaBadge(summary);
+    setQaSummaryByTaskId((current) => ({ ...current, [taskIdValue]: summary }));
+    setQaByTaskId((current) => {
+      const next = { ...current };
+      if (badge) next[taskIdValue] = badge;
+      else delete next[taskIdValue];
+      return next;
+    });
+    return summary;
+  }
+
+  async function onAddBoardQaCase(task: Task) {
+    const projectId = task.projectId || selectedProjectId;
+    if (!projectId) return;
+    setQaActionBusy(`${task.id}:case`);
+    setMessage(null);
+    try {
+      await createQaTestCase(auth.accessToken, {
+        expectedResult: "The task meets acceptance criteria and is safe to move forward.",
+        linkType: "COVERS",
+        priority: qaPriorityFromTaskPriority(task.priority),
+        projectId,
+        status: "ACTIVE",
+        taskId: task.id,
+        title: `Validate ${task.key}: ${task.title}`.slice(0, 180),
+        type: task.type === "BUG" ? "REGRESSION" : "FUNCTIONAL",
+      });
+      await refreshQaTask(task.id);
+      setMessage({ text: "QA case linked to task.", ok: true });
+    } catch (err) {
+      setMessage({ text: err instanceof Error ? err.message : "Unable to add QA case.", ok: false });
+    } finally {
+      setQaActionBusy(null);
+    }
+  }
+
+  async function onRecordBoardQaResult(task: Task, status: BoardQaExecutionStatus) {
+    const projectId = task.projectId || selectedProjectId;
+    if (!projectId) return;
+    setQaActionBusy(`${task.id}:${status}`);
+    setMessage(null);
+    try {
+      const summary = qaSummaryByTaskId[task.id] ?? await refreshQaTask(task.id);
+      const linkedCase = pickBoardQaCase(summary);
+      if (!linkedCase) {
+        setMessage({ text: "Add at least one QA case before recording a result.", ok: false });
+        return;
+      }
+      const run = await createQaTestRun(auth.accessToken, {
+        name: `${task.key} board QA - ${linkedCase.title}`.slice(0, 240),
+        projectId,
+        source: "MANUAL",
+        status: "RUNNING",
+        taskId: task.id,
+        testCaseIds: [linkedCase.id],
+      }) as { id?: string };
+      if (!run.id) throw new Error("QA run was not created.");
+      await createQaExecution(auth.accessToken, run.id, {
+        executedAt: new Date().toISOString(),
+        status,
+        taskId: task.id,
+        testCaseId: linkedCase.id,
+        title: linkedCase.title,
+      });
+      await completeQaTestRun(auth.accessToken, run.id);
+      await refreshQaTask(task.id);
+      setMessage({ text: `QA result recorded: ${qaStatusLabel(status)}.`, ok: true });
+    } catch (err) {
+      setMessage({ text: err instanceof Error ? err.message : "Unable to record QA result.", ok: false });
+    } finally {
+      setQaActionBusy(null);
+    }
+  }
+
   return (
     <div className="flex min-h-0 flex-col gap-3">
 
@@ -753,6 +882,17 @@ export default function BoardPage() {
               <List className="size-3.5" />
               List
             </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("qa")}
+              className={cn(
+                "inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-[12px] font-bold transition",
+                viewMode === "qa" ? "bg-foreground text-white shadow-sm" : "text-ink-soft hover:text-foreground",
+              )}
+            >
+              <ShieldCheck className="size-3.5" />
+              QA
+            </button>
           </div>
 
           <button
@@ -805,7 +945,16 @@ export default function BoardPage() {
       {loading ? (
         <BoardSkeleton />
       ) : filteredBoard ? (
-        viewMode === "list" ? (
+        viewMode === "qa" ? (
+          <BoardQaTable
+            actionBusy={qaActionBusy}
+            onAddCase={onAddBoardQaCase}
+            onRecordResult={onRecordBoardQaResult}
+            qaByTaskId={qaByTaskId}
+            qaSummaryByTaskId={qaSummaryByTaskId}
+            tasks={visibleTasks}
+          />
+        ) : viewMode === "list" ? (
           <ListView board={filteredBoard} density={density} sprints={sprints} />
         ) : swimlane !== "NONE" ? (
           <SwimlaneBoard
@@ -1034,6 +1183,292 @@ function InsightTile({ helper, label, tone, value }: { helper: string; label: st
         <span className="text-right text-[10px] font-bold text-ink-soft">{helper}</span>
       </div>
     </div>
+  );
+}
+
+function BoardQaTable({
+  actionBusy,
+  onAddCase,
+  onRecordResult,
+  qaByTaskId,
+  qaSummaryByTaskId,
+  tasks,
+}: {
+  actionBusy: string | null;
+  onAddCase: (task: Task) => void;
+  onRecordResult: (task: Task, status: BoardQaExecutionStatus) => void;
+  qaByTaskId: Record<string, BoardQaBadge>;
+  qaSummaryByTaskId: Record<string, BoardQaTaskSummary>;
+  tasks: Task[];
+}) {
+  const stats = useMemo(() => {
+    const covered = tasks.filter((task) => qaByTaskId[task.id]?.total).length;
+    const failed = tasks.filter((task) => (qaByTaskId[task.id]?.failed ?? 0) > 0).length;
+    const blocked = tasks.filter((task) => (qaByTaskId[task.id]?.blocked ?? 0) > 0).length;
+    const ready = tasks.filter((task) => qaByTaskId[task.id]?.ready).length;
+    return { blocked, covered, failed, ready, total: tasks.length };
+  }, [qaByTaskId, tasks]);
+
+  if (!tasks.length) {
+    return (
+      <div className="flex min-h-[360px] items-center justify-center rounded-2xl border border-dashed border-line bg-panel">
+        <div className="text-center">
+          <ShieldCheck className="mx-auto size-8 text-line" />
+          <h3 className="mt-3 text-sm font-black text-foreground">No tasks to validate</h3>
+          <p className="mt-1 text-sm text-ink-soft">Change the board filters or create tasks before running QA.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <section className="overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-white px-4 py-3">
+        <div className="flex items-center gap-3">
+          <span className="inline-flex size-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+            <ShieldCheck className="size-4" />
+          </span>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">Board QA</p>
+            <h2 className="text-[16px] font-black tracking-tight text-foreground">Task validation matrix</h2>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:flex">
+          <QaMetric label="Tasks" value={stats.total} />
+          <QaMetric label="Covered" value={stats.covered} />
+          <QaMetric label="Ready" value={stats.ready} tone="good" />
+          <QaMetric label="Risks" value={stats.failed + stats.blocked} tone={stats.failed + stats.blocked ? "bad" : "neutral"} />
+        </div>
+      </div>
+
+      <div className="overflow-x-auto tb-scrollbar">
+        <table className="w-full min-w-[1080px] border-collapse text-left">
+          <thead className="bg-panel-muted/80">
+            <tr className="border-b border-line">
+              {["Task", "Owner", "Due", "QA state", "Coverage", "Latest result", "Actions"].map((heading) => (
+                <th key={heading} className="px-4 py-3 text-[10px] font-black uppercase tracking-[0.14em] text-ink-soft">
+                  {heading}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {tasks.map((task) => {
+              const qa = qaByTaskId[task.id] ?? null;
+              const summary = qaSummaryByTaskId[task.id] ?? null;
+              const linkedCase = summary ? pickBoardQaCase(summary) : null;
+              const latest = linkedCase && summary ? latestBoardQaExecution(summary, linkedCase.id) : null;
+              const assignees = getCardAssignees(task);
+              const due = getTaskDue(task);
+              const busyPrefix = `${task.id}:`;
+              const rowBusy = Boolean(actionBusy?.startsWith(busyPrefix));
+              const qaRisk = (qa?.failed ?? 0) > 0 || (qa?.blocked ?? 0) > 0;
+
+              return (
+                <tr key={task.id} className="border-b border-line/60 bg-white align-top transition hover:bg-panel-muted/40">
+                  <td className="px-4 py-3">
+                    <div className="flex min-w-0 items-start gap-2.5">
+                      <span className="mt-1 size-2 shrink-0 rounded-full" style={{ background: PRIORITY_COLOR[task.priority] }} />
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="rounded-md bg-[#ffd40018] px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-[#b8870a]">
+                            {task.key}
+                          </span>
+                          <TaskSignalPill color={STATUS_COLOR[task.status]}>{taskStatusLabels[task.status]}</TaskSignalPill>
+                        </div>
+                        <Link href={`/tasks/${task.id}`} className="mt-1 block max-w-[300px] truncate text-[13px] font-black text-foreground hover:text-[#b8870a]">
+                          {task.title}
+                        </Link>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    {assignees.length ? (
+                      <div className="grid gap-1">
+                        {assignees.slice(0, 2).map((person) => (
+                          <span key={person.userId} className="text-[12px] font-bold text-foreground">
+                            {`${person.firstName ?? ""} ${person.lastName ?? ""}`.trim() || person.email}
+                          </span>
+                        ))}
+                        {assignees.length > 2 ? <span className="text-[11px] font-bold text-ink-soft">+{assignees.length - 2} more</span> : null}
+                      </div>
+                    ) : (
+                      <span className="text-[12px] font-bold text-ink-soft">Unassigned</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={cn("inline-flex rounded-lg px-2 py-1 text-[11px] font-black", getDueTone(due.state).className)}>
+                      {due.date ? formatShortDate(due.date) : "No due"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <QaStateBadge qa={qa} />
+                  </td>
+                  <td className="px-4 py-3">
+                    {qa?.total ? (
+                      <div className="w-[150px]">
+                        <div className="flex items-center justify-between text-[11px] font-black text-foreground">
+                          <span>{qa.passed}/{qa.total} passed</span>
+                          <span>{qa.passRate}%</span>
+                        </div>
+                        <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-line">
+                          <div
+                            className={cn("h-full rounded-full", qaRisk ? "bg-red-500" : qa.ready ? "bg-emerald-500" : "bg-amber-400")}
+                            style={{ width: `${Math.min(100, Math.max(0, qa.passRate))}%` }}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-[12px] font-bold text-ink-soft">No coverage</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {latest ? (
+                      <div className="grid gap-1">
+                        <QaResultPill status={latest.status} />
+                        <span className="text-[11px] font-bold text-ink-soft">
+                          {latest.updatedAt || latest.executedAt ? formatShortDate(latest.updatedAt || latest.executedAt || "") : "Just now"}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-[12px] font-bold text-ink-soft">No run yet</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap justify-end gap-1.5">
+                      {linkedCase ? (
+                        <>
+                          <QaActionButton
+                            busy={actionBusy === `${task.id}:PASSED`}
+                            disabled={rowBusy}
+                            label="Pass"
+                            tone="good"
+                            onClick={() => onRecordResult(task, "PASSED")}
+                          />
+                          <QaActionButton
+                            busy={actionBusy === `${task.id}:FAILED`}
+                            disabled={rowBusy}
+                            label="Fail"
+                            tone="bad"
+                            onClick={() => onRecordResult(task, "FAILED")}
+                          />
+                          <QaActionButton
+                            busy={actionBusy === `${task.id}:BLOCKED`}
+                            disabled={rowBusy}
+                            label="Block"
+                            tone="warn"
+                            onClick={() => onRecordResult(task, "BLOCKED")}
+                          />
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => onAddCase(task)}
+                          disabled={rowBusy}
+                          className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-primary px-2.5 text-[11px] font-black text-[#111111] transition hover:bg-primary-dark disabled:opacity-50"
+                        >
+                          <Plus className="size-3.5" />
+                          Add case
+                        </button>
+                      )}
+                      <Link
+                        href={`/tasks/${task.id}`}
+                        className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line bg-background px-2.5 text-[11px] font-black text-foreground transition hover:bg-panel-muted"
+                      >
+                        Open QA
+                        <ArrowUpRight className="size-3.5" />
+                      </Link>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function QaMetric({ label, tone = "neutral", value }: { label: string; tone?: "bad" | "good" | "neutral"; value: number }) {
+  const className = tone === "good"
+    ? "bg-emerald-50 text-emerald-700"
+    : tone === "bad"
+      ? "bg-red-50 text-red-700"
+      : "bg-background text-foreground";
+  return (
+    <div className={cn("min-w-24 rounded-xl border border-line px-3 py-2 text-center", className)}>
+      <p className="text-[18px] font-black leading-none">{value}</p>
+      <p className="mt-1 text-[9px] font-black uppercase tracking-[0.14em] opacity-70">{label}</p>
+    </div>
+  );
+}
+
+function QaStateBadge({ qa }: { qa: BoardQaBadge | null }) {
+  if (!qa?.total) {
+    return <span className="rounded-lg bg-[#f4f0e2] px-2 py-1 text-[11px] font-black text-ink-soft">Untested</span>;
+  }
+  if (qa.failed || qa.blocked) {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-2 py-1 text-[11px] font-black text-red-700">
+        <ShieldAlert className="size-3.5" />
+        Risk open
+      </span>
+    );
+  }
+  if (qa.ready) {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-black text-emerald-700">
+        <ShieldCheck className="size-3.5" />
+        Ready
+      </span>
+    );
+  }
+  return <span className="rounded-lg bg-amber-50 px-2 py-1 text-[11px] font-black text-amber-700">Needs run</span>;
+}
+
+function QaResultPill({ status }: { status: BoardQaExecutionStatus }) {
+  const className = status === "PASSED"
+    ? "bg-emerald-50 text-emerald-700"
+    : status === "FAILED"
+      ? "bg-red-50 text-red-700"
+      : status === "BLOCKED"
+        ? "bg-amber-50 text-amber-700"
+        : "bg-[#f4f0e2] text-ink-soft";
+  return (
+    <span className={cn("inline-flex w-fit rounded-lg px-2 py-1 text-[11px] font-black uppercase tracking-[0.08em]", className)}>
+      {qaStatusLabel(status)}
+    </span>
+  );
+}
+
+function QaActionButton({
+  busy,
+  disabled,
+  label,
+  onClick,
+  tone,
+}: {
+  busy: boolean;
+  disabled: boolean;
+  label: string;
+  onClick: () => void;
+  tone: "bad" | "good" | "warn";
+}) {
+  const className = tone === "good"
+    ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+    : tone === "bad"
+      ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+      : "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100";
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={cn("h-8 rounded-lg border px-2.5 text-[11px] font-black transition disabled:opacity-50", className)}
+    >
+      {busy ? "Saving" : label}
+    </button>
   );
 }
 
@@ -1909,6 +2344,71 @@ function getDueTone(state: ReturnType<typeof getTaskDue>["state"]) {
   return { className: "bg-[#f4f0e2] text-ink-soft" };
 }
 
+function normalizeBoardQaTaskSummary(value: unknown): BoardQaTaskSummary {
+  const source = boardQaRecord(value) ?? {};
+  return {
+    evidence: Array.isArray(source.evidence) ? source.evidence : [],
+    executions: normalizeBoardQaExecutionSummary(source.executions),
+    latestExecutions: Array.isArray(source.latestExecutions)
+      ? source.latestExecutions.filter((item): item is Record<string, unknown> => Boolean(boardQaRecord(item))).map(normalizeBoardQaLatestExecution)
+      : [],
+    linkedTestCases: Array.isArray(source.linkedTestCases)
+      ? source.linkedTestCases
+        .filter((item): item is Record<string, unknown> => Boolean(boardQaRecord(item)))
+        .map(normalizeBoardQaLinkedCase)
+        .filter((item) => item.testCase.id)
+      : [],
+  };
+}
+
+function normalizeBoardQaExecutionSummary(value: unknown): BoardQaExecutionSummary {
+  const source = boardQaRecord(value) ?? {};
+  const passed = boardQaNumber(source.passed);
+  const failed = boardQaNumber(source.failed);
+  const blocked = boardQaNumber(source.blocked);
+  const skipped = boardQaNumber(source.skipped);
+  const flaky = boardQaNumber(source.flaky);
+  const total = boardQaNumber(source.total) || passed + failed + blocked + skipped + flaky + boardQaNumber(source.untested);
+  return {
+    blocked,
+    failed,
+    flaky,
+    passed,
+    passRate: boardQaNumber(source.passRate),
+    ready: Boolean(source.ready),
+    skipped,
+    total,
+    untested: boardQaNumber(source.untested),
+  };
+}
+
+function normalizeBoardQaLatestExecution(source: Record<string, unknown>): BoardQaLatestExecution {
+  return {
+    executedAt: boardQaNullableString(source.executedAt),
+    id: boardQaString(source.id),
+    status: readBoardQaExecutionStatus(source.status),
+    testCaseId: boardQaNullableString(source.testCaseId),
+    testRunId: boardQaString(source.testRunId),
+    updatedAt: boardQaString(source.updatedAt),
+  };
+}
+
+function normalizeBoardQaLinkedCase(source: Record<string, unknown>): BoardQaLinkedTestCase {
+  const testCaseSource = boardQaRecord(source.testCase) ?? {};
+  return {
+    id: boardQaString(source.id),
+    linkType: boardQaString(source.linkType),
+    testCaseId: boardQaString(source.testCaseId),
+    testCase: {
+      id: boardQaString(testCaseSource.id),
+      priority: readBoardQaPriority(testCaseSource.priority),
+      status: boardQaString(testCaseSource.status),
+      title: boardQaString(testCaseSource.title),
+      type: readBoardQaType(testCaseSource.type),
+    },
+  };
+}
+
 function normalizeBoardQaBadge(value: unknown): BoardQaBadge | null {
   const root = boardQaRecord(value);
   if (!root) return null;
@@ -1918,7 +2418,8 @@ function normalizeBoardQaBadge(value: unknown): BoardQaBadge | null {
   const failed = boardQaNumber(executions?.failed);
   const blocked = boardQaNumber(executions?.blocked);
   const skipped = boardQaNumber(executions?.skipped);
-  const total = linked || passed + failed + blocked + skipped;
+  const flaky = boardQaNumber(executions?.flaky);
+  const total = linked || boardQaNumber(executions?.total) || passed + failed + blocked + skipped + flaky;
   if (!total) return null;
 
   const passRate = boardQaNumber(executions?.passRate);
@@ -1937,8 +2438,60 @@ function boardQaRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : null;
 }
 
+function boardQaString(value: unknown) {
+  return typeof value === "string" ? value : "";
+}
+
+function boardQaNullableString(value: unknown) {
+  return typeof value === "string" ? value : null;
+}
+
 function boardQaNumber(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function readBoardQaExecutionStatus(value: unknown): BoardQaExecutionStatus {
+  return value === "PASSED" || value === "FAILED" || value === "BLOCKED" || value === "SKIPPED" || value === "FLAKY"
+    ? value
+    : "UNTESTED";
+}
+
+function readBoardQaPriority(value: unknown): BoardQaCasePriority {
+  return value === "LOW" || value === "HIGH" || value === "CRITICAL" ? value : "MEDIUM";
+}
+
+function readBoardQaType(value: unknown): BoardQaCaseType {
+  if (
+    value === "REGRESSION"
+    || value === "SMOKE"
+    || value === "INTEGRATION"
+    || value === "PERFORMANCE"
+    || value === "SECURITY"
+    || value === "ACCESSIBILITY"
+    || value === "ACCEPTANCE"
+  ) {
+    return value;
+  }
+  return "FUNCTIONAL";
+}
+
+function pickBoardQaCase(summary: BoardQaTaskSummary | null) {
+  return summary?.linkedTestCases[0]?.testCase ?? null;
+}
+
+function latestBoardQaExecution(summary: BoardQaTaskSummary, testCaseId: string) {
+  return summary.latestExecutions.find((execution) => execution.testCaseId === testCaseId) ?? null;
+}
+
+function qaPriorityFromTaskPriority(priority: TaskPriority): BoardQaCasePriority {
+  if (priority === "CRITICAL" || priority === "URGENT") return "CRITICAL";
+  if (priority === "HIGH") return "HIGH";
+  if (priority === "LOW") return "LOW";
+  return "MEDIUM";
+}
+
+function qaStatusLabel(status: BoardQaExecutionStatus) {
+  return status.toLowerCase().replaceAll("_", " ");
 }
 
 function initialsFromParts(firstName?: string, lastName?: string, email?: string) {
@@ -2451,7 +3004,7 @@ function getSavedBoardConfig(view?: TaskSavedView): SavedBoardConfig | null {
     filters: { ...DEFAULT_BOARD_FILTERS, ...(config.filters ?? {}) },
     swimlane: isSwimlaneMode(config.swimlane) ? config.swimlane : "NONE",
     density: config.density === "comfortable" ? "comfortable" : "compact",
-    viewMode: config.viewMode === "list" ? "list" : "board",
+    viewMode: config.viewMode === "list" || config.viewMode === "qa" ? config.viewMode : "board",
   };
 }
 
