@@ -15,7 +15,6 @@ import {
   Eye,
   Fingerprint,
   Gauge,
-  LockKeyhole,
   Mail,
   MoreHorizontal,
   RotateCcw,
@@ -1653,10 +1652,12 @@ function OverviewDashboard({
   );
   const healthColor = healthScore >= 80 ? "#34d399" : healthScore >= 60 ? "#fbbf24" : "#f87171";
   const healthLabel = healthScore >= 80 ? "Healthy" : healthScore >= 60 ? "Watchlist" : "Action needed";
+  const otherTenants = Math.max(totalTenants - activeTenants - trialTenants - suspendedTenants, 0);
   const tenantSegments = [
     { label: "Active", value: activeTenants, color: "#34d399" },
     { label: "Trial", value: trialTenants, color: "#fbbf24" },
     { label: "Suspended", value: suspendedTenants, color: "#f87171" },
+    { label: "Other", value: otherTenants, color: "#d1d5db" },
   ].filter((segment) => segment.value > 0 || totalTenants === 0);
   const recentTenants = overview.recentTenants.slice(0, 5);
   const recentEvents = overview.recentEvents.slice(0, 4);
@@ -1686,122 +1687,214 @@ function OverviewDashboard({
       value: overview.platformAuditLogs,
     },
   ];
+  const activityBars = [
+    { label: "Tenants", value: totalTenants, color: "#6d5dd3" },
+    { label: "Users", value: totalUsers, color: "#6d5dd3" },
+    { label: "Sessions", value: overview.sessions.active, color: "#6d5dd3" },
+    { label: "Security", value: openEvents, color: "#fbbf24" },
+    { label: "Audit", value: overview.platformAuditLogs, color: "#111111" },
+    { label: "Admins", value: overview.platformAdmins, color: "#34d399" },
+  ];
+  const maxActivity = Math.max(1, ...activityBars.map((item) => item.value));
+  const activeDeg = totalTenants > 0 ? (activeTenants / totalTenants) * 360 : 0;
+  const trialDeg = totalTenants > 0 ? (trialTenants / totalTenants) * 360 : 0;
+  const suspendedDeg = totalTenants > 0 ? (suspendedTenants / totalTenants) * 360 : 0;
+  const tenantAllocationGradient =
+    totalTenants > 0
+      ? `conic-gradient(#34d399 0deg ${activeDeg}deg, #ffd400 ${activeDeg}deg ${activeDeg + trialDeg}deg, #f87171 ${activeDeg + trialDeg}deg ${activeDeg + trialDeg + suspendedDeg}deg, #d1d5db ${activeDeg + trialDeg + suspendedDeg}deg 360deg)`
+      : "conic-gradient(#e5e7eb 0deg 360deg)";
+  const todayLabel = new Intl.DateTimeFormat("en", { month: "2-digit", day: "2-digit", year: "numeric" }).format(new Date());
 
   return (
     <div className="space-y-5">
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="rounded-[28px] bg-white p-5 shadow-[0_14px_44px_rgba(17,17,17,0.055)] md:p-6" style={{ border: "1px solid #ded8c8" }}>
-          <div className="flex flex-wrap items-center gap-2">
-            <OverviewPill icon={<ShieldCheck className="size-3.5" />} label="Site admin" color="#ffd400" />
-            <OverviewPill icon={<LockKeyhole className="size-3.5" />} label={platformLevel} color="#111111" />
-          </div>
-          <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-            <div className="min-w-0">
-              <h1 className="text-2xl font-black leading-tight tracking-tight text-[#111111] md:text-[32px]">
-                Platform command
-              </h1>
-              <p className="mt-2 max-w-2xl text-[13px] font-semibold leading-6 text-[#665f54]">
-                A clean platform-level snapshot for tenants, users, live sessions, security pressure, and audit volume.
-              </p>
-            </div>
-            <div className="flex items-center gap-3 rounded-[20px] bg-[#fbfaf6] px-4 py-3" style={{ border: "1px solid #e7dfcf" }}>
-              <Gauge className="size-4" style={{ color: healthColor }} aria-hidden="true" />
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a8375]">Platform health</p>
-                <p className="mt-0.5 text-[13px] font-black" style={{ color: healthColor }}>
-                  {healthScore}% {healthLabel}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="mt-5 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
-            <OverviewMetricCard icon={Building2} label="Tenants" value={totalTenants} meta={`${activeTenants} active / ${trialTenants} trial`} color="#a78bfa" />
-            <OverviewMetricCard icon={Users} label="Users" value={totalUsers} meta={`${overview.users.INVITED ?? 0} invited`} color="#60a5fa" />
-            <OverviewMetricCard icon={Activity} label="Sessions" value={overview.sessions.active} meta="active now" color="#34d399" />
-            <OverviewMetricCard icon={AlertTriangle} label="Security" value={openEvents} meta={`${eventPressure}% pressure`} color={openEvents > 0 ? "#f87171" : "#34d399"} />
-          </div>
+      <header className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div>
+          <h1 className="text-[28px] font-black leading-tight tracking-tight text-[#111111]">Site Admin Dashboard</h1>
+          <p className="mt-1 text-[14px] font-medium text-[#5f574c]">
+            Welcome back to the TaskBricks platform workspace.
+          </p>
         </div>
-
-        <OverviewPanel title="Priority queue" eyebrow="Needs attention" accent={openEvents > 0 ? "#f87171" : "#34d399"}>
-          <div className="space-y-2.5">
-            {queueItems.map((item) => (
-              <OverviewQueueItem key={item.label} {...item} />
-            ))}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex h-10 items-center overflow-hidden rounded-full bg-white text-[12px] font-bold text-[#111111] shadow-[0_8px_24px_rgba(17,17,17,0.06)]" style={{ border: "1px solid #d8cfbc" }}>
+            <span className="px-4">{todayLabel} - {todayLabel}</span>
+            <span className="flex h-full items-center gap-2 border-l border-[#e7dfcf] px-3 text-[#6d5dd3]">
+              <SlidersHorizontal className="size-3.5" aria-hidden="true" />
+              <RotateCcw className="size-3.5" aria-hidden="true" />
+            </span>
           </div>
-        </OverviewPanel>
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_330px]">
-        <OverviewPanel title="Platform pulse" eyebrow="Operational mix" accent={healthColor}>
-          <div className="space-y-5">
-            <div>
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#8a8375]">Tenant status distribution</p>
-                <p className="text-[11px] font-bold tabular-nums text-[#8a8375]">{tenantCoverage}% active</p>
-              </div>
-              <div className="flex h-3 overflow-hidden rounded-full bg-[#eee8dc]">
-                {tenantSegments.map((segment) => {
-                  const width = totalTenants > 0 ? Math.max(7, Math.round((segment.value / totalTenants) * 100)) : 100 / tenantSegments.length;
-                  return <span key={segment.label} className="h-full" style={{ width: `${width}%`, background: segment.color }} />;
-                })}
-              </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              {tenantSegments.map((segment) => (
-                <PulseTile key={segment.label} label={segment.label} value={segment.value} color={segment.color} />
-              ))}
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              <PulseTile label="Audit events" value={overview.platformAuditLogs} color="#fbbf24" />
-              <PulseTile label="Site admins" value={overview.platformAdmins} color="#34d399" />
-              <PulseTile label="All events" value={totalEvents} color="#f87171" />
-            </div>
-          </div>
-        </OverviewPanel>
-
-        <OverviewPanel title="Access boundary" eyebrow="Current scope" accent="#ffd400">
-          <div className="rounded-2xl bg-[#fbfaf6] p-4" style={{ border: "1px solid #e7dfcf" }}>
-            <div className="flex items-center gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl" style={{ background: "rgba(255,212,0,0.12)", border: "1px solid rgba(255,212,0,0.24)" }}>
-                <LockKeyhole className="size-4" style={{ color: "#d6a900" }} aria-hidden="true" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-[12px] font-black text-[#111111]">{currentRole}</p>
-                <p className="mt-0.5 text-[10px] font-bold text-[#8a8375]">{platformLevel} platform grant</p>
-              </div>
-            </div>
-            <p className="mt-3 text-[12px] font-semibold leading-5 text-[#665f54]">
-              Site-admin permissions are separate from tenant-owner workspace administration and every platform action is recorded.
-            </p>
-          </div>
-        </OverviewPanel>
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_330px]">
-        <OverviewPanel title="Newest tenants" eyebrow="Tenant activity" accent="#a78bfa">
-          <div className="divide-y" style={{ borderColor: "#eee8dc" }}>
-            {recentTenants.map((tenant) => (
-              <OverviewTenantLine
-                key={tenant.id}
-                tenant={tenant}
-                busy={busy === `tenant:${tenant.id}`}
-                canMutate={canMutatePlatform}
-                onStatus={onChangeTenantStatus}
-              />
-            ))}
-            {recentTenants.length === 0 ? <OverviewEmpty text="No tenants yet." /> : null}
-          </div>
-        </OverviewPanel>
-
-        <OverviewPanel title="Security stream" eyebrow="Recent signals" accent="#f87171">
-          <OverviewEventList events={recentEvents} />
-          <Link href="/site-admin/security" className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl border border-[#ded8c8] bg-[#fbfaf6] text-[12px] font-black text-[#111111] transition hover:bg-[#ffd400]">
-            Open security page
+          <Link href="/site-admin/audit" className="inline-flex h-10 items-center gap-2 rounded-full bg-[#111111] px-4 text-[12px] font-black text-white shadow-[0_8px_24px_rgba(17,17,17,0.12)] transition hover:bg-[#2a2a2a]">
+            Audit trail
             <ArrowRight className="size-3.5" aria-hidden="true" />
           </Link>
-        </OverviewPanel>
+        </div>
+      </header>
+
+      <section className="grid gap-5 xl:grid-cols-[540px_minmax(0,1fr)]">
+        <div className="space-y-5">
+          <section className="overflow-hidden rounded-[28px] bg-white p-4 shadow-[0_16px_50px_rgba(17,17,17,0.07)]" style={{ border: "1px solid #ded8c8" }}>
+            <div className="flex items-center justify-between">
+              <h2 className="text-[16px] font-semibold text-[#111111]">Admin card</h2>
+              <Gauge className="size-4 text-[#6d5dd3]" aria-hidden="true" />
+            </div>
+            <div className="mt-4 overflow-hidden rounded-[22px] bg-[#fff4bd]" style={{ border: "1px solid #f1d766" }}>
+              <div className="grid min-h-[190px] grid-cols-[86px_1fr]">
+                <div className="flex flex-col justify-between bg-[#efe5ff] px-5 py-6">
+                  <ShieldCheck className="size-8 text-[#6d5dd3]" aria-hidden="true" />
+                  <p className="text-[12px] font-black text-[#111111]">{platformLevel}</p>
+                </div>
+                <div className="flex flex-col justify-between">
+                  <div className="px-6 py-6">
+                    <p className="text-[12px] font-black uppercase tracking-[0.18em] text-[#7a5a00]">TaskBricks Platform</p>
+                    <p className="mt-2 text-2xl font-black text-[#111111]">{currentRole}</p>
+                  </div>
+                  <div className="bg-[#111111] px-6 py-5 text-white">
+                    <p className="text-[12px] font-semibold text-white/70">Active sessions</p>
+                    <p className="mt-1 text-[28px] font-black">{overview.sessions.active}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-[28px] bg-white p-5 shadow-[0_16px_50px_rgba(17,17,17,0.06)]" style={{ border: "1px solid #ded8c8" }}>
+            <p className="text-[14px] font-semibold text-[#111111]">Platform health</p>
+            <div className="mt-5 flex items-end justify-between gap-4">
+              <div>
+                <p className="text-[34px] font-black leading-none text-[#111111]">{healthScore}%</p>
+                <p className="mt-2 text-[12px] font-black" style={{ color: healthColor }}>{healthLabel}</p>
+              </div>
+              <div className="flex gap-8 text-[12px] font-bold">
+                <span className="text-emerald-500">Up {tenantCoverage}% active</span>
+                <span className="text-red-500">Risk {eventPressure}% pressure</span>
+              </div>
+            </div>
+            <div className="mt-5 grid overflow-hidden rounded-[18px] bg-[#eeeafc] text-[13px] font-semibold text-[#2a2538] sm:grid-cols-3">
+              <div className="px-4 py-4">
+                <p className="text-[#665f54]">Tenants</p>
+                <p className="mt-1 font-black">{totalTenants}</p>
+              </div>
+              <div className="border-y border-white/70 px-4 py-4 sm:border-x sm:border-y-0">
+                <p className="text-[#665f54]">Status</p>
+                <p className="mt-1 font-black" style={{ color: healthColor }}>{healthLabel}</p>
+              </div>
+              <div className="px-4 py-4">
+                <p className="text-[#665f54]">Open events</p>
+                <p className="mt-1 font-black">{openEvents}</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-[28px] bg-white p-5 shadow-[0_16px_50px_rgba(17,17,17,0.06)]" style={{ border: "1px solid #ded8c8" }}>
+            <div className="flex items-center justify-between">
+              <p className="text-[14px] font-semibold text-[#111111]">Priority queue</p>
+              <Link href="/site-admin/security" className="flex size-6 items-center justify-center rounded-full bg-[#6d5dd3] text-white">
+                <ArrowRight className="size-3.5" aria-hidden="true" />
+              </Link>
+            </div>
+            <div className="mt-4 space-y-2.5">
+              {queueItems.map((item) => (
+                <OverviewQueueItem key={item.label} {...item} />
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <div className="space-y-5">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(320px,1.1fr)]">
+            <div className="grid gap-5 sm:grid-cols-2 lg:col-span-2">
+              <OverviewMetricCard icon={Building2} label="Tenants" value={totalTenants} meta={`${activeTenants} active / ${trialTenants} trial`} color="#6d5dd3" />
+              <OverviewMetricCard icon={Users} label="Users" value={totalUsers} meta={`${overview.users.INVITED ?? 0} invited`} color="#111111" />
+              <OverviewMetricCard icon={Activity} label="Sessions" value={overview.sessions.active} meta="active now" color="#34d399" />
+              <OverviewMetricCard icon={AlertTriangle} label="Security" value={openEvents} meta={`${eventPressure}% pressure`} color={openEvents > 0 ? "#f87171" : "#ffd400"} />
+            </div>
+
+            <section className="rounded-[28px] bg-white p-5 shadow-[0_16px_50px_rgba(17,17,17,0.06)]" style={{ border: "1px solid #ded8c8" }}>
+              <h2 className="text-[16px] font-semibold text-[#111111]">Tenant allocation</h2>
+              <div className="mt-6 flex justify-center">
+                <div className="grid size-48 place-items-center rounded-full" style={{ background: tenantAllocationGradient }}>
+                  <div className="grid size-28 place-items-center rounded-full bg-white">
+                    <div className="text-center">
+                      <p className="text-3xl font-black text-[#111111]">{totalTenants}</p>
+                      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#8a8375]">tenants</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-5 flex flex-wrap justify-center gap-3">
+                {tenantSegments.map((segment) => (
+                  <OverviewLegendItem
+                    key={segment.label}
+                    color={segment.color}
+                    label={`${segment.label} ${segment.value}`}
+                  />
+                ))}
+              </div>
+            </section>
+          </div>
+
+          <section className="rounded-[28px] bg-white p-5 shadow-[0_16px_50px_rgba(17,17,17,0.06)]" style={{ border: "1px solid #ded8c8" }}>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="text-[16px] font-semibold text-[#111111]">Platform activity analytics</h2>
+                <p className="mt-1 text-[12px] font-medium text-[#665f54]">Current operational mix across tenants, users, sessions, security, and audit.</p>
+              </div>
+              <p className="text-[12px] font-semibold text-[#665f54]">Live snapshot</p>
+            </div>
+            <div className="mt-5 grid gap-5 lg:grid-cols-[246px_minmax(0,1fr)]">
+              <div className="rounded-[22px] bg-[#eeeafc] p-5">
+                <p className="text-[12px] font-medium text-[#665f54]">Total tenants</p>
+                <p className="mt-1 text-3xl font-black text-[#111111]">{totalTenants}</p>
+                <p className="mt-5 text-[12px] font-medium text-[#665f54]">Active users</p>
+                <p className="mt-1 text-3xl font-black text-[#111111]">{totalUsers}</p>
+                <p className="mt-5 text-[12px] font-medium text-[#665f54]">Platform events</p>
+                <p className="mt-1 text-3xl font-black text-[#111111]">{totalEvents}</p>
+              </div>
+              <div className="min-h-[280px] rounded-[22px] bg-[#fbfaf6] px-5 pb-5 pt-8" style={{ border: "1px solid #eee8dc" }}>
+                <div className="flex h-56 items-end justify-between gap-4 border-b border-[#ddd6c8]">
+                  {activityBars.map((item) => {
+                    const height = Math.max(14, Math.round((item.value / maxActivity) * 100));
+                    return (
+                      <div key={item.label} className="flex h-full min-w-0 flex-1 flex-col justify-end gap-2">
+                        <div className="mx-auto w-full max-w-14 rounded-t-2xl" style={{ height: `${height}%`, background: item.color }} />
+                        <p className="truncate pb-2 text-center text-[10px] font-bold text-[#665f54]">{item.label}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-3 flex flex-wrap justify-center gap-5 text-[11px] font-semibold text-[#665f54]">
+                  <OverviewLegendItem color="#6d5dd3" label="Scale" />
+                  <OverviewLegendItem color="#34d399" label="Live" />
+                  <OverviewLegendItem color="#ffd400" label="Watch" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+            <OverviewPanel title="Newest tenants" eyebrow="Tenant activity" accent="#6d5dd3">
+              <div className="divide-y" style={{ borderColor: "#eee8dc" }}>
+                {recentTenants.map((tenant) => (
+                  <OverviewTenantLine
+                    key={tenant.id}
+                    tenant={tenant}
+                    busy={busy === `tenant:${tenant.id}`}
+                    canMutate={canMutatePlatform}
+                    onStatus={onChangeTenantStatus}
+                  />
+                ))}
+                {recentTenants.length === 0 ? <OverviewEmpty text="No tenants yet." /> : null}
+              </div>
+            </OverviewPanel>
+
+            <OverviewPanel title="Security stream" eyebrow="Recent signals" accent="#f87171">
+              <OverviewEventList events={recentEvents} />
+              <Link href="/site-admin/security" className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-2xl border border-[#ded8c8] bg-[#fbfaf6] text-[12px] font-black text-[#111111] transition hover:bg-[#ffd400]">
+                Open security page
+                <ArrowRight className="size-3.5" aria-hidden="true" />
+              </Link>
+            </OverviewPanel>
+          </section>
+        </div>
       </section>
     </div>
   );
@@ -1859,6 +1952,15 @@ function OverviewMetricCard({
         </span>
       </div>
     </div>
+  );
+}
+
+function OverviewLegendItem({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-2 text-[11px] font-bold text-[#665f54]">
+      <span className="size-2.5 rounded-full" style={{ background: color }} />
+      {label}
+    </span>
   );
 }
 
@@ -1976,15 +2078,6 @@ function OverviewEmpty({ text }: { text: string }) {
   return (
     <div className="rounded-2xl bg-[#fbfaf6] px-6 py-10 text-center text-[13px] font-bold text-[#766f63]" style={{ border: "1px dashed #d8cfbc" }}>
       {text}
-    </div>
-  );
-}
-
-function PulseTile({ color, compact, label, value }: { color: string; compact?: boolean; label: string; value: number }) {
-  return (
-    <div className={compact ? "rounded-2xl bg-[#fbfaf6] px-3 py-3" : "rounded-[18px] bg-[#fbfaf6] p-3.5"} style={{ border: "1px solid #e7dfcf" }}>
-      <p className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a8375]">{label}</p>
-      <p className={compact ? "mt-1 text-xl font-black leading-none" : "mt-2 text-2xl font-black leading-none"} style={{ color }}>{value}</p>
     </div>
   );
 }
