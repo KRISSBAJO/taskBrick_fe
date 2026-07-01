@@ -129,7 +129,7 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
           className="flex h-[64px] w-full items-center justify-center border-b border-line"
         >
           <span className="flex size-9 items-center justify-center rounded-xl bg-white shadow-[0_12px_28px_rgba(17,17,17,0.08)] ring-1 ring-line">
-            <Image src="/icon.png" alt="" width={26} height={26} className="size-[26px] object-contain" priority />
+            <Image src="/product/taskbrick_icon.png" alt="" width={26} height={26} className="size-[26px] object-contain" priority />
           </span>
         </Link>
 

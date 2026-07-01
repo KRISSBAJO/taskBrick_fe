@@ -296,7 +296,7 @@ function PlatformSidebar({ onLogout }: { onLogout: () => void }) {
         aria-label="TaskBricks home"
         className="group relative flex size-12 items-center justify-center rounded-2xl border border-[#ded8c8] bg-white shadow-[0_16px_34px_rgba(17,17,17,0.08)] transition hover:border-[#ffd400]"
       >
-        <Image src="/icon.png" alt="" width={30} height={30} className="size-[30px] object-contain" priority />
+        <Image src="/product/taskbrick_icon.png" alt="" width={30} height={30} className="size-[30px] object-contain" priority />
         <PlatformRailTooltip label="TaskBricks" description="Go to home" />
       </Link>
 

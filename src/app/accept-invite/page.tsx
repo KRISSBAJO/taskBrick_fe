@@ -16,7 +16,7 @@ export default async function AcceptInvitePage({
         <section className="w-full max-w-2xl rounded-[28px] border border-[#e8e0c8] bg-white p-8 shadow-[0_30px_90px_rgba(17,17,17,0.10)] sm:p-10">
           <Link href="/" className="inline-flex items-center gap-3">
             <span className="flex size-10 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-[#e8e0c8]">
-              <Image src="/icon.png" alt="" width={28} height={28} className="size-7 object-contain" priority />
+              <Image src="/product/taskbrick_icon.png" alt="" width={28} height={28} className="size-7 object-contain" priority />
             </span>
             <span className="text-sm font-black">TaskBricks Enterprise</span>
           </Link>
