@@ -1,9 +1,11 @@
 export { AgentHeroSection } from "./AgentHeroSection";
 export { AgentUseCasesSection } from "./AgentUseCasesSection";
+export { BookDemoFloatingButton } from "./BookDemoFloatingButton";
 export { FeatureHighlights } from "./FeatureHighlights";
 export { HeroSection } from "./HeroSection";
 export { LandingFooter } from "./LandingFooter";
 export { LandingNav } from "./LandingNav";
+export { MarketingLeadForm } from "./MarketingLeadForm";
 export { ProjectGlance } from "./ProjectGlance";
 export { ReliabilitySection } from "./ReliabilitySection";
 export { ServicesSection } from "./ServicesSection";

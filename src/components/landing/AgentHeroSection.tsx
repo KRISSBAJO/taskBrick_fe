@@ -92,10 +92,10 @@ export function AgentHeroSection() {
               </Link>
 
               <Link
-                href="/login"
+                href="/book-demo"
                 className="inline-flex h-12 items-center gap-2 rounded-md border border-black/[0.14] bg-white/80 px-6 text-sm font-extrabold text-[#111111] shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:border-black/[0.24] hover:bg-white"
               >
-                View demo
+                Book demo
               </Link>
             </motion.div>
 

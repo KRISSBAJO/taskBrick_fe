@@ -197,7 +197,7 @@ export function TestimonialsSection() {
             className="lg:pb-2"
           >
             <Link
-              href="#contact"
+              href="/contact"
               className="inline-flex h-12 items-center gap-2 rounded-full border border-black px-7 text-sm font-black text-black transition hover:bg-black hover:text-white"
             >
               Talk to TaskBricks

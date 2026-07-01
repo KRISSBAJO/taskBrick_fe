@@ -1,6 +1,7 @@
 import {
   AgentHeroSection,
   AgentUseCasesSection,
+  BookDemoFloatingButton,
   FeatureHighlights,
   LandingFooter,
   LandingNav,
@@ -26,6 +27,7 @@ export default function Home() {
       <ReliabilitySection />
       <TestimonialsSection />
       <LandingFooter />
+      <BookDemoFloatingButton />
     </main>
   );
 }

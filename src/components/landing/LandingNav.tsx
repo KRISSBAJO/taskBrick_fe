@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, LogOut, ChevronDown } from "lucide-react";
 import { landingNavLinks } from "./landing-data";
 import { getStoredAuth, clearStoredAuth, logoutSession, type AuthUser } from "@/lib/api";
 
 export function LandingNav() {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<AuthUser | null>(() => getStoredAuth()?.user ?? null);
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -59,19 +60,23 @@ export function LandingNav() {
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Landing navigation">
-          {landingNavLinks.map(([label, href]) => (
-            <a
-              key={label}
-              href={href}
-              className={`rounded-md px-3 py-2 text-sm font-semibold transition hover:bg-black/[0.04] hover:text-[#111111] ${
-                label === "Home"
-                  ? "border-b-2 border-[#ffd400] text-[#111111]"
-                  : "border-b-2 border-transparent text-[#68645b]"
-              }`}
-            >
-              {label}
-            </a>
-          ))}
+          {landingNavLinks.map(([label, href]) => {
+            const active = href === "/" ? pathname === "/" : pathname === href;
+
+            return (
+              <a
+                key={label}
+                href={href}
+                className={`rounded-md px-3 py-2 text-sm font-semibold transition hover:bg-black/[0.04] hover:text-[#111111] ${
+                  active
+                    ? "border-b-2 border-[#ffd400] text-[#111111]"
+                    : "border-b-2 border-transparent text-[#68645b]"
+                }`}
+              >
+                {label}
+              </a>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-2">

@@ -1,9 +1,9 @@
 export const landingNavLinks = [
-  ["Home", "#home"],
-  ["About", "#about"],
-  ["Services", "#services"],
-  ["Pricing", "#pricing"],
-  ["Contact", "#contact"],
+  ["Home", "/"],
+  ["About", "/#about"],
+  ["Services", "/#services"],
+  ["Pricing", "/#pricing"],
+  ["Contact", "/contact"],
 ] as const;
 
 export const logos = [

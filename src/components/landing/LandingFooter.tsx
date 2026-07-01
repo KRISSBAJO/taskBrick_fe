@@ -17,7 +17,8 @@ const footerColumns = [
     links: [
       ["About", "/#about"],
       ["Pricing", "/#pricing"],
-      ["Contact", "/#contact"],
+      ["Contact", "/contact"],
+      ["Book demo", "/book-demo"],
       ["Dashboard", "/dashboard"],
     ],
   },
