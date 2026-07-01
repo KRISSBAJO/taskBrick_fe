@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type FormEvent,
   type ReactNode,
@@ -313,12 +314,19 @@ export default function ProjectDetailPage() {
   const [showTaskComposer, setShowTaskComposer] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [refreshingWork, setRefreshingWork] = useState(false);
   const [saving, setSaving] = useState(false);
   const setMessage = useToastMessageDispatcher();
   const [error, setError] = useState("");
+  const hasLoadedProjectRef = useRef(false);
 
   const loadProject = useCallback(async () => {
-    setLoading(true);
+    const isRefresh = hasLoadedProjectRef.current;
+    if (isRefresh) {
+      setRefreshingWork(true);
+    } else {
+      setLoading(true);
+    }
     setError("");
 
     try {
@@ -381,12 +389,19 @@ export default function ProjectDetailPage() {
       } else {
         setTenantUsers([]);
       }
+      hasLoadedProjectRef.current = true;
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Unable to load project.");
+      const message = caught instanceof Error ? caught.message : "Unable to load project.";
+      if (hasLoadedProjectRef.current) {
+        setMessage(message);
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
+      setRefreshingWork(false);
     }
-  }, [auth.accessToken, projectId, workFilters]);
+  }, [auth.accessToken, projectId, setMessage, workFilters]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => void loadProject(), 0);
@@ -1592,6 +1607,7 @@ export default function ProjectDetailPage() {
           showComposer={showTaskComposer}
           sortedTasks={sortedTasks}
           tasks={tasks}
+          refreshing={refreshingWork}
           taxonomy={taxonomy}
           viewMode={workViewMode}
           onFiltersChange={setWorkFilters}
@@ -2010,6 +2026,7 @@ function WorkTab({
   showComposer,
   sortedTasks,
   tasks,
+  refreshing,
   taxonomy,
   viewMode,
 }: {
@@ -2041,6 +2058,7 @@ function WorkTab({
   showComposer: boolean;
   sortedTasks: Task[];
   tasks: Task[];
+  refreshing: boolean;
   taxonomy: TaskTaxonomy | null;
   viewMode: WorkViewMode;
 }) {
@@ -2053,6 +2071,12 @@ function WorkTab({
 
   return (
     <div className="space-y-3">
+      {refreshing ? (
+        <div className="overflow-hidden rounded-full bg-primary/10" role="status" aria-label="Updating filtered tasks">
+          <div className="h-1.5 w-1/3 origin-left animate-[tb-loading-bar_1.25s_ease-in-out_infinite] rounded-full bg-primary shadow-[0_0_18px_rgba(255,212,0,0.45)]" />
+        </div>
+      ) : null}
+
       {/* ── Header ── */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
@@ -2126,6 +2150,7 @@ function WorkTab({
       {/* ── Filter strip ── */}
       <TaskFilterBar
         filters={filters}
+        loading={refreshing}
         members={members}
         resultCount={tasks.length}
         onChange={onFiltersChange}
@@ -2541,6 +2566,7 @@ function TaskCollection({
 
 function TaskFilterBar({
   filters,
+  loading,
   members,
   onChange,
   onRefresh,
@@ -2548,6 +2574,7 @@ function TaskFilterBar({
   resultCount,
 }: {
   filters: WorkFilters;
+  loading: boolean;
   members: ProjectMember[];
   onChange: (filters: WorkFilters) => void;
   onRefresh: () => void;
@@ -2653,7 +2680,7 @@ function TaskFilterBar({
             className="inline-flex size-9 items-center justify-center rounded-xl border border-line bg-background text-ink-soft transition hover:text-foreground"
             aria-label="Refresh"
           >
-            <RefreshCw className="size-3.5" aria-hidden="true" />
+            <RefreshCw className={cn("size-3.5", loading && "animate-spin text-foreground")} aria-hidden="true" />
           </button>
           {activeFilters > 0 && (
             <button
