@@ -29,6 +29,7 @@ import {
   addTeamMember,
   assignRole,
   bulkInviteTenantUsers,
+  cancelTenantUserInvite,
   cancelTeamMemberInvite,
   createFileAsset,
   createTeam,
@@ -42,8 +43,10 @@ import {
   listTeams,
   listUsers,
   listWorkspaces,
+  reinviteTenantUser,
   removeRoleFromUser,
   removeTeamMember,
+  resendTenantUserInvite,
   resendTeamMemberInvite,
   updateTeam,
   updateTeamMemberRole,
@@ -338,6 +341,79 @@ export default function TeamPage() {
     } catch (err) {
       const description = err instanceof Error ? err.message : "Unable to update RBAC groups.";
       toast({ title: "RBAC update failed", description, variant: "error" });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function onResendTenantInvite(user: TenantUser) {
+    setSaving(true);
+    try {
+      const result = await resendTenantUserInvite(auth.accessToken, user.id) as TeamInviteResult;
+      const description = describeInviteDelivery(result, "A fresh tenant invitation was sent.");
+      toast({
+        title: "Invite resent",
+        description,
+        variant: result.deliveryStatus?.status === "failed" ? "warning" : "success",
+      });
+      await loadDirectory();
+    } catch (err) {
+      toast({
+        title: "Resend failed",
+        description: err instanceof Error ? err.message : "Unable to resend tenant invitation.",
+        variant: "error",
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function onCancelTenantInvite(user: TenantUser) {
+    const confirmed = await confirm({
+      title: "Cancel tenant invitation?",
+      description: `Cancel the pending invite for ${displayName(user)}? Their old invitation links will stop working.`,
+      confirmLabel: "Cancel invite",
+      tone: "danger",
+    });
+    if (!confirmed) return;
+
+    setSaving(true);
+    try {
+      await cancelTenantUserInvite(auth.accessToken, user.id);
+      toast({
+        title: "Invitation cancelled",
+        description: `${displayName(user)} was deactivated and open invite links were invalidated.`,
+        variant: "success",
+      });
+      await Promise.all([loadDirectory(), selectedTeam ? loadMembers(selectedTeam.id) : Promise.resolve()]);
+    } catch (err) {
+      toast({
+        title: "Cancel failed",
+        description: err instanceof Error ? err.message : "Unable to cancel tenant invitation.",
+        variant: "error",
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function onReactivateTenantInvite(user: TenantUser) {
+    setSaving(true);
+    try {
+      const result = await reinviteTenantUser(auth.accessToken, user.id) as TeamInviteResult;
+      const description = describeInviteDelivery(result, "Tenant invitation was reactivated and resent.");
+      toast({
+        title: "Invite reactivated",
+        description,
+        variant: result.deliveryStatus?.status === "failed" ? "warning" : "success",
+      });
+      await loadDirectory();
+    } catch (err) {
+      toast({
+        title: "Reactivate failed",
+        description: err instanceof Error ? err.message : "Unable to reactivate tenant invitation.",
+        variant: "error",
+      });
     } finally {
       setSaving(false);
     }
@@ -659,7 +735,10 @@ export default function TeamPage() {
                 )}
                 {activeTab === "directory" && (
                   <TenantUsersPanel
+                    onCancelInvite={onCancelTenantInvite}
                     onToggleRole={onToggleTenantUserRole}
+                    onReactivateInvite={onReactivateTenantInvite}
+                    onResendInvite={onResendTenantInvite}
                     roles={roles}
                     saving={saving}
                     users={users}
@@ -1028,13 +1107,19 @@ function AddExistingForm({ onSubmit, saving, users }: {
 /* ─── Role catalog ─────────────────────────────────────────────────────────── */
 
 function TenantUsersPanel({
+  onCancelInvite,
   onInvite,
+  onReactivateInvite,
+  onResendInvite,
   onToggleRole,
   roles,
   saving,
   users,
 }: {
+  onCancelInvite: (user: TenantUser) => void;
   onInvite: (e: FormEvent<HTMLFormElement>) => void;
+  onReactivateInvite: (user: TenantUser) => void;
+  onResendInvite: (user: TenantUser) => void;
   onToggleRole: (user: TenantUser, role: Role, assign: boolean) => void;
   roles: Role[];
   saving: boolean;
@@ -1074,6 +1159,8 @@ function TenantUsersPanel({
           {filteredUsers.length ? (
             filteredUsers.map((user) => {
               const assignedRoleIds = new Set(user.roles?.map((assignment) => assignment.role.id) ?? []);
+              const invitePending = user.status === "INVITED";
+              const inviteCancelled = user.status === "DEACTIVATED";
               return (
                 <article key={user.id} className="px-4 py-3 transition hover:bg-panel-muted/70">
                   <div className="flex items-center gap-3">
@@ -1110,6 +1197,49 @@ function TenantUsersPanel({
                     </div>
                     <StatusBadge status={user.status} />
                   </div>
+
+                  {invitePending || inviteCancelled ? (
+                    <div className="mt-3 flex flex-wrap items-center gap-2 pl-0 sm:pl-[52px]">
+                      {invitePending ? (
+                        <>
+                          <button
+                            type="button"
+                            disabled={saving}
+                            onClick={() => onResendInvite(user)}
+                            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line bg-background px-3 text-[11px] font-black text-foreground transition hover:bg-panel-muted disabled:opacity-50"
+                          >
+                            <Mail className="size-3.5" />
+                            Resend invite
+                          </button>
+                          <button
+                            type="button"
+                            disabled={saving}
+                            onClick={() => onCancelInvite(user)}
+                            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-red-100 bg-red-50 px-3 text-[11px] font-black text-red-700 transition hover:bg-red-100 disabled:opacity-50"
+                          >
+                            <Trash2 className="size-3.5" />
+                            Cancel invite
+                          </button>
+                        </>
+                      ) : null}
+                      {inviteCancelled ? (
+                        <button
+                          type="button"
+                          disabled={saving}
+                          onClick={() => onReactivateInvite(user)}
+                          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[#f3d46b] bg-[#fff7cc] px-3 text-[11px] font-black text-[#5f4600] transition hover:bg-[#ffe875] disabled:opacity-50"
+                        >
+                          <RefreshCw className="size-3.5" />
+                          Reactivate invite
+                        </button>
+                      ) : null}
+                      <span className="text-[11px] font-semibold text-ink-soft">
+                        {invitePending
+                          ? "Sends a fresh link using the configured production frontend."
+                          : "Creates a new pending invite for this canceled user."}
+                      </span>
+                    </div>
+                  ) : null}
 
                   <details className="group mt-3 rounded-xl border border-line bg-panel px-3 py-2">
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[11px] font-black uppercase tracking-[0.14em] text-ink-soft">

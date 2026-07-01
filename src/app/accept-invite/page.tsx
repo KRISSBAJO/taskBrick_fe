@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Blocks, UserPlus } from "lucide-react";
+import Image from "next/image";
+import { UserPlus } from "lucide-react";
 import { AcceptInviteForm } from "@/components/accept-invite-form";
 
 export default async function AcceptInvitePage({
@@ -14,8 +15,8 @@ export default async function AcceptInvitePage({
       <div className="mx-auto flex min-h-[calc(100dvh-80px)] w-full max-w-5xl items-center justify-center">
         <section className="w-full max-w-2xl rounded-[28px] border border-[#e8e0c8] bg-white p-8 shadow-[0_30px_90px_rgba(17,17,17,0.10)] sm:p-10">
           <Link href="/" className="inline-flex items-center gap-3">
-            <span className="flex size-10 items-center justify-center rounded-xl bg-[#111111]">
-              <Blocks className="size-5 text-[#ffd400]" aria-hidden="true" />
+            <span className="flex size-10 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-[#e8e0c8]">
+              <Image src="/icon.png" alt="" width={28} height={28} className="size-7 object-contain" priority />
             </span>
             <span className="text-sm font-black">TaskBricks Enterprise</span>
           </Link>

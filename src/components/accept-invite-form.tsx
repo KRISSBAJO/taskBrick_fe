@@ -12,12 +12,13 @@ const inputBase =
 export function AcceptInviteForm({ token }: { token?: string }) {
   const router = useRouter();
   const [error, setError] = useState("");
+  const [resolvedToken] = useState(() => token ?? readInviteTokenFromLocation());
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    if (!token) {
+    if (!resolvedToken) {
       setError("Invite token is missing. Use the link from your invitation email.");
       return;
     }
@@ -29,17 +30,22 @@ export function AcceptInviteForm({ token }: { token?: string }) {
       setError("Passwords do not match.");
       return;
     }
+    if (password.length < 12) {
+      setError("Password must be at least 12 characters.");
+      return;
+    }
 
     setLoading(true);
     try {
       const result = await acceptInvite({
-        token,
+        token: resolvedToken,
         firstName: String(formData.get("firstName") ?? ""),
         lastName: String(formData.get("lastName") ?? ""),
         password,
       });
       setStoredAuth(result);
-      router.push("/dashboard");
+      router.replace("/dashboard");
+      router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to accept invite");
     } finally {
@@ -81,9 +87,16 @@ export function AcceptInviteForm({ token }: { token?: string }) {
         </div>
       ) : null}
 
+      {!resolvedToken ? (
+        <div className="flex items-start gap-2 rounded-xl border border-[#fde68a] bg-[#fffbeb] px-4 py-3 text-sm font-semibold text-[#92400e]">
+          <span className="mt-px shrink-0">!</span>
+          This invite link does not include a token. Ask your workspace admin to resend the invitation.
+        </div>
+      ) : null}
+
       <button
         type="submit"
-        disabled={loading || !token}
+        disabled={loading || !resolvedToken}
         className="tb-yellow-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-black disabled:opacity-70"
       >
         {loading ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <CheckCircle2 className="size-4" aria-hidden="true" />}
@@ -95,6 +108,15 @@ export function AcceptInviteForm({ token }: { token?: string }) {
       </Link>
     </form>
   );
+}
+
+function readInviteTokenFromLocation() {
+  if (typeof window === "undefined") return "";
+
+  const searchParams = new URLSearchParams(window.location.search);
+  const hash = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : window.location.hash;
+  const hashParams = new URLSearchParams(hash);
+  return searchParams.get("token") ?? hashParams.get("token") ?? "";
 }
 
 function PasswordField({ id, label, name }: { id: string; label: string; name: string }) {

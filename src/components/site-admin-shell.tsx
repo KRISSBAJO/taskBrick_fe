@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useRef, useState, type ReactNode } from "react";
 import {
@@ -293,9 +294,9 @@ function PlatformSidebar({ onLogout }: { onLogout: () => void }) {
       <Link
         href="/"
         aria-label="TaskBricks home"
-        className="group relative flex size-12 items-center justify-center rounded-2xl border border-[#dfc744] bg-[#ffd400] text-[#111111] shadow-[0_16px_34px_rgba(255,212,0,0.28)] transition hover:bg-[#f2c200]"
+        className="group relative flex size-12 items-center justify-center rounded-2xl border border-[#ded8c8] bg-white shadow-[0_16px_34px_rgba(17,17,17,0.08)] transition hover:border-[#ffd400]"
       >
-        <Blocks className="size-5" aria-hidden="true" />
+        <Image src="/icon.png" alt="" width={30} height={30} className="size-[30px] object-contain" priority />
         <PlatformRailTooltip label="TaskBricks" description="Go to home" />
       </Link>
 

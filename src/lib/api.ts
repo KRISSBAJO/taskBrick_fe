@@ -234,7 +234,15 @@ export {
   upsertSsoProvider,
 } from "./api/identitySecurityApi";
 export { listSessions, revokeSession, revokeUserSessions } from "./api/sessionApi";
-export { bulkInviteTenantUsers, inviteTenantUser, listUsers, updateMyProfile } from "./api/userApi";
+export {
+  bulkInviteTenantUsers,
+  cancelTenantUserInvite,
+  inviteTenantUser,
+  listUsers,
+  reinviteTenantUser,
+  resendTenantUserInvite,
+  updateMyProfile,
+} from "./api/userApi";
 export { listWorkspaces } from "./api/workspaceApi";
 export {
   addTeamMember,

@@ -1,8 +1,9 @@
 import {
-boundedLimit,
-openApiRequest,
-type OpenApiJsonBody,
-type OpenApiQuery,
+  apiRequest,
+  boundedLimit,
+  openApiRequest,
+  type OpenApiJsonBody,
+  type OpenApiQuery,
 } from "./request";
 
 type UpdateMyProfilePayload = OpenApiJsonBody<"/api/v1/users/me/profile", "patch">;
@@ -31,6 +32,27 @@ export function bulkInviteTenantUsers(token: string, payload: BulkInviteTenantUs
     token,
     pathParams: {},
     body: payload,
+  });
+}
+
+export function resendTenantUserInvite(token: string, userId: string) {
+  return apiRequest(`/users/${encodeURIComponent(userId)}/resend-invite`, {
+    method: "POST",
+    token,
+  });
+}
+
+export function reinviteTenantUser(token: string, userId: string) {
+  return apiRequest(`/users/${encodeURIComponent(userId)}/reinvite`, {
+    method: "POST",
+    token,
+  });
+}
+
+export function cancelTenantUserInvite(token: string, userId: string) {
+  return apiRequest(`/users/${encodeURIComponent(userId)}/invite`, {
+    method: "DELETE",
+    token,
   });
 }
 

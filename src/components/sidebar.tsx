@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -127,8 +128,8 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
           aria-label="TaskBricks home"
           className="flex h-[64px] w-full items-center justify-center border-b border-line"
         >
-          <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-[#111111] shadow-[0_12px_28px_rgba(255,212,0,0.28)]">
-            <Blocks className="size-5" aria-hidden="true" />
+          <span className="flex size-9 items-center justify-center rounded-xl bg-white shadow-[0_12px_28px_rgba(17,17,17,0.08)] ring-1 ring-line">
+            <Image src="/icon.png" alt="" width={26} height={26} className="size-[26px] object-contain" priority />
           </span>
         </Link>
 
