@@ -12,6 +12,7 @@ import Link from "next/link";
 import {
   Archive,
   ArrowLeft,
+  Bug,
   Calendar,
   CheckSquare,
   Eye,
@@ -25,6 +26,8 @@ import {
   Minus,
   Plus,
   RotateCcw,
+  ShieldAlert,
+  ShieldCheck,
   Tag,
   Trash2,
   Unlink,
@@ -90,6 +93,14 @@ import {
   userInitials,
 } from "@/lib/workspace-ui";
 import { FileAssetManager } from "@/components/file-asset-manager";
+import {
+  completeQaTestRun,
+  createQaDefectFromExecution,
+  createQaExecution,
+  createQaTestCase,
+  createQaTestRun,
+  getQaTaskSummary,
+} from "@/lib/api/qaApi";
 
 type TaskLifecycleMode = "page" | "drawer";
 
@@ -125,6 +136,75 @@ const priorityColor: Record<TaskPriority, string> = {
 
 const labelColors = ["#ffd400", "#3b82f6", "#10b981", "#ef4444", "#8b5cf6", "#f97316"];
 
+type QaExecutionStatus = "UNTESTED" | "PASSED" | "FAILED" | "BLOCKED" | "SKIPPED" | "FLAKY";
+type QaTestCasePriority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+type QaTestCaseType =
+  | "FUNCTIONAL"
+  | "REGRESSION"
+  | "SMOKE"
+  | "INTEGRATION"
+  | "PERFORMANCE"
+  | "SECURITY"
+  | "ACCESSIBILITY"
+  | "ACCEPTANCE";
+type QaExecutionSummary = {
+  blocked: number;
+  failed: number;
+  flaky: number;
+  passed: number;
+  passRate: number;
+  ready: boolean;
+  skipped: number;
+  total: number;
+  untested: number;
+};
+type QaLinkedTestCase = {
+  id?: string;
+  linkType?: string;
+  testCaseId?: string;
+  testCase: {
+    automationKey?: string | null;
+    id: string;
+    priority?: QaTestCasePriority;
+    status?: string;
+    title: string;
+    type?: QaTestCaseType;
+  };
+};
+type QaLatestExecution = {
+  actualResult?: string | null;
+  defectTask?: { id: string; key: string; status: TaskStatus; title: string } | null;
+  executedAt?: string | null;
+  failureMessage?: string | null;
+  id: string;
+  status: QaExecutionStatus;
+  testCaseId?: string | null;
+  testRunId?: string;
+  updatedAt?: string;
+};
+type QaTaskSummary = {
+  evidence: unknown[];
+  executions: QaExecutionSummary;
+  latestExecutions: QaLatestExecution[];
+  linkedTestCases: QaLinkedTestCase[];
+};
+type QaDraft = {
+  expectedResult: string;
+  title: string;
+};
+
+const emptyQaExecutionSummary: QaExecutionSummary = {
+  blocked: 0,
+  failed: 0,
+  flaky: 0,
+  passed: 0,
+  passRate: 0,
+  ready: false,
+  skipped: 0,
+  total: 0,
+  untested: 0,
+};
+
 export function TaskLifecycleView({
   mode = "page",
   onClose,
@@ -149,6 +229,8 @@ export function TaskLifecycleView({
   const [relatedTasks, setRelatedTasks] = useState<Task[]>([]);
   const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [qaSummary, setQaSummary] = useState<QaTaskSummary | null>(null);
+  const [qaDraft, setQaDraft] = useState<QaDraft>({ expectedResult: "", title: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
@@ -167,12 +249,14 @@ export function TaskLifecycleView({
         checklistData,
         activityData,
         dependencyData,
+        qaSummaryData,
       ] = await Promise.all([
         getTask(token, taskId),
         listTaskComments(token, taskId),
         listTaskChecklists(token, taskId),
         listTaskActivities(token, taskId),
         listTaskDependencies(token, taskId),
+        getQaTaskSummary(token, taskId).then(normalizeQaTaskSummary).catch(() => null),
       ]);
 
       setTask(taskData);
@@ -182,6 +266,7 @@ export function TaskLifecycleView({
       setDependencies(dependencyData);
       setTaskLabels(taskData.labels ?? []);
       setAssignees(taskData.assignees ?? []);
+      setQaSummary(qaSummaryData);
 
       const [labelResult, taskLabelResult, assigneeResult, watcherResult, memberResult, meResult, relatedResult] =
         await Promise.allSettled([
@@ -295,6 +380,24 @@ export function TaskLifecycleView({
       percent: total ? Math.round((done / total) * 100) : 0,
     };
   }, [checklists]);
+
+  const qaExecutionByCase = useMemo(() => {
+    const map = new Map<string, QaLatestExecution>();
+    for (const execution of qaSummary?.latestExecutions ?? []) {
+      if (execution.testCaseId) map.set(execution.testCaseId, execution);
+    }
+    return map;
+  }, [qaSummary]);
+
+  const qaStats = qaSummary?.executions ?? emptyQaExecutionSummary;
+
+  async function refreshQaSummary() {
+    try {
+      setQaSummary(normalizeQaTaskSummary(await getQaTaskSummary(token, taskId)));
+    } catch {
+      setQaSummary(null);
+    }
+  }
 
   async function refreshActivity() {
     try {
@@ -801,6 +904,113 @@ export function TaskLifecycleView({
     }
   }
 
+  async function addQaTestCase(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!task) return;
+    const title = qaDraft.title.trim();
+    if (!title) return;
+
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      await createQaTestCase(token, {
+        expectedResult: qaDraft.expectedResult.trim() || undefined,
+        linkType: "COVERS",
+        priority: "MEDIUM",
+        projectId,
+        status: "ACTIVE",
+        taskId,
+        title,
+        type: "FUNCTIONAL",
+      });
+      setQaDraft({ expectedResult: "", title: "" });
+      await refreshQaSummary();
+      void refreshActivity();
+      setMessage({ text: "QA test case linked to task.", ok: true });
+    } catch (caught) {
+      setMessage({
+        text: caught instanceof Error ? caught.message : "Unable to create QA test case.",
+        ok: false,
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function recordQaResult(testCase: QaLinkedTestCase["testCase"], status: QaExecutionStatus) {
+    if (!task) return;
+
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      const run = await createQaTestRun(token, {
+        name: `${task.key} manual QA - ${testCase.title}`.slice(0, 240),
+        projectId,
+        source: "MANUAL",
+        status: "RUNNING",
+        taskId,
+        testCaseIds: [testCase.id],
+      }) as { id?: string };
+      if (!run.id) throw new Error("QA run was not created.");
+      await createQaExecution(token, run.id, {
+        executedAt: new Date().toISOString(),
+        status,
+        taskId,
+        testCaseId: testCase.id,
+        title: testCase.title,
+      });
+      await completeQaTestRun(token, run.id);
+      await refreshQaSummary();
+      void refreshActivity();
+      setMessage({ text: `QA result recorded: ${qaStatusLabel(status)}.`, ok: true });
+    } catch (caught) {
+      setMessage({
+        text: caught instanceof Error ? caught.message : "Unable to record QA result.",
+        ok: false,
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function createDefectFromQa(execution: QaLatestExecution, testCase: QaLinkedTestCase["testCase"]) {
+    if (!execution.testRunId) {
+      setMessage({ text: "This QA result is missing its run reference.", ok: false });
+      return;
+    }
+    const confirmed = await confirm({
+      title: "Create bug from failed test?",
+      description: `Create a board bug for "${testCase.title}" and link it to this QA result.`,
+      confirmLabel: "Create bug",
+      tone: "danger",
+    });
+    if (!confirmed) return;
+
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      await createQaDefectFromExecution(token, execution.testRunId, execution.id, {
+        description: `QA failure from ${task?.key ?? "task"}: ${testCase.title}`,
+        priority: "HIGH",
+        title: `Fix QA failure: ${testCase.title}`.slice(0, 180),
+        type: "BUG",
+      });
+      await refreshQaSummary();
+      void refreshActivity();
+      setMessage({ text: "Bug created from QA failure.", ok: true });
+    } catch (caught) {
+      setMessage({
+        text: caught instanceof Error ? caught.message : "Unable to create QA defect.",
+        ok: false,
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
   if (loading) {
     return (
       <Shell mode={mode}>
@@ -1091,6 +1301,131 @@ export function TaskLifecycleView({
                 Create
               </button>
             </form>
+          </SectionCard>
+
+          <SectionCard icon={ShieldCheck} title="QA validation" defaultOpen={Boolean(qaSummary?.linkedTestCases.length)}>
+            <div className="space-y-4">
+              <div className="grid gap-2 sm:grid-cols-4">
+                <QaStat label="Pass rate" tone={qaStats.ready ? "good" : qaStats.failed || qaStats.blocked ? "danger" : "neutral"} value={`${qaStats.passRate}%`} />
+                <QaStat label="Passed" tone="good" value={String(qaStats.passed)} />
+                <QaStat label="Failed" tone={qaStats.failed ? "danger" : "neutral"} value={String(qaStats.failed)} />
+                <QaStat label="Blocked" tone={qaStats.blocked ? "danger" : "neutral"} value={String(qaStats.blocked)} />
+              </div>
+
+              <div className="rounded-xl border border-line bg-background p-3.5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h4 className="text-sm font-black text-foreground">Linked test cases</h4>
+                    <p className="text-[11px] font-semibold text-ink-soft">
+                      Manual QA history is saved per execution. Failed results can raise bug tasks.
+                    </p>
+                  </div>
+                  <span className={cn(
+                    "rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em]",
+                    qaStats.ready ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700",
+                  )}>
+                    {qaStats.ready ? "Ready" : qaSummary?.linkedTestCases.length ? "Needs QA" : "No coverage"}
+                  </span>
+                </div>
+
+                <div className="mt-3 space-y-2">
+                  {qaSummary?.linkedTestCases.length ? (
+                    qaSummary.linkedTestCases.map((link) => {
+                      const testCase = link.testCase;
+                      const latest = qaExecutionByCase.get(testCase.id);
+                      return (
+                        <article key={link.id ?? testCase.id} className="rounded-xl border border-line bg-panel p-3">
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span className="rounded-md bg-background px-1.5 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] text-ink-soft">
+                                  {testCase.type?.replaceAll("_", " ") ?? "Functional"}
+                                </span>
+                                <span className="rounded-md bg-background px-1.5 py-0.5 text-[9px] font-black uppercase tracking-[0.1em] text-ink-soft">
+                                  {testCase.priority ?? "MEDIUM"}
+                                </span>
+                                <QaStatusBadge status={latest?.status ?? "UNTESTED"} />
+                              </div>
+                              <h5 className="mt-2 text-sm font-black text-foreground">{testCase.title}</h5>
+                              {latest?.defectTask ? (
+                                <Link
+                                  href={`/tasks/${latest.defectTask.id}`}
+                                  className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-2 py-1 text-[11px] font-black text-red-700"
+                                >
+                                  <Bug className="size-3.5" />
+                                  Defect {latest.defectTask.key}
+                                </Link>
+                              ) : latest?.updatedAt ? (
+                                <p className="mt-1 text-[11px] font-semibold text-ink-soft">
+                                  Last run {formatShortDate(latest.updatedAt)}
+                                </p>
+                              ) : null}
+                            </div>
+
+                            <div className="flex flex-wrap justify-end gap-1.5">
+                              {(["PASSED", "FAILED", "BLOCKED", "SKIPPED"] as QaExecutionStatus[]).map((status) => (
+                                <button
+                                  key={status}
+                                  type="button"
+                                  onClick={() => void recordQaResult(testCase, status)}
+                                  disabled={saving}
+                                  className={cn(
+                                    "h-8 rounded-lg border px-2.5 text-[11px] font-black transition disabled:opacity-50",
+                                    status === "PASSED" && "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+                                    status === "FAILED" && "border-red-200 bg-red-50 text-red-700 hover:bg-red-100",
+                                    status === "BLOCKED" && "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100",
+                                    status === "SKIPPED" && "border-line bg-background text-ink-soft hover:bg-panel-muted",
+                                  )}
+                                >
+                                  {qaStatusLabel(status)}
+                                </button>
+                              ))}
+                              {latest && latest.status === "FAILED" && !latest.defectTask ? (
+                                <button
+                                  type="button"
+                                  onClick={() => void createDefectFromQa(latest, testCase)}
+                                  disabled={saving}
+                                  className="h-8 rounded-lg border border-line bg-foreground px-2.5 text-[11px] font-black text-white transition hover:bg-black disabled:opacity-50"
+                                >
+                                  Create bug
+                                </button>
+                              ) : null}
+                            </div>
+                          </div>
+                        </article>
+                      );
+                    })
+                  ) : (
+                    <EmptyState icon={ShieldAlert} text="No linked QA cases yet." compact />
+                  )}
+                </div>
+              </div>
+
+              <form onSubmit={addQaTestCase} className="grid gap-2 rounded-xl border border-line bg-background p-3">
+                <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+                  <input
+                    value={qaDraft.title}
+                    onChange={(event) => setQaDraft((current) => ({ ...current, title: event.target.value }))}
+                    required
+                    placeholder="Test case title"
+                    className={fieldClass}
+                  />
+                  <input
+                    value={qaDraft.expectedResult}
+                    onChange={(event) => setQaDraft((current) => ({ ...current, expectedResult: event.target.value }))}
+                    placeholder="Expected result"
+                    className={fieldClass}
+                  />
+                  <button
+                    type="submit"
+                    disabled={saving || !qaDraft.title.trim()}
+                    className="h-10 rounded-lg bg-primary px-4 text-sm font-black text-[#111111] transition hover:bg-primary-dark disabled:opacity-55"
+                  >
+                    Add QA case
+                  </button>
+                </div>
+              </form>
+            </div>
           </SectionCard>
 
           <SectionCard icon={GitBranch} title="Dependencies and blockers" defaultOpen={dependencies.blocking.length > 0 || dependencies.blockedBy.length > 0}>
@@ -1568,6 +1903,49 @@ export function TaskLifecycleView({
   );
 }
 
+function QaStat({ label, tone, value }: { label: string; tone: "danger" | "good" | "neutral"; value: string }) {
+  return (
+    <div
+      className={cn(
+        "rounded-xl border px-3 py-3",
+        tone === "good" && "border-emerald-200 bg-emerald-50",
+        tone === "danger" && "border-red-200 bg-red-50",
+        tone === "neutral" && "border-line bg-background",
+      )}
+    >
+      <p
+        className={cn(
+          "text-[22px] font-black leading-none tabular-nums",
+          tone === "good" && "text-emerald-700",
+          tone === "danger" && "text-red-700",
+          tone === "neutral" && "text-foreground",
+        )}
+      >
+        {value}
+      </p>
+      <p className="mt-1 text-[10px] font-black uppercase tracking-[0.14em] text-ink-soft">{label}</p>
+    </div>
+  );
+}
+
+function QaStatusBadge({ status }: { status: QaExecutionStatus }) {
+  return (
+    <span
+      className={cn(
+        "rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase tracking-[0.1em]",
+        status === "PASSED" && "bg-emerald-50 text-emerald-700",
+        status === "FAILED" && "bg-red-50 text-red-700",
+        status === "BLOCKED" && "bg-amber-50 text-amber-700",
+        status === "SKIPPED" && "bg-slate-100 text-slate-600",
+        status === "FLAKY" && "bg-purple-50 text-purple-700",
+        status === "UNTESTED" && "bg-background text-ink-soft",
+      )}
+    >
+      {qaStatusLabel(status)}
+    </span>
+  );
+}
+
 function Shell({ children, mode }: { children: ReactNode; mode: TaskLifecycleMode }) {
   if (mode === "drawer") {
     return (
@@ -1882,6 +2260,124 @@ function dateInputValue(value?: string | null) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
   return date.toISOString().slice(0, 10);
+}
+
+function qaStatusLabel(status: QaExecutionStatus) {
+  return status.toLowerCase().replaceAll("_", " ");
+}
+
+function normalizeQaTaskSummary(value: unknown): QaTaskSummary {
+  const source = isRecord(value) ? value : {};
+  return {
+    evidence: Array.isArray(source.evidence) ? source.evidence : [],
+    executions: normalizeQaExecutionSummary(source.executions),
+    latestExecutions: Array.isArray(source.latestExecutions)
+      ? source.latestExecutions.filter(isRecord).map(normalizeQaLatestExecution)
+      : [],
+    linkedTestCases: Array.isArray(source.linkedTestCases)
+      ? source.linkedTestCases.filter(isRecord).map(normalizeQaLinkedCase).filter((item) => item.testCase.id)
+      : [],
+  };
+}
+
+function normalizeQaExecutionSummary(value: unknown): QaExecutionSummary {
+  const source = isRecord(value) ? value : {};
+  return {
+    blocked: readNumber(source.blocked),
+    failed: readNumber(source.failed),
+    flaky: readNumber(source.flaky),
+    passed: readNumber(source.passed),
+    passRate: readNumber(source.passRate),
+    ready: source.ready === true,
+    skipped: readNumber(source.skipped),
+    total: readNumber(source.total),
+    untested: readNumber(source.untested),
+  };
+}
+
+function normalizeQaLatestExecution(source: Record<string, unknown>): QaLatestExecution {
+  const defectTask = isRecord(source.defectTask)
+    ? {
+        id: readString(source.defectTask.id),
+        key: readString(source.defectTask.key),
+        status: readTaskStatus(source.defectTask.status),
+        title: readString(source.defectTask.title),
+      }
+    : null;
+
+  return {
+    actualResult: readNullableString(source.actualResult),
+    defectTask: defectTask?.id ? defectTask : null,
+    executedAt: readNullableString(source.executedAt),
+    failureMessage: readNullableString(source.failureMessage),
+    id: readString(source.id),
+    status: readQaExecutionStatus(source.status),
+    testCaseId: readNullableString(source.testCaseId),
+    testRunId: readString(source.testRunId),
+    updatedAt: readString(source.updatedAt),
+  };
+}
+
+function normalizeQaLinkedCase(source: Record<string, unknown>): QaLinkedTestCase {
+  const testCaseSource = isRecord(source.testCase) ? source.testCase : {};
+  return {
+    id: readString(source.id),
+    linkType: readString(source.linkType),
+    testCaseId: readString(source.testCaseId),
+    testCase: {
+      automationKey: readNullableString(testCaseSource.automationKey),
+      id: readString(testCaseSource.id),
+      priority: readQaPriority(testCaseSource.priority),
+      status: readString(testCaseSource.status),
+      title: readString(testCaseSource.title),
+      type: readQaType(testCaseSource.type),
+    },
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
+}
+
+function readString(value: unknown) {
+  return typeof value === "string" ? value : "";
+}
+
+function readNullableString(value: unknown) {
+  return typeof value === "string" ? value : null;
+}
+
+function readNumber(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function readQaExecutionStatus(value: unknown): QaExecutionStatus {
+  return value === "PASSED" || value === "FAILED" || value === "BLOCKED" || value === "SKIPPED" || value === "FLAKY"
+    ? value
+    : "UNTESTED";
+}
+
+function readQaPriority(value: unknown): QaTestCasePriority {
+  return value === "LOW" || value === "HIGH" || value === "CRITICAL" ? value : "MEDIUM";
+}
+
+function readQaType(value: unknown): QaTestCaseType {
+  if (
+    value === "REGRESSION"
+    || value === "SMOKE"
+    || value === "INTEGRATION"
+    || value === "PERFORMANCE"
+    || value === "SECURITY"
+    || value === "ACCESSIBILITY"
+    || value === "ACCEPTANCE"
+  ) {
+    return value;
+  }
+  return "FUNCTIONAL";
+}
+
+function readTaskStatus(value: unknown): TaskStatus {
+  return lifecycleStatusOrder.includes(value as TaskStatus) ? value as TaskStatus : "BACKLOG";
 }
 
 const fieldClass =

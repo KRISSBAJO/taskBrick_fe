@@ -45,6 +45,7 @@ import {
   Rows3,
   Save,
   Search,
+  ShieldAlert,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
@@ -84,6 +85,7 @@ import {
   type TaskType,
   type TenantUser,
 } from "@/lib/api";
+import { getQaTaskSummary } from "@/lib/api/qaApi";
 import { cn } from "@/lib/cn";
 import {
   formatShortDate,
@@ -114,6 +116,15 @@ type SavedBoardConfig = {
 };
 type DragHandleAttributes = ReturnType<typeof useSortable>["attributes"];
 type DragHandleListeners  = ReturnType<typeof useSortable>["listeners"];
+type BoardQaBadge = {
+  blocked: number;
+  failed: number;
+  passed: number;
+  passRate: number;
+  ready: boolean;
+  total: number;
+  untested: number;
+};
 
 const DEFAULT_BOARD_FILTERS: BoardFilters = {
   search: "",
@@ -176,6 +187,7 @@ export default function BoardPage() {
   const [expandedTaskIds,    setExpandedTaskIds]    = useState<Set<string>>(() => new Set());
   const [activeTask,         setActiveTask]         = useState<Task | null>(null);
   const [activeColumn,       setActiveColumn]       = useState<BoardColumn | null>(null);
+  const [qaByTaskId,         setQaByTaskId]         = useState<Record<string, BoardQaBadge>>({});
   const [viewMode,           setViewMode]           = useState<ViewMode>("board");
 
   const sensors = useSensors(
@@ -241,10 +253,47 @@ export default function BoardPage() {
   }, [board, filteredBoard]);
 
   const visibleTasks = useMemo(() => filteredBoard?.columns.flatMap((c) => c.tasks ?? []) ?? [], [filteredBoard]);
+  const visibleTaskIds = useMemo(() => visibleTasks.map((task) => task.id).join("|"), [visibleTasks]);
   const swimlaneGroups = useMemo(
     () => filteredBoard ? groupBoardBySwimlane(filteredBoard, swimlane, sprints) : [],
     [filteredBoard, sprints, swimlane],
   );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!auth.accessToken || !visibleTaskIds) {
+      void Promise.resolve().then(() => {
+        if (!cancelled) {
+          setQaByTaskId({});
+        }
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const ids = visibleTaskIds.split("|").filter(Boolean).slice(0, 80);
+
+    void Promise.allSettled(
+      ids.map(async (id) => {
+        const summary = await getQaTaskSummary(auth.accessToken, id);
+        return [id, normalizeBoardQaBadge(summary)] as const;
+      }),
+    ).then((results) => {
+      if (cancelled) return;
+      const next: Record<string, BoardQaBadge> = {};
+      results.forEach((result) => {
+        if (result.status !== "fulfilled") return;
+        const [id, badge] = result.value;
+        if (badge) next[id] = badge;
+      });
+      setQaByTaskId(next);
+    });
+
+    return () => { cancelled = true; };
+  }, [auth.accessToken, visibleTaskIds]);
+
   const boardPermissions = board?.permissions;
   const canCreateTask = Boolean(boardPermissions?.canCreateTask);
   const canMoveTasks = Boolean(boardPermissions?.canMoveTasks);
@@ -766,6 +815,7 @@ export default function BoardPage() {
             onQuickAssign={onQuickAssignTask}
             onQuickUpdate={onQuickUpdateTask}
             onToggleExpanded={toggleTaskExpanded}
+            qaByTaskId={qaByTaskId}
             sprints={sprints}
             users={users}
           />
@@ -788,6 +838,7 @@ export default function BoardPage() {
                       sprints={sprints}
                       onDelete={onDeleteColumn}
                       onQuickAdd={onQuickAddTask}
+                      qaByTaskId={qaByTaskId}
                       onUpdate={onUpdateColumn}
                       users={users}
                       expandedTaskIds={expandedTaskIds}
@@ -800,7 +851,7 @@ export default function BoardPage() {
               </SortableContext>
             </div>
             <DragOverlay>
-              {activeTask   ? <RichTaskCard task={activeTask} dragging sprints={sprints} users={users} /> : null}
+              {activeTask   ? <RichTaskCard task={activeTask} dragging qa={qaByTaskId[activeTask.id]} sprints={sprints} users={users} /> : null}
               {activeColumn ? <ColGhost column={activeColumn} /> : null}
             </DragOverlay>
           </DndContext>
@@ -1001,6 +1052,7 @@ function SwimlaneBoard({
   onQuickAssign,
   onQuickUpdate,
   onToggleExpanded,
+  qaByTaskId,
   sprints,
   users,
 }: {
@@ -1010,6 +1062,7 @@ function SwimlaneBoard({
   onQuickAssign: (task: Task, userId: string) => void;
   onQuickUpdate: (task: Task, patch: Partial<Pick<Task, "status" | "priority" | "dueDate">>) => void;
   onToggleExpanded: (taskIdValue: string) => void;
+  qaByTaskId: Record<string, BoardQaBadge>;
   sprints: Sprint[];
   users: TenantUser[];
 }) {
@@ -1047,6 +1100,7 @@ function SwimlaneBoard({
                         onQuickAssign={onQuickAssign}
                         onQuickUpdate={onQuickUpdate}
                         onToggleExpanded={onToggleExpanded}
+                        qa={qaByTaskId[task.id]}
                         sprints={sprints}
                         task={task}
                         users={users}
@@ -1174,7 +1228,7 @@ function TaskSummaryPreview({ task }: { task: Task }) {
 }
 
 function BoardColView({
-  canCreateTask, canManageColumns, canMoveTasks, column, density, expandedTaskIds, onDelete, onQuickAdd, onQuickAssign, onQuickUpdate, onToggleExpanded, onUpdate, sprints, users,
+  canCreateTask, canManageColumns, canMoveTasks, column, density, expandedTaskIds, onDelete, onQuickAdd, onQuickAssign, onQuickUpdate, onToggleExpanded, onUpdate, qaByTaskId, sprints, users,
 }: {
   canCreateTask: boolean;
   canManageColumns: boolean;
@@ -1188,6 +1242,7 @@ function BoardColView({
   onQuickUpdate: (task: Task, patch: Partial<Pick<Task, "status" | "priority" | "dueDate">>) => void;
   onToggleExpanded: (taskIdValue: string) => void;
   onUpdate: (colId: string, payload: Partial<BoardColumn>) => void;
+  qaByTaskId: Record<string, BoardQaBadge>;
   sprints: Sprint[];
   users: TenantUser[];
 }) {
@@ -1401,6 +1456,7 @@ function BoardColView({
               onQuickAssign={onQuickAssign}
               onQuickUpdate={onQuickUpdate}
               onToggleExpanded={onToggleExpanded}
+              qa={qaByTaskId[task.id]}
               canMoveTasks={canMoveTasks}
               users={users}
             />
@@ -1500,7 +1556,7 @@ function ColumnMetric({ color, label, value }: { color: string; label: string; v
 }
 
 function SortableCard({
-  canMoveTasks, columnId: cId, density, expanded, onQuickAssign, onQuickUpdate, onToggleExpanded, sprints, task, users,
+  canMoveTasks, columnId: cId, density, expanded, onQuickAssign, onQuickUpdate, onToggleExpanded, qa, sprints, task, users,
 }: {
   canMoveTasks: boolean;
   columnId: string;
@@ -1509,6 +1565,7 @@ function SortableCard({
   onQuickAssign: (task: Task, userId: string) => void;
   onQuickUpdate: (task: Task, patch: Partial<Pick<Task, "status" | "priority" | "dueDate">>) => void;
   onToggleExpanded: (taskIdValue: string) => void;
+  qa?: BoardQaBadge;
   sprints: Sprint[];
   task: Task;
   users: TenantUser[];
@@ -1533,6 +1590,7 @@ function SortableCard({
         onQuickAssign={task.permissions?.canAssign === false ? undefined : onQuickAssign}
         onQuickUpdate={task.permissions?.canEdit === false ? undefined : onQuickUpdate}
         onToggleExpanded={onToggleExpanded}
+        qa={qa}
         users={users}
       />
     </div>
@@ -1562,6 +1620,7 @@ function RichTaskCard({
   onQuickAssign,
   onQuickUpdate,
   onToggleExpanded,
+  qa,
   sprints = [],
   task,
   users = [],
@@ -1574,6 +1633,7 @@ function RichTaskCard({
   onQuickAssign?: (task: Task, userId: string) => void;
   onQuickUpdate?: (task: Task, patch: Partial<Pick<Task, "status" | "priority" | "dueDate">>) => void;
   onToggleExpanded?: (taskIdValue: string) => void;
+  qa?: BoardQaBadge;
   sprints?: Sprint[];
   task: Task;
   users?: TenantUser[];
@@ -1666,6 +1726,7 @@ function RichTaskCard({
         <div className={cn("flex flex-wrap items-center gap-1.5", compact ? "mt-2" : "mt-2.5")}>
           <TaskSignalPill color={statusColor}>{taskStatusLabels[task.status]}</TaskSignalPill>
           <TaskSignalPill color={PRIORITY_COLOR[task.priority]}>{priorityLabels[task.priority]}</TaskSignalPill>
+          {qa?.total ? <TaskQaPill qa={qa} /> : null}
         </div>
 
         {!compact && labels.length > 0 ? (
@@ -1735,6 +1796,25 @@ function TaskSignalPill({ children, color }: { children: ReactNode; color: strin
   return (
     <span className="inline-flex items-center rounded-md border border-line bg-background px-1.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em]" style={{ color }}>
       {children}
+    </span>
+  );
+}
+
+function TaskQaPill({ qa }: { qa: BoardQaBadge }) {
+  const hasRisk = qa.failed > 0 || qa.blocked > 0;
+  const className = hasRisk
+    ? "border-red-200 bg-red-50 text-red-600"
+    : qa.ready
+      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+      : "border-amber-200 bg-amber-50 text-amber-700";
+  const label = hasRisk
+    ? `QA ${qa.passed}/${qa.total} · ${qa.failed + qa.blocked} risk`
+    : `QA ${qa.passed}/${qa.total}`;
+
+  return (
+    <span className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em]", className)}>
+      {hasRisk ? <ShieldAlert className="size-3" /> : <ShieldCheck className="size-3" />}
+      {label}
     </span>
   );
 }
@@ -1827,6 +1907,38 @@ function getDueTone(state: ReturnType<typeof getTaskDue>["state"]) {
   if (state === "DONE") return { className: "bg-emerald-50 text-emerald-700" };
   if (state === "UPCOMING") return { className: "bg-blue-50 text-blue-600" };
   return { className: "bg-[#f4f0e2] text-ink-soft" };
+}
+
+function normalizeBoardQaBadge(value: unknown): BoardQaBadge | null {
+  const root = boardQaRecord(value);
+  if (!root) return null;
+  const linked = Array.isArray(root.linkedTestCases) ? root.linkedTestCases.length : 0;
+  const executions = boardQaRecord(root.executions);
+  const passed = boardQaNumber(executions?.passed);
+  const failed = boardQaNumber(executions?.failed);
+  const blocked = boardQaNumber(executions?.blocked);
+  const skipped = boardQaNumber(executions?.skipped);
+  const total = linked || passed + failed + blocked + skipped;
+  if (!total) return null;
+
+  const passRate = boardQaNumber(executions?.passRate);
+  return {
+    blocked,
+    failed,
+    passed,
+    passRate,
+    ready: Boolean(executions?.ready),
+    total,
+    untested: Math.max(total - passed - failed - blocked - skipped, 0),
+  };
+}
+
+function boardQaRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : null;
+}
+
+function boardQaNumber(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
 function initialsFromParts(firstName?: string, lastName?: string, email?: string) {
