@@ -10108,6 +10108,15 @@ export interface components {
         };
         AuthLifecycleResponse: {
             devLink?: string;
+            delivery?: {
+                /** @enum {string} */
+                channel: "email";
+                error?: string;
+                provider: string;
+                skipped?: boolean;
+                /** @enum {string} */
+                status: "sent" | "skipped" | "failed";
+            };
             email?: string;
             message: string;
             requiresEmailVerification?: boolean;

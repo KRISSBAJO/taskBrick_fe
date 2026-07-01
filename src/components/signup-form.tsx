@@ -3,7 +3,7 @@
 import { useState, type SyntheticEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Building, CheckCircle2, KeyRound, Loader2, Mail } from "lucide-react";
+import { ArrowRight, Building, KeyRound, Loader2, Mail } from "lucide-react";
 import { register, setStoredAuth } from "@/lib/api";
 
 const inputBase =
@@ -12,13 +12,11 @@ const inputBase =
 export function SignupForm() {
   const router = useRouter();
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState<{ message: string; devLink?: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setSuccess(null);
     setLoading(true);
     const formData = new FormData(event.currentTarget);
 
@@ -36,7 +34,17 @@ export function SignupForm() {
         router.push("/dashboard");
         return;
       }
-      setSuccess({ message: result.message, devLink: result.devLink });
+
+      const params = new URLSearchParams();
+      params.set("message", result.message);
+      if (result.email) params.set("email", result.email);
+      if (result.tenantSlug) params.set("tenantSlug", result.tenantSlug);
+      if (result.delivery?.status) params.set("deliveryStatus", result.delivery.status);
+      if (result.delivery?.provider) params.set("deliveryProvider", result.delivery.provider);
+      if (result.devLink) params.set("devLink", result.devLink);
+
+      const query = params.toString();
+      router.push(`/verify-email${query ? `?${query}` : ""}`);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to create account");
     } finally {
@@ -147,20 +155,6 @@ export function SignupForm() {
         <div className="flex items-start gap-2 rounded-xl border border-[#fecaca] bg-[#fef2f2] px-4 py-3 text-sm font-medium text-[#b91c1c]">
           <span className="mt-px shrink-0">!</span>
           {error}
-        </div>
-      ) : null}
-
-      {success ? (
-        <div className="rounded-xl border border-[#bbf7d0] bg-[#f0fdf4] px-4 py-3 text-sm font-semibold text-[#166534]">
-          <div className="flex items-start gap-2">
-            <CheckCircle2 className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-            <span>{success.message}</span>
-          </div>
-          {success.devLink ? (
-            <Link href={success.devLink} className="mt-2 block break-all text-xs font-black text-[#111111] underline underline-offset-2">
-              Open local verification link
-            </Link>
-          ) : null}
         </div>
       ) : null}
 

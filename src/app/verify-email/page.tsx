@@ -5,9 +5,16 @@ import { VerifyEmailPanel } from "@/components/verify-email-panel";
 export default async function VerifyEmailPage({
   searchParams,
 }: {
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { token } = await searchParams;
+  const params = await searchParams;
+  const token = readSearchParam(params.token);
+  const email = readSearchParam(params.email);
+  const tenantSlug = readSearchParam(params.tenantSlug);
+  const message = readSearchParam(params.message);
+  const deliveryStatus = readSearchParam(params.deliveryStatus);
+  const deliveryProvider = readSearchParam(params.deliveryProvider);
+  const devLink = readSearchParam(params.devLink);
 
   return (
     <main className="min-h-dvh bg-[#fffdf3] px-6 py-10 text-[#111111]">
@@ -23,17 +30,33 @@ export default async function VerifyEmailPage({
             <MailCheck className="size-4 text-[#111111]" aria-hidden="true" />
             Email verification
           </span>
-          <h1 className="mt-5 text-3xl font-black tracking-tight">{token ? "Verifying your email" : "Resend verification"}</h1>
+          <h1 className="mt-5 text-3xl font-black tracking-tight">
+            {token ? "Verifying your email" : email ? "Check your email" : "Resend verification"}
+          </h1>
           <p className="mt-2 text-sm font-semibold leading-6 text-[#68645b]">
             {token
               ? "We are confirming your email and preparing your workspace session."
-              : "Enter your workspace and email address to receive a fresh verification link."}
+              : email
+                ? "Use the verification link we sent, or request a new one below."
+                : "Enter your workspace and email address to receive a fresh verification link."}
           </p>
           <div className="mt-8">
-            <VerifyEmailPanel token={token} />
+            <VerifyEmailPanel
+              token={token}
+              initialEmail={email}
+              initialTenantSlug={tenantSlug}
+              initialMessage={message}
+              initialDeliveryStatus={deliveryStatus}
+              initialDeliveryProvider={deliveryProvider}
+              initialDevLink={devLink}
+            />
           </div>
         </section>
       </div>
     </main>
   );
+}
+
+function readSearchParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
 }
