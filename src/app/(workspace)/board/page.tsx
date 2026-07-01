@@ -90,7 +90,10 @@ import {
   createQaExecution,
   createQaTestCase,
   createQaTestRun,
+  getQaProjectSettings,
   getQaTaskSummary,
+  updateQaProjectSettings,
+  type UpdateQaProjectSettingsPayload,
 } from "@/lib/api/qaApi";
 import { cn } from "@/lib/cn";
 import {
@@ -145,6 +148,13 @@ type BoardQaCaseType =
 type BoardQaExecutionSummary = BoardQaBadge & {
   flaky: number;
   skipped: number;
+};
+type BoardQaGateSettings = {
+  id?: string;
+  key?: string;
+  name?: string;
+  qaGateEnabled: boolean;
+  qaGateMinimumPassRate: number;
 };
 type BoardQaLinkedTestCase = {
   id?: string;
@@ -202,6 +212,18 @@ const PRIORITY_COLOR: Record<TaskPriority, string> = {
 const colId  = (id: string) => `column:${id}`;
 const taskId = (id: string) => `task:${id}`;
 
+function normalizeQaGateSettings(value: unknown): BoardQaGateSettings {
+  const record = value && typeof value === "object" ? value as Record<string, unknown> : {};
+  const rate = Number(record.qaGateMinimumPassRate);
+  return {
+    id: typeof record.id === "string" ? record.id : undefined,
+    key: typeof record.key === "string" ? record.key : undefined,
+    name: typeof record.name === "string" ? record.name : undefined,
+    qaGateEnabled: record.qaGateEnabled === true,
+    qaGateMinimumPassRate: Number.isFinite(rate) ? rate : 100,
+  };
+}
+
 export default function BoardPage() {
   const { auth } = useWorkspaceAuth();
   const { confirm } = useConfirm();
@@ -237,6 +259,8 @@ export default function BoardPage() {
   const [qaByTaskId,         setQaByTaskId]         = useState<Record<string, BoardQaBadge>>({});
   const [qaSummaryByTaskId,  setQaSummaryByTaskId]  = useState<Record<string, BoardQaTaskSummary>>({});
   const [qaActionBusy,       setQaActionBusy]       = useState<string | null>(null);
+  const [qaGateSettings,     setQaGateSettings]     = useState<BoardQaGateSettings | null>(null);
+  const [qaGateSaving,       setQaGateSaving]       = useState(false);
   const [viewMode,           setViewMode]           = useState<ViewMode>("board");
 
   const sensors = useSensors(
@@ -252,17 +276,19 @@ export default function BoardPage() {
       setProjects(page.data);
       const nextId        = projectId || page.data[0]?.id || "";
       setSelectedProjectId(nextId);
-      if (!nextId) { setBoard(null); setSprints([]); setSavedViews([]); setUsers([]); return; }
-      const [boardData, sprintPage, savedViewPage, userPage] = await Promise.all([
+      if (!nextId) { setBoard(null); setSprints([]); setSavedViews([]); setUsers([]); setQaGateSettings(null); return; }
+      const [boardData, sprintPage, savedViewPage, userPage, qaSettings] = await Promise.all([
         getProjectBoard(auth.accessToken, nextId),
         listSprints(auth.accessToken, { projectId: nextId }),
         listTaskSavedViews(auth.accessToken, { projectId: nextId, limit: 100 }),
         listUsers(auth.accessToken, { limit: 100 }),
+        getQaProjectSettings(auth.accessToken, nextId),
       ]);
       setBoard(normalizeBoard(boardData));
       setSprints(sprintPage.data);
       setSavedViews(savedViewPage.data);
       setUsers(userPage.data);
+      setQaGateSettings(normalizeQaGateSettings(qaSettings));
     } catch (err) {
       setMessage({ text: err instanceof Error ? err.message : "Unable to load board.", ok: false });
     } finally { setLoading(false); }
@@ -756,6 +782,27 @@ export default function BoardPage() {
     }
   }
 
+  async function onUpdateQaGateSettings(payload: UpdateQaProjectSettingsPayload) {
+    if (!selectedProjectId) return;
+    setQaGateSaving(true);
+    setMessage(null);
+    try {
+      const updated = await updateQaProjectSettings(auth.accessToken, selectedProjectId, payload);
+      const nextSettings = normalizeQaGateSettings(updated);
+      setQaGateSettings(nextSettings);
+      setMessage({
+        text: nextSettings.qaGateEnabled
+          ? `QA gate enabled. Done requires ${nextSettings.qaGateMinimumPassRate}% pass rate.`
+          : "QA gate disabled for this project.",
+        ok: true,
+      });
+    } catch (err) {
+      setMessage({ text: err instanceof Error ? err.message : "Unable to update QA gate.", ok: false });
+    } finally {
+      setQaGateSaving(false);
+    }
+  }
+
   return (
     <div className="flex min-h-0 flex-col gap-3">
 
@@ -948,9 +995,13 @@ export default function BoardPage() {
         viewMode === "qa" ? (
           <BoardQaTable
             actionBusy={qaActionBusy}
+            canConfigureGate={Boolean(boardPermissions?.canEditBoard || boardPermissions?.canManageColumns || boardPermissions?.canManageSprints)}
             onAddCase={onAddBoardQaCase}
             onRecordResult={onRecordBoardQaResult}
+            onUpdateGate={onUpdateQaGateSettings}
             qaByTaskId={qaByTaskId}
+            qaGateSaving={qaGateSaving}
+            qaGateSettings={qaGateSettings}
             qaSummaryByTaskId={qaSummaryByTaskId}
             tasks={visibleTasks}
           />
@@ -1202,16 +1253,24 @@ function InsightTile({ helper, label, tone, value }: { helper: string; label: st
 
 function BoardQaTable({
   actionBusy,
+  canConfigureGate,
   onAddCase,
   onRecordResult,
+  onUpdateGate,
   qaByTaskId,
+  qaGateSaving,
+  qaGateSettings,
   qaSummaryByTaskId,
   tasks,
 }: {
   actionBusy: string | null;
+  canConfigureGate: boolean;
   onAddCase: (task: Task) => void;
   onRecordResult: (task: Task, status: BoardQaExecutionStatus) => void;
+  onUpdateGate: (payload: UpdateQaProjectSettingsPayload) => void;
   qaByTaskId: Record<string, BoardQaBadge>;
+  qaGateSaving: boolean;
+  qaGateSettings: BoardQaGateSettings | null;
   qaSummaryByTaskId: Record<string, BoardQaTaskSummary>;
   tasks: Task[];
 }) {
@@ -1247,11 +1306,19 @@ function BoardQaTable({
             <h2 className="text-[16px] font-black tracking-tight text-foreground">Task validation matrix</h2>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:flex">
-          <QaMetric label="Tasks" value={stats.total} />
-          <QaMetric label="Covered" value={stats.covered} />
-          <QaMetric label="Ready" value={stats.ready} tone="good" />
-          <QaMetric label="Risks" value={stats.failed + stats.blocked} tone={stats.failed + stats.blocked ? "bad" : "neutral"} />
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <QaGateControl
+            canConfigure={canConfigureGate}
+            onUpdate={onUpdateGate}
+            saving={qaGateSaving}
+            settings={qaGateSettings}
+          />
+          <div className="grid grid-cols-2 gap-2 sm:flex">
+            <QaMetric label="Tasks" value={stats.total} />
+            <QaMetric label="Covered" value={stats.covered} />
+            <QaMetric label="Ready" value={stats.ready} tone="good" />
+            <QaMetric label="Risks" value={stats.failed + stats.blocked} tone={stats.failed + stats.blocked ? "bad" : "neutral"} />
+          </div>
         </div>
       </div>
 
@@ -1401,6 +1468,58 @@ function BoardQaTable({
         </table>
       </div>
     </section>
+  );
+}
+
+function QaGateControl({
+  canConfigure,
+  onUpdate,
+  saving,
+  settings,
+}: {
+  canConfigure: boolean;
+  onUpdate: (payload: UpdateQaProjectSettingsPayload) => void;
+  saving: boolean;
+  settings: BoardQaGateSettings | null;
+}) {
+  const enabled = Boolean(settings?.qaGateEnabled);
+  const passRate = settings?.qaGateMinimumPassRate ?? 100;
+  return (
+    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-line bg-background px-3 py-2">
+      <div className="min-w-[150px]">
+        <p className="text-[9px] font-black uppercase tracking-[0.14em] text-ink-soft">Done gate</p>
+        <p className="mt-0.5 text-[12px] font-black text-foreground">
+          {enabled ? `Requires ${passRate}% pass rate` : "Not enforced"}
+        </p>
+      </div>
+      <button
+        type="button"
+        disabled={!canConfigure || saving}
+        onClick={() => onUpdate({ qaGateEnabled: !enabled, qaGateMinimumPassRate: passRate })}
+        className={cn(
+          "inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-black transition disabled:cursor-not-allowed disabled:opacity-50",
+          enabled
+            ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+            : "border-line bg-white text-ink-soft hover:text-foreground",
+        )}
+      >
+        <ShieldCheck className="size-3.5" />
+        {saving ? "Saving" : enabled ? "Gate on" : "Gate off"}
+      </button>
+      <label className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line bg-white px-2 text-[11px] font-black text-ink-soft">
+        Pass
+        <select
+          value={passRate}
+          disabled={!canConfigure || saving}
+          onChange={(event) => onUpdate({ qaGateMinimumPassRate: Number(event.target.value) })}
+          className="bg-transparent text-[11px] font-black text-foreground outline-none disabled:opacity-60"
+        >
+          {[100, 95, 90, 80].map((value) => (
+            <option key={value} value={value}>{value}%</option>
+          ))}
+        </select>
+      </label>
+    </div>
   );
 }
 
