@@ -212,6 +212,11 @@ const PRIORITY_COLOR: Record<TaskPriority, string> = {
 const colId  = (id: string) => `column:${id}`;
 const taskId = (id: string) => `task:${id}`;
 
+function readFormText(form: FormData, key: string) {
+  const value = form.get(key);
+  return typeof value === "string" ? value.trim() : "";
+}
+
 function normalizeQaGateSettings(value: unknown): BoardQaGateSettings {
   const record = value && typeof value === "object" ? value as Record<string, unknown> : {};
   const rate = Number(record.qaGateMinimumPassRate);
@@ -259,6 +264,7 @@ export default function BoardPage() {
   const [qaByTaskId,         setQaByTaskId]         = useState<Record<string, BoardQaBadge>>({});
   const [qaSummaryByTaskId,  setQaSummaryByTaskId]  = useState<Record<string, BoardQaTaskSummary>>({});
   const [qaActionBusy,       setQaActionBusy]       = useState<string | null>(null);
+  const [qaCaseTask,         setQaCaseTask]         = useState<Task | null>(null);
   const [qaGateSettings,     setQaGateSettings]     = useState<BoardQaGateSettings | null>(null);
   const [qaGateSaving,       setQaGateSaving]       = useState(false);
   const [viewMode,           setViewMode]           = useState<ViewMode>("board");
@@ -719,23 +725,43 @@ export default function BoardPage() {
     return summary;
   }
 
-  async function onAddBoardQaCase(task: Task) {
+  function onAddBoardQaCase(task: Task) {
+    setQaCaseTask(task);
+  }
+
+  async function onCreateBoardQaCase(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const task = qaCaseTask;
+    if (!task) return;
     const projectId = task.projectId || selectedProjectId;
     if (!projectId) return;
+    const form = new FormData(event.currentTarget);
+    const title = readFormText(form, "title") || `Validate ${task.key}: ${task.title}`.slice(0, 180);
+    const stepsText = readFormText(form, "steps");
+    const steps = stepsText
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((action, index) => ({ action, order: index + 1 }));
+
     setQaActionBusy(`${task.id}:case`);
     setMessage(null);
     try {
       await createQaTestCase(auth.accessToken, {
-        expectedResult: "The task meets acceptance criteria and is safe to move forward.",
+        description: readFormText(form, "description") || undefined,
+        expectedResult: readFormText(form, "expectedResult") || "The task meets acceptance criteria and is safe to move forward.",
         linkType: "COVERS",
-        priority: qaPriorityFromTaskPriority(task.priority),
+        preconditions: readFormText(form, "preconditions") || undefined,
+        priority: readFormText(form, "priority") as BoardQaCasePriority || qaPriorityFromTaskPriority(task.priority),
         projectId,
         status: "ACTIVE",
+        steps: steps.length ? ({ items: steps } as unknown as Record<string, never>) : undefined,
         taskId: task.id,
-        title: `Validate ${task.key}: ${task.title}`.slice(0, 180),
-        type: task.type === "BUG" ? "REGRESSION" : "FUNCTIONAL",
+        title,
+        type: readFormText(form, "type") as BoardQaCaseType || (task.type === "BUG" ? "REGRESSION" : "FUNCTIONAL"),
       });
       await refreshQaTask(task.id);
+      setQaCaseTask(null);
       setMessage({ text: "QA case linked to task.", ok: true });
     } catch (err) {
       setMessage({ text: err instanceof Error ? err.message : "Unable to add QA case.", ok: false });
@@ -984,6 +1010,20 @@ export default function BoardPage() {
             board={filteredBoard} saving={saving} sprints={sprints}
             selectedSprintId={sprintFilter !== "ALL" && sprintFilter !== "BACKLOG" ? sprintFilter : ""}
             onSubmit={onCreateTask}
+          />
+        </TaskModal>
+      )}
+      {qaCaseTask && (
+        <TaskModal
+          icon={<ShieldCheck className="size-3.5 text-emerald-700" />}
+          onClose={() => setQaCaseTask(null)}
+          title="New QA case"
+        >
+          <BoardQaCaseComposer
+            onCancel={() => setQaCaseTask(null)}
+            onSubmit={onCreateBoardQaCase}
+            saving={qaActionBusy === `${qaCaseTask.id}:case`}
+            task={qaCaseTask}
           />
         </TaskModal>
       )}
@@ -2745,7 +2785,121 @@ function TaskComposer({ board, onSubmit, saving, selectedSprintId, sprints }: {
 
 /* ─── Task modal ───────────────────────────────────────────────────────────── */
 
-function TaskModal({ children, onClose }: { children: ReactNode; onClose: () => void }) {
+function BoardQaCaseComposer({
+  onCancel,
+  onSubmit,
+  saving,
+  task,
+}: {
+  onCancel: () => void;
+  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  saving: boolean;
+  task: Task;
+}) {
+  const defaultType: BoardQaCaseType = task.type === "BUG" ? "REGRESSION" : "FUNCTIONAL";
+  const defaultPriority = qaPriorityFromTaskPriority(task.priority);
+  const caseTypes: BoardQaCaseType[] = ["FUNCTIONAL", "REGRESSION", "SMOKE", "INTEGRATION", "PERFORMANCE", "SECURITY", "ACCESSIBILITY", "ACCEPTANCE"];
+  const priorities: BoardQaCasePriority[] = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
+
+  return (
+    <form onSubmit={onSubmit} className="rounded-2xl border border-line bg-panel p-5 shadow-sm">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-emerald-700">Task coverage</p>
+          <h3 className="mt-1 max-w-2xl text-[16px] font-black text-foreground">
+            {task.key} - {task.title}
+          </h3>
+          <p className="mt-1 text-[12px] font-semibold text-ink-soft">
+            Create a reusable case that can be executed manually now and later included in sprint or release test runs.
+          </p>
+        </div>
+        <TaskSignalPill color={STATUS_COLOR[task.status]}>{taskStatusLabels[task.status]}</TaskSignalPill>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <FormField label="Case title" className="sm:col-span-2">
+          <input
+            name="title"
+            required
+            maxLength={240}
+            defaultValue={`Validate ${task.key}: ${task.title}`.slice(0, 180)}
+            className={fieldClass}
+          />
+        </FormField>
+        <FormField label="Type">
+          <select name="type" defaultValue={defaultType} className={fieldClass}>
+            {caseTypes.map((type) => (
+              <option key={type} value={type}>{type.toLowerCase().replaceAll("_", " ")}</option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="Priority">
+          <select name="priority" defaultValue={defaultPriority} className={fieldClass}>
+            {priorities.map((priority) => (
+              <option key={priority} value={priority}>{priority.toLowerCase()}</option>
+            ))}
+          </select>
+        </FormField>
+        <FormField label="Preconditions" className="sm:col-span-2">
+          <input
+            name="preconditions"
+            placeholder="User is signed in, project is available, required data exists..."
+            className={fieldClass}
+          />
+        </FormField>
+        <FormField label="Description" className="sm:col-span-2 lg:col-span-3">
+          <textarea
+            name="description"
+            placeholder="What risk or acceptance criteria does this case cover?"
+            className="min-h-20 w-full resize-y rounded-lg border border-line bg-background px-3 py-2 text-[13px] text-foreground placeholder:text-ink-soft transition focus:border-primary focus:outline-none"
+          />
+        </FormField>
+        <FormField label="Manual steps" className="sm:col-span-2">
+          <textarea
+            name="steps"
+            placeholder={"Open the task detail page\nChange status to Testing\nConfirm the board badge updates"}
+            className="min-h-32 w-full resize-y rounded-lg border border-line bg-background px-3 py-2 text-[13px] text-foreground placeholder:text-ink-soft transition focus:border-primary focus:outline-none"
+          />
+        </FormField>
+        <FormField label="Expected result">
+          <textarea
+            name="expectedResult"
+            required
+            defaultValue="The task meets acceptance criteria and is safe to move forward."
+            className="min-h-32 w-full resize-y rounded-lg border border-line bg-background px-3 py-2 text-[13px] text-foreground placeholder:text-ink-soft transition focus:border-primary focus:outline-none"
+          />
+        </FormField>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
+        <p className="max-w-xl text-xs font-semibold text-ink-soft">
+          After creation, use the QA table Pass, Fail, or Block controls to record the first manual execution.
+        </p>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={onCancel} className="h-10 rounded-xl border border-line px-4 text-[13px] font-black text-foreground transition hover:bg-panel-muted">
+            Cancel
+          </button>
+          <button type="submit" disabled={saving} className="tb-yellow-button inline-flex h-10 items-center gap-2 rounded-xl px-5 text-[13px] font-black disabled:opacity-55">
+            {saving ? <RefreshCw className="size-4 animate-spin" /> : <ShieldCheck className="size-4" />}
+            {saving ? "Creating" : "Create QA case"}
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+}
+
+function TaskModal({
+  children,
+  icon = <Plus className="size-3.5 text-foreground" />,
+  onClose,
+  title = "New Task",
+}: {
+  children: ReactNode;
+  icon?: ReactNode;
+  onClose: () => void;
+  title?: string;
+}) {
   useEffect(() => {
     function handleKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
     document.addEventListener("keydown", handleKey);
@@ -2761,9 +2915,9 @@ function TaskModal({ children, onClose }: { children: ReactNode; onClose: () => 
         <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
           <div className="flex items-center gap-2">
             <span className="flex size-6 items-center justify-center rounded-md bg-[#ffd400]">
-              <Plus className="size-3.5 text-foreground" />
+              {icon}
             </span>
-            <p className="text-[13px] font-black text-foreground">New Task</p>
+            <p className="text-[13px] font-black text-foreground">{title}</p>
           </div>
           <button
             type="button"

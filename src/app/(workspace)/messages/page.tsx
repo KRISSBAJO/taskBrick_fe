@@ -946,9 +946,7 @@ function MessageBubble({ currentUserId, editing, editBody, message, parentMessag
       {!mine ? (
         <div className="mb-0.5 w-8 shrink-0">
           {showAvatar ? (
-            <span className="flex size-8 items-center justify-center rounded-full bg-[#111111] text-[9px] font-black text-white">
-              {userInitials(message.sender)}
-            </span>
+            <PersonAvatar user={message.sender} sizeClass="size-8" textClass="text-[9px]" />
           ) : null}
         </div>
       ) : null}
@@ -1256,9 +1254,7 @@ function ConversationDetails({ conversation, currentUserId, onTogglePin, pinnedM
         <div className="mt-3 grid gap-2">
           {conversation.members.map((member) => (
             <div key={member.id} className="flex items-center gap-3 rounded-xl border border-line bg-background p-2.5 transition hover:border-primary/30">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#111111] text-[9px] font-black text-white">
-                {userInitials(member.user)}
-              </span>
+              <PersonAvatar user={member.user} sizeClass="size-8" textClass="text-[9px]" />
               <div className="min-w-0">
                 <p className="truncate text-[12px] font-bold text-foreground">{displayName(member.user)}</p>
                 <p className="truncate text-[10px] text-ink-soft">{member.user?.email ?? member.userId}</p>
@@ -1384,24 +1380,51 @@ function NewConversationModal({ currentUserId, onClose, onCreate, users }: {
 function AvatarStack({ conversation, currentUserId, dark }: { conversation: Conversation; currentUserId: string; dark?: boolean }) {
   const people  = conversation.members.filter((m) => m.userId !== currentUserId).slice(0, 2);
   const primary = people[0]?.user ?? conversation.members[0]?.user;
-  const bg      = dark ? "bg-white/[0.15]" : "bg-[#111111]";
-  const text    = dark ? "text-white" : "text-white";
 
   if (!conversation.isGroup) {
-    return (
-      <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-full text-[10px] font-black", bg, text)}>
-        {userInitials(primary)}
-      </span>
-    );
+    return <PersonAvatar user={primary} sizeClass="size-9" textClass="text-[10px]" dark={dark} />;
   }
   return (
     <span className="relative flex size-9 shrink-0">
-      <span className={cn("absolute left-0 top-0.5 flex size-7 items-center justify-center rounded-full text-[9px] font-black ring-2", bg, text, dark ? "ring-[#0f1117]" : "ring-panel")}>
-        {userInitials(people[0]?.user)}
-      </span>
-      <span className="absolute bottom-0.5 right-0 flex size-7 items-center justify-center rounded-full bg-primary text-[9px] font-black text-[#111111] ring-2 ring-panel">
-        {userInitials(people[1]?.user)}
-      </span>
+      <PersonAvatar user={people[0]?.user} sizeClass="size-7" textClass="text-[9px]" dark={dark} className={cn("absolute left-0 top-0.5 ring-2", dark ? "ring-[#0f1117]" : "ring-panel")} />
+      <PersonAvatar user={people[1]?.user} sizeClass="size-7" textClass="text-[9px]" className="absolute bottom-0.5 right-0 ring-2 ring-panel" />
+    </span>
+  );
+}
+
+function PersonAvatar({
+  className,
+  dark,
+  sizeClass = "size-8",
+  textClass = "text-[9px]",
+  user,
+}: {
+  className?: string;
+  dark?: boolean;
+  sizeClass?: string;
+  textClass?: string;
+  user?: UserSummary | null;
+}) {
+  const avatarUrl = typeof user?.avatarUrl === "string" && user.avatarUrl.trim() ? user.avatarUrl.trim() : "";
+
+  return (
+    <span className={cn(
+      "relative flex shrink-0 items-center justify-center overflow-hidden rounded-full font-black",
+      sizeClass,
+      textClass,
+      dark ? "bg-white/[0.15] text-white" : "bg-[#111111] text-white",
+      className,
+    )}>
+      <span>{userInitials(user)}</span>
+      {avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={avatarUrl}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          onError={(event) => { event.currentTarget.style.display = "none"; }}
+        />
+      ) : null}
     </span>
   );
 }
