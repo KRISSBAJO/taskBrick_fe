@@ -19,7 +19,7 @@ function createRequestId() {
 
 export const API_BASE_URL = normalizeApiBaseUrl(configuredApiUrl);
 export const API_ORIGIN = API_BASE_URL.replace(/\/api\/v\d+$/i, "");
-export const WS_BASE_URL = (process.env.NEXT_PUBLIC_WS_URL ?? API_ORIGIN).replace(/\/$/, "");
+export const WS_BASE_URL = (process.env.NEXT_PUBLIC_WS_URL ?? process.env.NEXT_PUBLIC_REALTIME_URL ?? API_ORIGIN).replace(/\/$/, "");
 
 const ACCESS_TOKEN_KEY = "taskbricks.accessToken";
 const LEGACY_REFRESH_TOKEN_KEY = "taskbricks.refreshToken";
