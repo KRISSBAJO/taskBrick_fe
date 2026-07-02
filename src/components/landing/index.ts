@@ -1,5 +1,4 @@
 export { AgentHeroSection } from "./AgentHeroSection";
-export { AgentUseCasesSection } from "./AgentUseCasesSection";
 export { BookDemoFloatingButton } from "./BookDemoFloatingButton";
 export { FeatureHighlights } from "./FeatureHighlights";
 export { HeroSection } from "./HeroSection";

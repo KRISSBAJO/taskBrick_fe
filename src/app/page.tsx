@@ -1,6 +1,5 @@
 import {
   AgentHeroSection,
-  AgentUseCasesSection,
   BookDemoFloatingButton,
   FeatureHighlights,
   LandingFooter,
@@ -22,7 +21,6 @@ export default function Home() {
       <FeatureHighlights />
       <ServicesSection />
       <WorkflowAutomationSection />
-      <AgentUseCasesSection />
       <ProjectGlance />
       <ReliabilitySection />
       <TestimonialsSection />
