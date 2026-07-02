@@ -11,9 +11,17 @@ import { getStoredAuth, clearStoredAuth, logoutSession, type AuthUser } from "@/
 export function LandingNav() {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<AuthUser | null>(() => getStoredAuth()?.user ?? null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Stored auth is browser-only; reading it during render breaks SSR hydration.
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setUser(getStoredAuth()?.user ?? null);
+    }, 0);
+    return () => window.clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -41,7 +49,7 @@ export function LandingNav() {
     : "";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-black/[0.06] bg-[#f7f6ef]/92 text-[#111111] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-black/[0.06] bg-white/90 text-[#111111] backdrop-blur-xl">
       <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-16">
         <Link href="/" className="flex items-center gap-2.5">
           <span className="overflow-hidden rounded-xl shadow-[0_4px_20px_rgba(17,17,17,0.08)]">

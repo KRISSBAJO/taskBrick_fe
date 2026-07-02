@@ -14,6 +14,7 @@ import {
   Save,
   ShieldCheck,
   Trash2,
+  X,
   Zap,
 } from "lucide-react";
 import { useConfirm } from "@/components/confirm-provider";
@@ -34,7 +35,14 @@ import {
   type SiteBillingPlan,
 } from "@/lib/api";
 import { cn } from "@/lib/cn";
-import { EmptyState, SearchInput, StatusBadge } from "../../_components/site-admin-ops-ui";
+import {
+  EmptyState,
+  MetricCard,
+  OperationsHero,
+  OpsPanel,
+  SearchInput,
+  StatusBadge,
+} from "../../_components/site-admin-ops-ui";
 
 /* ─── Types ──────────────────────────────────────────────────────────────────── */
 
@@ -86,6 +94,7 @@ export default function SiteAdminBillingPlansPage() {
   const [features, setFeatures] = useState<SiteBillingFeature[]>([]);
   const [query, setQuery] = useState("");
   const [selectedPlanId, setSelectedPlanId] = useState("");
+  const [composerOpen, setComposerOpen] = useState(false);
   const [createDraft, setCreateDraft] = useState<PlanDraft>(blankPlan);
   const [editPlanState, setEditPlanState] = useState<{ draft: PlanDraft; planId: string }>({ draft: blankPlan, planId: "" });
   const [assignmentDraft, setAssignmentDraft] = useState<AssignmentDraft>(blankAssignment);
@@ -151,6 +160,7 @@ export default function SiteAdminBillingPlansPage() {
       const created = await createSiteBillingPlan(auth.accessToken, payload);
       toast({ title: "Plan created", description: `${created.name} is now available.`, variant: "success" });
       setCreateDraft(blankPlan);
+      setComposerOpen(false);
       setSelectedPlanId(created.id);
       await load();
     } catch (caught) {
@@ -281,150 +291,155 @@ export default function SiteAdminBillingPlansPage() {
   return (
     <div className="mx-auto grid w-full max-w-7xl gap-5">
 
-      {/* ── Page header ──────────────────────────────────────────────────────── */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-[12px] bg-[#ffd400]/15">
-            <CreditCard className="size-4 text-[#b08900]" aria-hidden="true" />
-          </div>
-          <div>
-            <h1 className="text-lg font-black leading-tight text-[#111111]">Plan builder</h1>
-            <p className="text-[12px] font-semibold text-[#8a8375]">
-              {plans.length} plan{plans.length !== 1 ? "s" : ""} · {activePlans} active · {totalSubscriptions} subscription{totalSubscriptions !== 1 ? "s" : ""}
-            </p>
-          </div>
-        </div>
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <Link
-            href="/site-admin/billing"
-            className="inline-flex h-9 items-center gap-1.5 rounded-[12px] bg-[#fbfaf6] px-3 text-[12px] font-black text-[#5f574c] transition hover:bg-[#f0ebe0]"
-            style={{ border: "1px solid #ded8c8" }}
-          >
-            <ArrowLeft className="size-3.5" /> Billing
-          </Link>
-          <button
-            type="button"
-            onClick={() => void load()}
-            className="inline-flex h-9 items-center gap-1.5 rounded-[12px] bg-[#ffd400] px-3 text-[12px] font-black text-[#111111] shadow-[0_2px_8px_rgba(255,212,0,0.22)] transition hover:bg-amber-300"
-          >
-            <RefreshCw className="size-3.5" /> Refresh
-          </button>
-        </div>
-      </header>
+      <OperationsHero
+        icon={PackageCheck}
+        label="Billing"
+        title="Plans"
+        description="Catalog, pricing, and entitlements for tenant subscriptions"
+      >
+        <Link
+          href="/site-admin/billing"
+          className="inline-flex h-10 items-center gap-1.5 rounded-2xl bg-[#fbfaf6] px-3 text-[12px] font-black text-[#5f574c] transition hover:bg-[#f0ebe0]"
+          style={{ border: "1px solid #ded8c8" }}
+        >
+          <ArrowLeft className="size-3.5" /> Billing
+        </Link>
+        <button
+          type="button"
+          onClick={() => void load()}
+          className="inline-flex h-10 items-center gap-1.5 rounded-2xl bg-[#fbfaf6] px-3 text-[12px] font-black text-[#5f574c] transition hover:bg-[#f0ebe0]"
+          style={{ border: "1px solid #ded8c8" }}
+        >
+          <RefreshCw className="size-3.5" /> Refresh
+        </button>
+        <button
+          type="button"
+          onClick={() => setComposerOpen((open) => !open)}
+          disabled={!canManageBilling}
+          className="inline-flex h-10 items-center gap-1.5 rounded-2xl bg-[#ffd400] px-4 text-[12px] font-black text-[#111111] shadow-[0_2px_8px_rgba(255,212,0,0.22)] transition hover:bg-amber-300 disabled:opacity-50"
+        >
+          {composerOpen ? <X className="size-3.5" /> : <Plus className="size-3.5" />}
+          {composerOpen ? "Close" : "New plan"}
+        </button>
+      </OperationsHero>
 
       {error && (
-        <div className="rounded-[16px] border border-red-200 bg-red-50 px-5 py-3 text-sm font-bold text-red-700">
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-bold text-red-700">
           {error}
         </div>
       )}
 
-      <div className="grid gap-5 xl:grid-cols-[400px_minmax(0,1fr)]">
+      {/* ── Metrics ──────────────────────────────────────────────────────────── */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard icon={PackageCheck} label="Plans" tone="#6d5dd3" value={plans.length} subtext="In catalog" />
+        <MetricCard icon={CheckCircle2} label="Active" tone="#047857" value={activePlans} subtext="Open for new subscriptions" />
+        <MetricCard icon={CreditCard} label="Subscriptions" tone="#d89b00" value={totalSubscriptions} subtext="Across all plans" />
+        <MetricCard icon={ShieldCheck} label="Features" tone="#111111" value={features.length} subtext="In feature catalog" />
+      </div>
 
-        {/* ── Left column: create + directory ──────────────────────────────── */}
-        <div className="grid content-start gap-5">
-
-          {/* Create new plan */}
-          <Panel
-            iconBg="#111111"
-            icon={<Plus className="size-4 text-[#ffd400]" />}
-            eyebrow="New"
-            title="Create plan"
-          >
-            <PlanDraftForm
-              disabled={!canManageBilling || busy === "create-plan"}
-              draft={createDraft}
-              onChange={setCreateDraft}
-              onNameChange={(name) =>
-                setCreateDraft((c) => ({ ...c, name, slug: c.slug || slugify(name) }))
-              }
-            />
+      {/* ── New plan composer ────────────────────────────────────────────────── */}
+      {composerOpen && (
+        <OpsPanel
+          accent="#ffd400"
+          eyebrow="New plan"
+          title="Create a plan"
+          actions={
+            <button
+              type="button"
+              onClick={() => setComposerOpen(false)}
+              className="inline-flex h-9 items-center gap-1.5 rounded-2xl bg-[#fbfaf6] px-3 text-[12px] font-black text-[#5f574c] transition hover:bg-[#f0ebe0]"
+              style={{ border: "1px solid #ded8c8" }}
+            >
+              Cancel
+            </button>
+          }
+        >
+          <PlanDraftForm
+            disabled={!canManageBilling || busy === "create-plan"}
+            draft={createDraft}
+            onChange={setCreateDraft}
+            onNameChange={(name) =>
+              setCreateDraft((c) => ({ ...c, name, slug: c.slug || slugify(name) }))
+            }
+          />
+          <div className="mt-5 flex justify-end">
             <button
               type="button"
               onClick={() => void createPlan()}
               disabled={!canManageBilling || busy === "create-plan"}
-              className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-[14px] bg-[#ffd400] text-sm font-black text-[#111111] shadow-[0_4px_18px_rgba(255,212,0,0.28)] transition hover:bg-amber-300 disabled:opacity-50"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#ffd400] px-6 text-sm font-black text-[#111111] shadow-[0_4px_18px_rgba(255,212,0,0.28)] transition hover:bg-amber-300 disabled:opacity-50"
             >
               <Plus className="size-4" /> Create plan
             </button>
-          </Panel>
+          </div>
+        </OpsPanel>
+      )}
 
-          {/* Plans directory */}
-          <Panel
-            iconBg="#ede9fe"
-            icon={<PackageCheck className="size-4 text-[#6d5dd3]" />}
-            eyebrow="Directory"
-            title={`Plans (${plans.length})`}
-          >
-            <SearchInput value={query} onChange={setQuery} placeholder="Search plans…" />
+      <div className="grid items-start gap-5 xl:grid-cols-[340px_minmax(0,1fr)]">
 
-            <div className="mt-3 grid gap-2">
-              {loading && <EmptyState text="Loading plans…" />}
-              {!loading && plans.length === 0 && <EmptyState text="No plans found." />}
+        {/* ── Catalog ──────────────────────────────────────────────────────── */}
+        <OpsPanel accent="#6d5dd3" eyebrow="Catalog" title={`All plans (${plans.length})`}>
+          <SearchInput value={query} onChange={setQuery} placeholder="Search plans…" />
 
-              {plans.map((plan) => {
-                const sel = selectedPlan?.id === plan.id;
-                return (
-                  <button
-                    type="button"
-                    key={plan.id}
-                    onClick={() => setSelectedPlanId(plan.id)}
-                    className={cn(
-                      "group w-full rounded-[16px] p-3.5 text-left transition-all duration-200",
-                      sel
-                        ? "bg-[#111111] shadow-[0_8px_24px_rgba(17,17,17,0.22)]"
-                        : "bg-[#fbfaf6] hover:bg-[#fff8d6] hover:shadow-sm",
-                    )}
-                    style={{ border: sel ? "1px solid #2e2e2e" : "1px solid #e7dfcf" }}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <span className={cn("text-sm font-black", sel ? "text-white" : "text-[#111111]")}>
-                            {plan.name}
-                          </span>
-                          {plan.archivedAt ? (
-                            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-amber-700">Archived</span>
-                          ) : plan.isActive ? (
-                            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-emerald-700">Active</span>
-                          ) : (
-                            <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-neutral-500">Inactive</span>
-                          )}
-                        </div>
-                        <p className={cn("mt-1 text-[11px] font-semibold", sel ? "text-white/40" : "text-[#a09890]")}>
-                          {plan._count?.subscriptions ?? 0} subscribers · {plan.features?.length ?? 0} features
-                        </p>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <p className={cn("text-[15px] font-black leading-tight", sel ? "text-[#ffd400]" : "text-[#111111]")}>
-                          {formatMoney(plan.price, plan.currency)}
-                        </p>
-                        <p className={cn("text-[10px] font-semibold", sel ? "text-white/35" : "text-[#a09890]")}>
-                          /{plan.interval}
-                        </p>
-                      </div>
+          <div className="mt-3 grid gap-2">
+            {loading && <EmptyState text="Loading plans…" />}
+            {!loading && plans.length === 0 && <EmptyState text="No plans yet. Create one to start billing tenants." />}
+
+            {plans.map((plan) => {
+              const sel = selectedPlan?.id === plan.id;
+              const statusColor = plan.archivedAt ? "#d89b00" : plan.isActive ? "#047857" : "#a09890";
+              const statusLabel = plan.archivedAt ? "Archived" : plan.isActive ? "Active" : "Inactive";
+              return (
+                <button
+                  type="button"
+                  key={plan.id}
+                  onClick={() => setSelectedPlanId(plan.id)}
+                  className={cn(
+                    "w-full rounded-2xl p-3.5 text-left transition-all duration-200",
+                    sel
+                      ? "bg-[#111111] shadow-[0_8px_24px_rgba(17,17,17,0.22)]"
+                      : "bg-[#fbfaf6] hover:bg-[#fff8d6] hover:shadow-sm",
+                  )}
+                  style={{ border: sel ? "1px solid #2e2e2e" : "1px solid #e7dfcf" }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className={cn("truncate text-sm font-black", sel ? "text-white" : "text-[#111111]")}>
+                        {plan.name}
+                      </p>
+                      <p className={cn("mt-1 flex items-center gap-1.5 text-[11px] font-semibold", sel ? "text-white/40" : "text-[#a09890]")}>
+                        <span className="size-1.5 shrink-0 rounded-full" style={{ background: statusColor }} aria-hidden="true" />
+                        {statusLabel} · {plan._count?.subscriptions ?? 0} subscriber{(plan._count?.subscriptions ?? 0) !== 1 ? "s" : ""}
+                      </p>
                     </div>
-                  </button>
-                );
-              })}
-            </div>
-          </Panel>
-        </div>
+                    <div className="shrink-0 text-right">
+                      <p className={cn("text-[15px] font-black leading-tight", sel ? "text-[#ffd400]" : "text-[#111111]")}>
+                        {formatMoney(plan.price, plan.currency)}
+                      </p>
+                      <p className={cn("text-[10px] font-semibold", sel ? "text-white/35" : "text-[#a09890]")}>
+                        /{plan.interval}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </OpsPanel>
 
-        {/* ── Right column: edit + entitlements ────────────────────────────── */}
+        {/* ── Selected plan ────────────────────────────────────────────────── */}
         <div className="grid content-start gap-5">
 
-          {/* Edit selected plan */}
-          <Panel
-            iconBg="#fef3c7"
-            icon={<CreditCard className="size-4 text-amber-600" />}
-            eyebrow="Selected plan"
+          <OpsPanel
+            accent="#ffd400"
+            eyebrow="Plan settings"
             title={selectedPlan ? selectedPlan.name : "No plan selected"}
-            aside={
+            actions={
               selectedPlan ? (
                 <StatusBadge
                   value={selectedPlan.archivedAt ? "ARCHIVED" : selectedPlan.isActive ? "ACTIVE" : "INACTIVE"}
                 />
-              ) : null
+              ) : undefined
             }
           >
             {selectedPlan ? (
@@ -440,12 +455,12 @@ export default function SiteAdminBillingPlansPage() {
                     }))
                   }
                 />
-                <div className="mt-5 flex flex-wrap gap-2">
+                <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-[#eee8dc] pt-4">
                   <button
                     type="button"
                     onClick={() => void savePlan()}
                     disabled={!canManageBilling || busy === `save:${selectedPlan.id}`}
-                    className="inline-flex h-10 items-center gap-2 rounded-[12px] bg-[#111111] px-4 text-[12px] font-black text-white transition hover:bg-[#2a2a2a] disabled:opacity-50"
+                    className="inline-flex h-10 items-center gap-2 rounded-2xl bg-[#111111] px-4 text-[12px] font-black text-white transition hover:bg-[#2a2a2a] disabled:opacity-50"
                   >
                     <Save className="size-4" /> Save changes
                   </button>
@@ -453,8 +468,8 @@ export default function SiteAdminBillingPlansPage() {
                     type="button"
                     onClick={() => void syncStripe(selectedPlan)}
                     disabled={!canManageBilling || selectedPlan.currency.toUpperCase() === "NGN" || busy === `stripe:${selectedPlan.id}`}
-                    className="inline-flex h-10 items-center gap-2 rounded-[12px] bg-indigo-50 px-4 text-[12px] font-black text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-50"
-                    style={{ border: "1px solid #c7d2fe" }}
+                    className="inline-flex h-10 items-center gap-2 rounded-2xl bg-[#fbfaf6] px-4 text-[12px] font-black text-[#5f574c] transition hover:bg-[#f0ebe0] disabled:opacity-50"
+                    style={{ border: "1px solid #ded8c8" }}
                   >
                     <Zap className="size-4" /> Sync Stripe
                   </button>
@@ -462,8 +477,11 @@ export default function SiteAdminBillingPlansPage() {
                     type="button"
                     onClick={() => void toggleArchive(selectedPlan)}
                     disabled={!canManageBilling || busy === `archive:${selectedPlan.id}`}
-                    className="inline-flex h-10 items-center gap-2 rounded-[12px] bg-[#fbfaf6] px-4 text-[12px] font-black text-[#766f63] transition hover:bg-[#f5f0e4] disabled:opacity-50"
-                    style={{ border: "1px solid #ded8c8" }}
+                    className={cn(
+                      "ml-auto inline-flex h-10 items-center gap-2 rounded-2xl bg-white px-4 text-[12px] font-black transition disabled:opacity-50",
+                      selectedPlan.archivedAt ? "text-[#5f574c] hover:bg-[#f0ebe0]" : "text-red-600 hover:bg-red-50",
+                    )}
+                    style={{ border: selectedPlan.archivedAt ? "1px solid #ded8c8" : "1px solid #fecaca" }}
                   >
                     {selectedPlan.archivedAt ? <RotateCcw className="size-4" /> : <Archive className="size-4" />}
                     {selectedPlan.archivedAt ? "Restore plan" : "Archive plan"}
@@ -471,44 +489,53 @@ export default function SiteAdminBillingPlansPage() {
                 </div>
               </>
             ) : (
-              <EmptyState text="Select a plan from the directory to edit." />
+              <EmptyState text="Select a plan from the catalog to edit its settings." />
             )}
-          </Panel>
+          </OpsPanel>
 
-          {/* Entitlements */}
-          <Panel
-            iconBg="#ecfdf5"
-            icon={<ShieldCheck className="size-4 text-emerald-600" />}
+          {/* ── Entitlements ─────────────────────────────────────────────────── */}
+          <OpsPanel
+            accent="#047857"
             eyebrow="Entitlements"
-            title="Plan features & limits"
+            title="Features & limits"
+            actions={
+              selectedPlan ? (
+                <span className="text-[11px] font-black text-[#8a8375]">
+                  {selectedPlan.features?.length ?? 0} assigned
+                </span>
+              ) : undefined
+            }
           >
             {selectedPlan ? (
               <>
-                {/* Assign row */}
+                {/* Add feature */}
                 <div
-                  className="grid gap-2.5 rounded-[16px] bg-[#fbfaf6] p-4 sm:grid-cols-[minmax(0,1fr)_130px_90px_auto]"
-                  style={{ border: "1px solid #e7dfcf" }}
+                  className="grid items-end gap-2.5 rounded-2xl border border-dashed border-[#ded8c8] bg-[#fbfaf6] p-4 sm:grid-cols-[minmax(0,1fr)_120px_auto_auto]"
                 >
-                  <select
-                    value={assignmentFeatureId}
-                    onChange={(e) => setAssignmentDraft((c) => ({ ...c, featureId: e.target.value }))}
-                    disabled={!canManageBilling || availableFeatures.length === 0}
-                    className={cn(inputCls, "cursor-pointer")}
-                    style={inputBorder}
-                  >
-                    <option value="">Select feature…</option>
-                    {availableFeatures.map((f) => (
-                      <option key={f.id} value={f.id}>{f.name} ({f.key})</option>
-                    ))}
-                  </select>
-                  <input
-                    value={assignmentDraft.limit}
-                    onChange={(e) => setAssignmentDraft((c) => ({ ...c, limit: e.target.value }))}
-                    placeholder="Limit"
-                    inputMode="numeric"
-                    className={inputCls}
-                    style={inputBorder}
-                  />
+                  <Field label="Feature">
+                    <select
+                      value={assignmentFeatureId}
+                      onChange={(e) => setAssignmentDraft((c) => ({ ...c, featureId: e.target.value }))}
+                      disabled={!canManageBilling || availableFeatures.length === 0}
+                      className={cn(inputCls, "cursor-pointer")}
+                      style={inputBorder}
+                    >
+                      <option value="">Select feature…</option>
+                      {availableFeatures.map((f) => (
+                        <option key={f.id} value={f.id}>{f.name} ({f.key})</option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Limit">
+                    <input
+                      value={assignmentDraft.limit}
+                      onChange={(e) => setAssignmentDraft((c) => ({ ...c, limit: e.target.value }))}
+                      placeholder="Unlimited"
+                      inputMode="numeric"
+                      className={inputCls}
+                      style={inputBorder}
+                    />
+                  </Field>
                   <label
                     className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-[12px] bg-white px-3 text-[11px] font-black text-[#111111]"
                     style={inputBorder}
@@ -519,15 +546,15 @@ export default function SiteAdminBillingPlansPage() {
                       onChange={(e) => setAssignmentDraft((c) => ({ ...c, enabled: e.target.checked }))}
                       className="accent-[#111111]"
                     />
-                    On
+                    Enabled
                   </label>
                   <button
                     type="button"
                     onClick={() => void assignFeature()}
                     disabled={!canManageBilling || !assignmentFeatureId || busy === `assign:${selectedPlan.id}`}
-                    className="inline-flex h-10 items-center justify-center gap-1.5 rounded-[12px] bg-[#ffd400] px-4 text-[12px] font-black text-[#111111] shadow-[0_2px_8px_rgba(255,212,0,0.22)] transition hover:bg-amber-300 disabled:opacity-50"
+                    className="inline-flex h-10 items-center justify-center gap-1.5 rounded-[12px] bg-[#111111] px-4 text-[12px] font-black text-white transition hover:bg-[#2a2a2a] disabled:opacity-50"
                   >
-                    <Plus className="size-4" /> Assign
+                    <Plus className="size-4" /> Add
                   </button>
                 </div>
 
@@ -550,59 +577,17 @@ export default function SiteAdminBillingPlansPage() {
                       />
                     ))
                   ) : (
-                    <EmptyState text="No features assigned to this plan yet." />
+                    <EmptyState text="No features assigned yet. Add one above to define what this plan includes." />
                   )}
                 </div>
               </>
             ) : (
-              <EmptyState text="Select a plan to manage entitlements." />
+              <EmptyState text="Select a plan to manage its entitlements." />
             )}
-          </Panel>
+          </OpsPanel>
         </div>
       </div>
     </div>
-  );
-}
-
-/* ─── Panel shell ────────────────────────────────────────────────────────────── */
-
-function Panel({
-  aside,
-  children,
-  eyebrow,
-  icon,
-  iconBg,
-  title,
-}: {
-  aside?: ReactNode;
-  children: ReactNode;
-  eyebrow: string;
-  icon: ReactNode;
-  iconBg: string;
-  title: string;
-}) {
-  return (
-    <section
-      className="overflow-hidden rounded-[24px] bg-white shadow-[0_8px_32px_rgba(17,17,17,0.06)]"
-      style={{ border: "1px solid #ded8c8" }}
-    >
-      <div className="flex items-center justify-between gap-3 border-b border-[#eee8dc] px-5 py-4">
-        <div className="flex items-center gap-3">
-          <span
-            className="flex size-8 shrink-0 items-center justify-center rounded-[10px]"
-            style={{ background: iconBg }}
-          >
-            {icon}
-          </span>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#8a8375]">{eyebrow}</p>
-            <h2 className="text-sm font-black text-[#111111]">{title}</h2>
-          </div>
-        </div>
-        {aside}
-      </div>
-      <div className="p-5">{children}</div>
-    </section>
   );
 }
 
@@ -793,33 +778,22 @@ function EntitlementRow({
 
   return (
     <div
-      className="flex flex-col gap-3 rounded-[14px] bg-[#fbfaf6] p-3.5 sm:flex-row sm:items-center"
+      className="flex flex-col gap-3 rounded-2xl bg-[#fbfaf6] p-3.5 sm:flex-row sm:items-center"
       style={{ border: "1px solid #e7dfcf" }}
     >
       {/* Feature info */}
       <div className="flex flex-1 items-center gap-3 min-w-0">
-        <div
-          className={cn(
-            "flex size-9 shrink-0 items-center justify-center rounded-[11px]",
-            enabled ? "bg-emerald-50" : "bg-white",
-          )}
-          style={{ border: "1px solid #e7dfcf" }}
-        >
-          {enabled
-            ? <CheckCircle2 className="size-4 text-emerald-600" />
-            : <ShieldCheck className="size-4 text-[#a09890]" />}
-        </div>
+        <span
+          className="mt-0.5 size-2 shrink-0 rounded-full"
+          style={{ background: enabled ? "#047857" : "#c4bdb4" }}
+          aria-hidden="true"
+        />
         <div className="min-w-0">
           <p className="truncate text-sm font-black text-[#111111]">{name}</p>
           <p className="truncate text-[11px] font-semibold text-[#a09890]">
             {featureKey}{unit ? ` · ${unit}` : ""}
           </p>
         </div>
-        {limit != null && (
-          <span className="ml-auto shrink-0 rounded-full bg-[#111111] px-2.5 py-1 text-[10px] font-black text-[#ffd400]">
-            {limit} max
-          </span>
-        )}
       </div>
 
       {/* Controls */}

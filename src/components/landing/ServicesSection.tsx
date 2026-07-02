@@ -103,7 +103,7 @@ const themes: Record<
     gradient: "bg-gradient-to-t from-[#111111] via-transparent to-transparent",
   },
   yellow: {
-    card: "bg-[#fff5b8]",
+    card: "border border-black/[0.06] bg-[#f7f6ef]",
     icon: "bg-[#111111] text-[#ffd400]",
     tag: "border border-black/10 bg-black/5 text-[#111111]/65",
     title: "text-[#111111]",
@@ -123,7 +123,7 @@ const themes: Record<
     gradient: "",
   },
   cream: {
-    card: "bg-[#faf8ef]",
+    card: "border border-black/[0.06] bg-[#f7f6ef]",
     icon: "bg-[#111111] text-[#ffd400]",
     tag: "border border-black/8 bg-black/4 text-[#68645b]",
     title: "text-[#111111]",
@@ -232,7 +232,7 @@ export function ServicesSection() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1.8, ease: "easeOut" }}
-        className="pointer-events-none absolute left-1/2 top-[-80px] -z-10 h-[520px] w-[800px] -translate-x-1/2 rounded-full bg-[#ffd400]/10 blur-[100px]"
+        className="pointer-events-none absolute left-1/2 top-[-80px] -z-10 h-[520px] w-[800px] -translate-x-1/2 rounded-full bg-[#ffd400]/[0.06] blur-[100px]"
       />
 
       {/* ── Section header ── */}
@@ -243,7 +243,7 @@ export function ServicesSection() {
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="inline-flex items-center gap-2 rounded-full border border-[#e8d800] bg-[#fff5b8] px-4 py-1.5 text-[11px] font-black uppercase tracking-widest text-[#111111]"
+          className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-1.5 text-[11px] font-black uppercase tracking-widest text-[#111111] shadow-sm"
         >
           <Zap className="size-3.5 fill-[#ffd400] text-[#ffd400]" aria-hidden="true" />
           Core work management

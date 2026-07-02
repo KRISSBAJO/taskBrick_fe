@@ -22,7 +22,7 @@ const FEATURES: readonly Feature[] = [
     text: "Role-based access tokens and cryptographic workspace boundaries isolate your team data layers safely by default.",
     icon: ShieldCheck,
     tags: ["Owner", "Admin", "Member"],
-    accent: "#6d5dd3",
+    accent: "#111111",
   },
   {
     number: "02",
@@ -31,7 +31,7 @@ const FEATURES: readonly Feature[] = [
     text: "Dynamic execution blocks, live owner metrics, and synchronized state transitions keep delivery loops perfectly transparent.",
     icon: Zap,
     tags: ["In Progress", "Review", "Done"],
-    accent: "#d97706",
+    accent: "#111111",
   },
   {
     number: "03",
@@ -40,7 +40,7 @@ const FEATURES: readonly Feature[] = [
     text: "Continuous velocity arrays and structural charts compile automatically right from active project workspaces.",
     icon: TrendingUp,
     tags: ["Velocity", "Burndown", "Throughput"],
-    accent: "#059669",
+    accent: "#111111",
   },
 ] as const;
 
@@ -51,7 +51,7 @@ export function FeatureHighlights() {
   return (
     <section
       ref={containerRef}
-      className="relative overflow-hidden border-t border-black/[0.03] bg-[#fffdf3] px-6 py-32 text-[#111111] antialiased sm:px-8 lg:px-16"
+      className="relative overflow-hidden bg-white px-6 py-32 text-[#111111] antialiased sm:px-8 lg:px-16"
     >
       {/* Light Technical Layout Grid background */}
       <div
@@ -146,7 +146,7 @@ function FeatureCard({ feature, index, isWide = false }: { feature: Feature; ind
       style={{ x: transformX, y: transformY }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className={`group relative flex flex-col justify-between overflow-hidden rounded-[24px] bg-white border border-black/[0.04] p-8 shadow-sm transition-all duration-500 hover:border-black/15 hover:shadow-md will-change-transform ${
+      className={`group relative flex flex-col justify-between overflow-hidden rounded-[24px] bg-white border border-black/[0.07] p-8 shadow-sm transition-all duration-500 hover:border-black/15 hover:shadow-md will-change-transform ${
         isWide ? "min-h-[260px] lg:min-h-[210px] lg:flex-row lg:items-center gap-8" : "min-h-[460px]"
       }`}
     >
@@ -214,7 +214,7 @@ function FeatureCard({ feature, index, isWide = false }: { feature: Feature; ind
       <div className="absolute bottom-0 inset-x-0 h-[2px] w-full overflow-hidden bg-black/[0.02] z-20">
         <motion.div
           className="h-full w-full origin-left scale-x-[0.25] rounded-full transition-transform duration-500 ease-[0.16,1,0.3,1] group-hover:scale-x-100"
-          style={{ backgroundColor: feature.accent }}
+          style={{ backgroundColor: "#ffd400" }}
         />
       </div>
     </motion.div>

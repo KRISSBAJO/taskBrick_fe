@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Mail, ShieldCheck, Workflow } from "lucide-react";
+import { ArrowLeft, Mail, ShieldCheck, Workflow } from "lucide-react";
 import { LandingFooter, LandingNav, MarketingLeadForm } from "@/components/landing";
 
 export const metadata: Metadata = {
@@ -11,24 +11,24 @@ export const metadata: Metadata = {
 const contactSignals = [
   {
     icon: Mail,
-    title: "One intake path",
-    copy: "Sales, product, implementation, and partnership messages land in a durable lead queue.",
+    title: "One place to start",
+    copy: "Sales, product, implementation, and partnership questions all begin here — no wrong door.",
   },
   {
     icon: ShieldCheck,
-    title: "Production ready",
-    copy: "Requests are stored first, then routed through the configured TaskBricks mail provider.",
+    title: "Nothing gets lost",
+    copy: "Every message is recorded the moment you send it, then routed to the right team.",
   },
   {
     icon: Workflow,
-    title: "Fast handoff",
-    copy: "Your message includes source context so the right team can respond with fewer follow-up questions.",
+    title: "Faster answers",
+    copy: "Your message arrives with context, so the right person replies without a round of follow-up questions.",
   },
 ] as const;
 
 export default function ContactPage() {
   return (
-    <main className="min-h-dvh bg-[#f7f6ef] text-[#111111]">
+    <main className="min-h-dvh bg-white text-[#111111]">
       <LandingNav />
 
       <section className="px-5 py-10 sm:px-8 lg:px-16 lg:py-14">
@@ -51,15 +51,14 @@ export default function ContactPage() {
             </h1>
             <p className="mt-5 max-w-xl text-base font-semibold leading-8 text-[#5f5a50]">
               Send us product questions, rollout plans, sales requests, or implementation notes.
-              The backend stores every request before attempting email delivery, so nothing disappears
-              if a mail provider is unavailable.
+              Every message is saved and routed to the right team, so you always hear back.
             </p>
 
             <div className="mt-8 space-y-3">
               {contactSignals.map((item) => (
                 <div key={item.title} className="rounded-2xl border border-black/[0.08] bg-white p-4 shadow-sm">
                   <div className="flex gap-4">
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[#fff4bf] text-[#111111]">
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[#111111] text-[#ffd400]">
                       <item.icon className="size-5" aria-hidden="true" />
                     </span>
                     <div>
@@ -71,10 +70,9 @@ export default function ContactPage() {
               ))}
             </div>
 
-            <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold leading-6 text-emerald-800">
-              <CheckCircle2 className="mr-2 inline size-4 align-[-2px]" aria-hidden="true" />
-              For scheduling a product walkthrough, use the dedicated demo form.
-              <Link href="/book-demo" className="ml-1 underline underline-offset-4">
+            <div className="mt-6 rounded-2xl border border-black/[0.08] bg-white p-4 text-sm font-semibold leading-6 text-[#68645b] shadow-sm">
+              Want a product walkthrough instead?
+              <Link href="/book-demo" className="ml-1 font-black text-[#111111] underline decoration-[#ffd400] underline-offset-4">
                 Book a demo
               </Link>
               .

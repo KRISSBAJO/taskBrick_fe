@@ -42,7 +42,7 @@ const priorityCfg: Record<
 };
 
 const statusCfg = {
-  "In Progress": { Icon: TrendingUp, color: "text-[#ffd400]" },
+  "In Progress": { Icon: TrendingUp, color: "text-[#b08900]" },
   "In Review": { Icon: CheckCircle2, color: "text-[#22c55e]" },
   Planning: { Icon: Clock, color: "text-[#a09580]" },
 } as const;
@@ -68,7 +68,7 @@ export function ProjectGlance() {
   return (
     <section
       id="project-glance"
-      className="relative overflow-hidden bg-[#fffdf3] px-5 py-24 sm:px-8 lg:px-16"
+      className="relative overflow-hidden bg-[#f7f6ef] px-5 py-24 sm:px-8 lg:px-16"
     >
       {/* Subtle warm divider lines */}
       <div
@@ -87,9 +87,9 @@ export function ProjectGlance() {
           whileInView={{ opacity: 1, scale: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 rounded-full bg-[#ffd400] px-4 py-2 text-sm font-black text-[#111111]"
+          className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-black uppercase tracking-widest text-[#111111] shadow-sm"
         >
-          <TrendingUp className="size-3.5" aria-hidden="true" />
+          <span className="size-2 rounded-full bg-[#ffd400]" aria-hidden="true" />
           Project intelligence
         </motion.span>
 

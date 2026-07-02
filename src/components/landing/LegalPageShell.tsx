@@ -17,7 +17,7 @@ type LegalPageShellProps = {
 
 export function LegalPageShell({ eyebrow, title, description, sections }: LegalPageShellProps) {
   return (
-    <main className="min-h-dvh bg-[#f7f6ef] text-[#111111]">
+    <main className="min-h-dvh bg-white text-[#111111]">
       <LandingNav />
       <section className="px-5 py-12 sm:px-8 lg:px-16">
         <div className="mx-auto max-w-4xl">

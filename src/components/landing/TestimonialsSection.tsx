@@ -154,7 +154,7 @@ export function TestimonialsSection() {
   }, [updateCarouselState]);
 
   return (
-    <section className="relative overflow-hidden bg-[#fffdf3] py-16 sm:py-20">
+    <section className="relative overflow-hidden bg-[#f7f6ef] py-16 sm:py-20">
       <div className="mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-16">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div>

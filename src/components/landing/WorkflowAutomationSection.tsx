@@ -26,20 +26,20 @@ type WorkflowNode = {
 };
 
 const topFlow: WorkflowNode[] = [
-  { icon: Zap, label: "Work payload registered", meta: "SYSTEM_TRIGGER", tone: "yellow" },
-  { icon: Bot, label: "TaskBricks evaluates priority vector & routes operational paths", meta: "ENGINE_INFERENCE", tone: "dark" },
+  { icon: Zap, label: "A new request comes in", meta: "TRIGGER", tone: "yellow" },
+  { icon: Bot, label: "TaskBricks checks priority, workload, and deadlines — then routes the work", meta: "SMART ROUTING", tone: "dark" },
 ];
 
 const leftBranch: WorkflowNode[] = [
-  { icon: ShieldAlert, label: "Escalate blocked branches to active priority queues", meta: "CRITICAL_PATH", tone: "red" },
-  { icon: MessageSquare, label: "Sync state logs to operational Slack channels", meta: "TEAM_BROADCAST", tone: "blue" },
-  { icon: BellRing, label: "Generate cryptographic executive follow-ups", meta: "SYSTEM_ACTION", tone: "white" },
+  { icon: ShieldAlert, label: "Escalate it to the priority queue", meta: "ESCALATION", tone: "red" },
+  { icon: MessageSquare, label: "Alert the team in Slack", meta: "NOTIFICATION", tone: "blue" },
+  { icon: BellRing, label: "Schedule follow-ups so nothing stalls", meta: "FOLLOW-UP", tone: "white" },
 ];
 
 const rightBranch: WorkflowNode[] = [
-  { icon: UserPlus, label: "Map context weights to optimal engineering owner", meta: "DYNAMIC_ROUTING", tone: "green" },
-  { icon: Mail, label: "Dispatch client-facing confirmation schemas", meta: "AUTOMATED_COMMS", tone: "white" },
-  { icon: Gauge, label: "Re-index structural SLAs and baseline scores", meta: "METRIC_COMPILATION", tone: "yellow" },
+  { icon: UserPlus, label: "Assign the best available owner", meta: "ASSIGNMENT", tone: "green" },
+  { icon: Mail, label: "Confirm receipt to the requester", meta: "CONFIRMATION", tone: "white" },
+  { icon: Gauge, label: "Update SLA and progress tracking", meta: "TRACKING", tone: "yellow" },
 ];
 
 export function WorkflowAutomationSection() {
@@ -76,25 +76,25 @@ export function WorkflowAutomationSection() {
               <Workflow className="size-4" />
             </span>
             <div>
-              <h2 className="text-sm font-bold tracking-tight text-white">Pipeline Automation Canvas</h2>
-              <p className="mt-0.5 font-mono text-[10px] uppercase tracking-widest text-white/40">Automated Lifecycle Matrix</p>
+              <h2 className="text-sm font-bold tracking-tight text-white">Workflow automation</h2>
+              <p className="mt-0.5 font-mono text-[10px] uppercase tracking-widest text-white/40">Your process runs itself</p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-8 font-mono text-[11px]">
             <div className="flex items-center gap-2.5">
-              <span className="text-white/40">PROPAGATION:</span>
-              <span className="font-bold text-white">3.2x Velocity</span>
+              <span className="text-white/40">TRIGGERS:</span>
+              <span className="font-bold text-white">Every new request</span>
             </div>
             <span className="h-3 w-px bg-white/10" />
             <div className="flex items-center gap-2.5">
-              <span className="text-white/40">HEURISTICS:</span>
-              <span className="font-bold text-[#ffd400]">24/7 Continuous</span>
+              <span className="text-white/40">RUNS:</span>
+              <span className="font-bold text-[#ffd400]">24/7, hands-free</span>
             </div>
             <span className="h-3 w-px bg-white/10" />
             <div className="flex items-center gap-2.5">
-              <span className="text-white/40">ERROR_RATE:</span>
-              <span className="font-bold text-emerald-400">0.00% Drift</span>
+              <span className="text-white/40">SETUP:</span>
+              <span className="font-bold text-emerald-400">No code required</span>
             </div>
           </div>
         </div>
@@ -174,8 +174,8 @@ export function WorkflowAutomationSection() {
 
           {/* Branch columns */}
           <div className="mt-16 grid gap-8 md:grid-cols-2 md:gap-12">
-            <BranchColumn label="SCHEMA_VAL_HIGH_RISK" nodes={leftBranch} delayOffset={0.2} inView={inView} />
-            <BranchColumn label="SCHEMA_VAL_OPTIMAL" nodes={rightBranch} delayOffset={0.3} inView={inView} />
+            <BranchColumn label="IF BLOCKED OR AT RISK" nodes={leftBranch} delayOffset={0.2} inView={inView} />
+            <BranchColumn label="IF ON TRACK" nodes={rightBranch} delayOffset={0.3} inView={inView} />
           </div>
 
           {/* Terminal resolved card */}
@@ -197,12 +197,12 @@ export function WorkflowAutomationSection() {
                     <CheckCircle2 className="size-5" />
                   </span>
                   <div>
-                    <h4 className="text-[13.5px] font-bold tracking-wide text-white">Sync State Matrix Refreshed Globally</h4>
-                    <p className="mt-1 text-[12px] font-medium text-white/40">All data structures successfully balanced across target clusters</p>
+                    <h4 className="text-[13.5px] font-bold tracking-wide text-white">Work delivered, everyone in the loop</h4>
+                    <p className="mt-1 text-[12px] font-medium text-white/40">Owners assigned, stakeholders notified, status tracked — no manual handoffs</p>
                   </div>
                 </div>
                 <span className="hidden rounded-md border border-emerald-500/[0.2] bg-emerald-500/[0.1] px-2.5 py-1 font-mono text-[9px] tracking-widest text-emerald-400 sm:inline-block">
-                  RESOLVED
+                  DONE
                 </span>
               </div>
             </div>
@@ -215,15 +215,15 @@ export function WorkflowAutomationSection() {
             href="/signup"
             className="inline-flex h-11 items-center justify-center rounded-xl bg-[#ffd400] px-6 text-xs font-bold text-[#111111] shadow-[0_8px_24px_rgba(255,212,0,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#f2c200]"
           >
-            Deploy Operational Flow
+            Start for free
             <ArrowRight className="ml-2 size-3.5" />
           </Link>
-          <a
-            href="#docs"
+          <Link
+            href="/book-demo"
             className="inline-flex h-11 items-center justify-center rounded-xl border border-white/[0.1] bg-white/[0.04] px-6 text-xs font-bold text-white transition-all duration-300 hover:border-white/[0.2] hover:bg-white/[0.08]"
           >
-            Read Logic Specs
-          </a>
+            Book demo
+          </Link>
         </div>
 
       </div>

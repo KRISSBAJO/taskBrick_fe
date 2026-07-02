@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Activity, CheckCircle2, Lock, ShieldCheck, Zap } from "lucide-react";
+import { Activity, CheckCircle2, Lock, Zap } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 
@@ -45,14 +45,14 @@ export function ReliabilitySection() {
   return (
     <section
       id="about"
-      className="relative overflow-hidden bg-[#111111] px-5 py-24 text-white sm:px-8 lg:px-16"
+      className="relative overflow-hidden border-y border-black/[0.05] bg-white px-5 py-24 text-[#111111] sm:px-8 lg:px-16"
     >
       {/* Dot-grid texture */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.035]"
+        className="pointer-events-none absolute inset-0 opacity-[0.03]"
         style={{
-          backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)",
+          backgroundImage: "radial-gradient(circle, #111111 1px, transparent 1px)",
           backgroundSize: "28px 28px",
         }}
       />
@@ -60,7 +60,7 @@ export function ReliabilitySection() {
       {/* Ambient glow — right */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute right-0 top-1/2 h-[600px] w-[600px] -translate-y-1/2 rounded-full bg-[#ffd400]/6 blur-[110px]"
+        className="pointer-events-none absolute right-0 top-1/2 h-[600px] w-[600px] -translate-y-1/2 rounded-full bg-[#ffd400]/[0.07] blur-[110px]"
       />
 
       {/* ── Main grid ── */}
@@ -76,9 +76,9 @@ export function ReliabilitySection() {
             animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
             initial={{ opacity: 0, y: 16, scale: 0.9 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 rounded-full bg-[#ffd400] px-4 py-2 text-sm font-black text-[#111111]"
+            className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-black uppercase tracking-widest text-[#111111] shadow-sm"
           >
-            <ShieldCheck className="size-4" aria-hidden="true" />
+            <span className="size-2 rounded-full bg-[#ffd400]" aria-hidden="true" />
             Security-first platform
           </motion.span>
 
@@ -87,11 +87,15 @@ export function ReliabilitySection() {
             initial={{ opacity: 0, y: 24 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.12, duration: 0.55, ease: "easeOut" }}
-            className="mt-6 max-w-lg text-4xl font-black leading-[1.1] text-white sm:text-5xl"
+            className="mt-6 max-w-lg text-4xl font-black leading-[1.1] text-[#111111] sm:text-5xl"
           >
             Built for{" "}
             <span className="relative inline-block">
-              <span className="relative z-10 text-[#ffd400]">reliability</span>
+              <span className="relative z-10">reliability</span>
+              <span
+                className="absolute bottom-1 left-0 right-0 h-[12px] -rotate-1 rounded-sm bg-[#ffd400]"
+                aria-hidden="true"
+              />
             </span>{" "}
             and trust
           </motion.h2>
@@ -106,10 +110,10 @@ export function ReliabilitySection() {
                 transition={{ delay: 0.22 + i * 0.1, duration: 0.5, ease: "easeOut" }}
                 className="flex items-start gap-3"
               >
-                <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-[#ffd400]/12 text-[#ffd400]">
+                <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border border-black/[0.08] bg-[#fbfaf6] text-[#111111]">
                   <Icon className="size-3.5" aria-hidden="true" />
                 </span>
-                <span className="text-sm font-medium leading-relaxed text-white/65">
+                <span className="text-sm font-medium leading-relaxed text-[#4f4b43]">
                   {text}
                 </span>
               </motion.li>
@@ -121,15 +125,15 @@ export function ReliabilitySection() {
             initial={{ opacity: 0, y: 24 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.54, duration: 0.55, ease: "easeOut" }}
-            className="mt-10 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-white/8 bg-white/8"
+            className="mt-10 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-black/[0.08] bg-black/[0.06] shadow-sm"
           >
             {metrics.map(({ value, label }) => (
               <div
                 key={label}
-                className="flex flex-col items-center bg-[#111111] px-4 py-5 text-center"
+                className="flex flex-col items-center bg-white px-4 py-5 text-center"
               >
-                <p className="text-2xl font-black text-white">{value}</p>
-                <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-white/38">
+                <p className="text-2xl font-black text-[#111111]">{value}</p>
+                <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-[#8a8578]">
                   {label}
                 </p>
               </div>
@@ -145,7 +149,7 @@ export function ReliabilitySection() {
           className="relative"
         >
           {/* Main image */}
-          <div className="relative overflow-hidden rounded-2xl border border-white/10">
+          <div className="relative overflow-hidden rounded-2xl border border-black/[0.08] shadow-[0_24px_60px_rgba(17,17,17,0.12)]">
             <Image
               src="/figma/reliability.jpg"
               alt="A person working on logaXP"

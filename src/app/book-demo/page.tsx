@@ -28,7 +28,7 @@ const demoTopics = [
 
 export default function BookDemoPage() {
   return (
-    <main className="min-h-dvh bg-[#f7f6ef] text-[#111111]">
+    <main className="min-h-dvh bg-white text-[#111111]">
       <LandingNav />
 
       <section className="px-5 py-10 sm:px-8 lg:px-16 lg:py-14">

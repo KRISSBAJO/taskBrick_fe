@@ -9,7 +9,7 @@ export function TrustedCompanies() {
   const logoTrack = [...logos, ...logos, ...logos];
 
   return (
-    <section className="relative overflow-hidden border-b border-black/[0.06] bg-[#fffdf3] px-5 pb-12 pt-20">
+    <section className="relative overflow-hidden border-b border-black/[0.06] bg-[#f7f6ef] px-5 pb-12 pt-20">
       <div className="relative z-10 mx-auto max-w-[1240px]">
         <p className="mb-6 text-center text-[13px] font-black uppercase tracking-[0.16em] text-[#111111]">
           Trusted by ambitious teams and fast-moving companies

@@ -15,14 +15,14 @@ export function AgentHeroSection() {
   return (
     <section
       id="home"
-      className="relative isolate overflow-hidden border-b border-black/[0.06] bg-[#fbfaf6] px-5 pb-12 pt-8 text-[#111111] sm:px-8 lg:px-16 lg:pb-14 lg:pt-10"
+      className="relative isolate overflow-hidden border-b border-black/[0.06] bg-white px-5 pb-12 pt-8 text-[#111111] sm:px-8 lg:px-16 lg:pb-14 lg:pt-10"
     >
       <div className="mx-auto max-w-[1180px]">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
-          className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-white/84 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.13em] text-[#68645b] shadow-sm backdrop-blur"
+          className="inline-flex items-center gap-2 rounded-full border border-black/[0.08] bg-[#fbfaf6] px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.13em] text-[#68645b] shadow-sm"
         >
           <span className="size-2 animate-pulse rounded-full bg-[#ffd400]" />
           AI-powered enterprise work management
@@ -93,7 +93,7 @@ export function AgentHeroSection() {
 
               <Link
                 href="/book-demo"
-                className="inline-flex h-12 items-center gap-2 rounded-md border border-black/[0.14] bg-white/80 px-6 text-sm font-extrabold text-[#111111] shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:border-black/[0.24] hover:bg-white"
+                className="inline-flex h-12 items-center gap-2 rounded-md border border-black/[0.14] bg-white px-6 text-sm font-extrabold text-[#111111] shadow-sm transition hover:-translate-y-0.5 hover:border-black/[0.24] hover:bg-[#fbfaf6]"
               >
                 Book demo
               </Link>
@@ -103,7 +103,7 @@ export function AgentHeroSection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.65 }}
-              className="mt-8 grid max-w-[560px] grid-cols-3 divide-x divide-black/[0.08] rounded-2xl border border-black/[0.08] bg-white/72 shadow-sm backdrop-blur"
+              className="mt-8 grid max-w-[560px] grid-cols-3 divide-x divide-black/[0.08] rounded-2xl border border-black/[0.08] bg-[#fbfaf6] shadow-sm"
             >
               {heroStats.map((stat) => (
                 <div key={stat.label} className="min-w-0 px-4 py-3">
